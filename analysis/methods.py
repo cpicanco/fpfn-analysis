@@ -12,11 +12,26 @@ import sys, os
 import numpy as np
 from itertools import islice
 
-from drawing import draw_relative_rate
+from drawing import draw_absolute_rate, draw_relative_rate
+
+
+def load_ini_data(path)
+    from ConfigParser import ConfigParser
+    Config = ConfigParser()
+    Config.read(path)
+    for section in Config.sections():
+        for option in Config.options(section):
+            print(Config.get(section, option))
+
+def ellipse(center, width, height, n = 360):
+    thetas = [np.pi*2 * i/n for i in range(n)]
+    points = [(center[0] + np.cos(t) * width, center[1] + np.sin(t) * height) for t in thetas]
+    return np.array(points)
 
 def load_fpe_data(path, skip_header):
     """
-    Columns:
+    
+    Columns v1:
         Bloc__Id
         Bloc_Nam
         Trial_No
@@ -31,6 +46,20 @@ def load_fpe_data(path, skip_header):
         ExpcResp
         __Result
 
+    Columns v2:
+        BlocoID
+        BlocoNome
+        TentativaContador
+        TentativaID
+        TentativaNome
+        IETInicio
+        IETFim
+        CResultado
+        SInicio
+        RLatencia
+        SFim
+        RFrequencia
+        RPrevista    
     """
     if not os.path.isfile(path):
         raise "Path was not found:"+path
@@ -49,12 +78,21 @@ def load_fpe_data(path, skip_header):
 
 def load_fpe_timestamps(path):
     """
-    Columns:
+    Columns v1:
         Time
         Bloc__Id
         Trial_Id
         Trial_No
         Event
+
+
+    Columns v2:
+        Tempo
+        BlocoID
+        TentativaID
+        TentativaContador
+        Evento
+
     """
     if not os.path.isfile(path):
         raise "Path was not found:"+path
@@ -88,11 +126,15 @@ def window(seq, n=2):
 def get_perfomance(data):
     return [line.decode("utf-8") for line in data['__Result']]
 
-def get_session_type(data):
+def get_session_type(data, version='v1'):
     fp_strings = ['FP', 'Feature Positive']
     fn_strings = ['FN', 'Feature Negative']
     
-    bloc_name = data['Bloc_Nam'][0].decode("utf-8")
+    if version == 'v1':
+        bloc_name = data['Bloc_Nam'][0].decode("utf-8")
+    elif version == 'v2':
+        bloc_name = data['BlocoNome'][0].decode("utf-8")
+
     for fp_string in fp_strings:
         if bloc_name in fp_string:
             return 'feature positive'
@@ -135,8 +177,14 @@ def consecutive_hits(paths, skip_header=13):
 
     print('The participant DO NOT reached %s consecutive hits in %s trials.'%(size,count+size-1),'\n')
  
-def get_events_per_trial_in_bloc(data, ts, target_bloc=2):
-    session = zip(ts['Time'], ts['Bloc__Id'], ts['Trial_No'], ts['Event'])
+def get_events_per_trial_in_bloc(data, ts, target_bloc=2, version='v1'):
+    # print(ts.dtype.names)
+    # print(data.dtype.names)
+    if version == 'v1':
+        session = zip(ts['Time'], ts['Bloc__Id'], ts['Trial_No'], ts['Event'])
+    elif version == 'v2':
+        session = zip(ts['Tempo'], ts['BlocoID'], ts['TentativaContador'], ts['Evento'])
+
     events_per_trial = {} 
     for time, bloc_id, trial, ev in session:
         event = ev.decode("utf-8")
@@ -144,14 +192,19 @@ def get_events_per_trial_in_bloc(data, ts, target_bloc=2):
             if trial not in events_per_trial:
                 events_per_trial[trial] = {'Type':'','Time':[],'Event':[]}
             
-            if event == 'ITI R':
+            if event == 'ITI R': # fix for ITI trial number
                 events_per_trial[trial-1]['Time'].append(time)    
                 events_per_trial[trial-1]['Event'].append(event)
             else:
                 events_per_trial[trial]['Time'].append(time)    
                 events_per_trial[trial]['Event'].append(event)
 
-    session = zip(data['TrialNam'], data['Trial_No'])
+
+    if version == 'v1':
+        session = zip(data['TrialNam'], data['Trial_No'])
+    elif version == 'v2':
+        session = zip(data['TentativaNome'], data['TentativaContador'])
+
     type1 = 'Positiva'
     type2 = 'Negativa'
     for trial_name, trial_number in session:
@@ -164,26 +217,21 @@ def get_events_per_trial_in_bloc(data, ts, target_bloc=2):
 
     return events_per_trial
 
-def get_trial_starts(trials):
+def get_trial_intervals(trials):
     starts = []
+    ends = []
     for i, trial in trials.items():
         for time, event in zip(trial['Time'], trial['Event']):
             if event == 'TS':
                 starts.append({'Time':time, 'Type':trial['Type']})
 
-    last_type = list(trials.values())[-1]['Type']
-    last_time = starts[-1]['Time']
+            if event == 'TE':
+                ends.append({'Time':time, 'Type':trial['Type']})
 
-    l = [end['Time'] - start['Time'] for start, end in zip(starts, starts[1:])] 
-    last_time += np.mean(l) 
-    
-    starts.append({'Time':last_time, 'Type':last_type})
-    return starts
 
-def get_start_end_intervals_with_iti(starts):
     positive_intervals = []
     negative_intervals = []
-    for start, end in zip(starts, starts[1:]):
+    for start, end in zip(starts, ends):
         if start['Type'] == 'Positiva':
             positive_intervals.append([start['Time'], end['Time']])
 
@@ -193,9 +241,26 @@ def get_start_end_intervals_with_iti(starts):
     return positive_intervals, negative_intervals
 
 
-def get_all_responses(ts):
-    return [time for time, event in zip(ts['Time'], ts['Event']) \
+
+def get_all_responses(ts, version='v1'):
+    if version == 'v1':
+        session = zip(ts['Time'], ts['Event'])
+
+    if version == 'v2':
+        session = zip(ts['Tempo'], ts['Evento'])
+
+    return [time for time, event in session  \
         if event.decode('utf-8') == 'R' or 'ITI R']
+
+def get_responses(ts, version='v1'):
+    if version == 'v1':
+        session = zip(ts['Time'], ts['Event'])
+
+    if version == 'v2':
+        session = zip(ts['Tempo'], ts['Evento'])
+
+    return [time for time, event in session \
+        if event.decode('utf-8') == 'R']    
 
 def rate_in(time_interval_pairwise,timestamps):
     def is_inside(timestamps,rangein, rangeout):
@@ -206,26 +271,79 @@ def rate_in(time_interval_pairwise,timestamps):
 def get_relative_rate(data1, data2):
     return [a/(b+a) if b+a > 0 else np.nan for a, b in zip(data1, data2)]
 
+# def get_trial_starts(trials):
+#     starts = []
+#     for i, trial in trials.items():
+#         for time, event in zip(trial['Time'], trial['Event']):
+#             if event == 'TS':
+#                 starts.append({'Time':time, 'Type':trial['Type']})
 
-def rate(paths, skip_header=13):
+#     last_type = list(trials.values())[-1]['Type']
+#     last_time = starts[-1]['Time']
+
+#     l = [end['Time'] - start['Time'] for start, end in zip(starts, starts[1:])] 
+#     last_time += np.mean(l) 
+    
+#     starts.append({'Time':last_time, 'Type':last_type})
+#     return starts
+
+# def get_start_end_intervals_with_iti(starts):
+#     positive_intervals = []
+#     negative_intervals = []
+#     for start, end in zip(starts, starts[1:]):
+#         if start['Type'] == 'Positiva':
+#             positive_intervals.append([start['Time'], end['Time']])
+
+#         if start['Type'] == 'Negativa':
+#             negative_intervals.append([start['Time'], end['Time']])
+        
+#     return positive_intervals, negative_intervals
+
+# def rate(paths, skip_header=13):
+#     overall_performance = []
+#     count = 0
+#     for path in paths:
+#         data_file = load_fpe_data(path[0],skip_header)
+#         timestamps_file = load_fpe_timestamps(path[1])
+#         responses = get_all_responses(timestamps_file)
+#         trials = get_events_per_trial_in_bloc(data_file,timestamps_file)
+#         starts = get_trial_starts(trials)
+#         positive_intervals, negative_intervals = get_start_end_intervals_with_iti(starts)  
+#         positive_data = rate_in(positive_intervals,responses)
+#         negative_data = rate_in(negative_intervals,responses)
+#         relative_rate = get_relative_rate(positive_data, negative_data)
+#         title = path[0].replace('/home/pupil/recordings/DATA/','')
+#         title = title.replace('/stimulus_control/000.data','')
+#         title = title.replace('/','_')
+#         title = title+'_'+get_session_type(data_file)
+#         title = title.replace(' ', '_')
+#         draw_relative_rate(relative_rate,title, False)
+
+def rate(paths, skip_header=13, version='v1'):
     overall_performance = []
     count = 0
     for path in paths:
         data_file = load_fpe_data(path[0],skip_header)
         timestamps_file = load_fpe_timestamps(path[1])
-        responses = get_all_responses(timestamps_file)
-        trials = get_events_per_trial_in_bloc(data_file,timestamps_file)
-        starts = get_trial_starts(trials)
-        positive_intervals, negative_intervals = get_start_end_intervals_with_iti(starts)  
+        responses = get_responses(timestamps_file, version=version)
+        trials = get_events_per_trial_in_bloc(data_file,timestamps_file,
+            target_bloc=2, version=version)
+        positive_intervals, negative_intervals = get_trial_intervals(trials)  
         positive_data = rate_in(positive_intervals,responses)
         negative_data = rate_in(negative_intervals,responses)
+
         relative_rate = get_relative_rate(positive_data, negative_data)
         title = path[0].replace('/home/pupil/recordings/DATA/','')
         title = title.replace('/stimulus_control/000.data','')
         title = title.replace('/','_')
-        title = title+'_'+get_session_type(data_file)
+        title = title+'_'+get_session_type(data_file, version)
         title = title.replace(' ', '_')
-        draw_relative_rate(relative_rate,title, True)
+
+        # draw_absolute_rate([positive_data, negative_data],title, False, version)        
+        # draw_relative_rate(relative_rate,title, False, version)
+
+        draw_absolute_rate([positive_data, negative_data],title, True, version)        
+        draw_relative_rate(relative_rate,title, True, version)
 
 
 def get_paths(paths):
@@ -238,42 +356,6 @@ def get_paths(paths):
 
 if __name__ == '__main__':
     
-    # paths = [
-    #     "/home/pupil/recordings/DATA/2017_02_06/000_ELD/000/stimulus_control/000.data"
-    # ]
-    # main(paths)
-
-    # paths = [
-    #     "/home/pupil/recordings/DATA/2017_04_11/000_HER/001/stimulus_control/000.data" 
-    # ]
-    # consecutive_hits(paths, 14)
-
-    # paths = [
-    #     "/home/pupil/recordings/DATA/2017_04_12/000_ATL/000/stimulus_control/000.data",
-    #     "/home/pupil/recordings/DATA/2017_04_12/000_ATL/001/stimulus_control/000.data"
-    # ]
-    # consecutive_hits(paths)
-
-    # paths = [
-    #     "/home/pupil/recordings/DATA/2017_04_29/000_DEM/000/stimulus_control/000.data",
-    #     "/home/pupil/recordings/DATA/2017_04_29/000_DEM/001/stimulus_control/000.data",
-    #     "/home/pupil/recordings/DATA/2017_04_29/000_DEM/002/stimulus_control/000.data"
-    # ]
-    # consecutive_hits(paths)
-
-    # paths = [
-    #     "/home/pupil/recordings/DATA/2017_04_29/000_JES/000/stimulus_control/000.data",
-    #     "/home/pupil/recordings/DATA/2017_04_29/000_JES/001/stimulus_control/000.data"
-    # ]
-    # consecutive_hits(paths)
-
-    # paths = [
-    #     "/home/pupil/recordings/DATA/2017_04_29/000_JUL/000/stimulus_control/000.data"
-    # ]
-
-    # consecutive_hits(paths)
-
-
     d = {
         'root': [
             '/home/pupil/recordings/DATA/2017_04_11/000_HER/001/stimulus_control'
@@ -281,7 +363,7 @@ if __name__ == '__main__':
         'file': ['000.data', '000.timestamps']
         }
 
-    rate(get_paths(d),14)
+    rate(get_paths(d),skip_header=14)
 
     d = {
         'root': [
@@ -324,3 +406,29 @@ if __name__ == '__main__':
         }
 
     rate(get_paths(d))
+
+    d = {
+        'root': [
+            '/home/pupil/recordings/DATA/2017_10_30/000_THA/000/stimulus_control'
+            ],
+        'file': ['000.data', '000.timestamps']
+        }
+
+    rate(get_paths(d), 38, version='v2')
+
+
+    d = {
+        'root': [
+            '/home/pupil/recordings/DATA/2017_10_30/000_LOR/000/stimulus_control'
+            ],
+        'file': ['000.data', '000.timestamps']
+        }
+    rate(get_paths(d), 38, version='v2')
+
+    d = {
+        'root': [
+            '/home/pupil/recordings/DATA/2017_10_31/000_DAN/000/stimulus_control'
+            ],
+        'file': ['000.data', '000.timestamps']
+        }
+    rate(get_paths(d), 29, version='v2')
