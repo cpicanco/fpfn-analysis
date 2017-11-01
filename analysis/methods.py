@@ -14,14 +14,18 @@ from itertools import islice
 
 from drawing import draw_absolute_rate, draw_relative_rate
 
-
-def load_ini_data(path)
-    from ConfigParser import ConfigParser
+def load_ini_data(path='/home/rafael/git/fpfn-analysis/data/positive_01.txt'):
+    from configparser import ConfigParser
     Config = ConfigParser()
     Config.read(path)
+    data = []
     for section in Config.sections():
         for option in Config.options(section):
-            print(Config.get(section, option))
+            if 'gaplength' in option:
+                if int(Config.get(section, option)) > 0:
+                    data.append(int(option.replace('c','').replace('gaplength', '')))
+
+    return data
 
 def ellipse(center, width, height, n = 360):
     thetas = [np.pi*2 * i/n for i in range(n)]
@@ -356,79 +360,80 @@ def get_paths(paths):
 
 if __name__ == '__main__':
     
-    d = {
-        'root': [
-            '/home/pupil/recordings/DATA/2017_04_11/000_HER/001/stimulus_control'
-            ],
-        'file': ['000.data', '000.timestamps']
-        }
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_04_11/000_HER/001/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps']
+    #     }
 
-    rate(get_paths(d),skip_header=14)
+    # rate(get_paths(d),skip_header=14)
 
-    d = {
-        'root': [
-            '/home/pupil/recordings/DATA/2017_04_12/000_ATL/000/stimulus_control',
-            '/home/pupil/recordings/DATA/2017_04_12/000_ATL/001/stimulus_control'
-            ],
-        'file': ['000.data', '000.timestamps']
-        }
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_04_12/000_ATL/000/stimulus_control',
+    #         '/home/pupil/recordings/DATA/2017_04_12/000_ATL/001/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps']
+    #     }
 
-    rate(get_paths(d))
+    # rate(get_paths(d))
 
-    d = {
-        'root': [
-            '/home/pupil/recordings/DATA/2017_04_29/000_DEM/000/stimulus_control',
-            '/home/pupil/recordings/DATA/2017_04_29/000_DEM/001/stimulus_control',
-            '/home/pupil/recordings/DATA/2017_04_29/000_DEM/002/stimulus_control'
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_DEM/000/stimulus_control',
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_DEM/001/stimulus_control',
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_DEM/002/stimulus_control'
 
-            ],
-        'file': ['000.data', '000.timestamps']
-        }
+    #         ],
+    #     'file': ['000.data', '000.timestamps']
+    #     }
 
-    rate(get_paths(d))
-
-
-    d = {
-        'root': [
-            '/home/pupil/recordings/DATA/2017_04_29/000_JES/000/stimulus_control',
-            '/home/pupil/recordings/DATA/2017_04_29/000_JES/001/stimulus_control'
-        ],    
-        'file': ['000.data', '000.timestamps']
-    }
-
-    rate(get_paths(d))
-
-    d = {
-        'root': [
-            '/home/pupil/recordings/DATA/2017_04_29/000_JUL/000/stimulus_control'
-            ],
-        'file': ['000.data', '000.timestamps']
-        }
-
-    rate(get_paths(d))
-
-    d = {
-        'root': [
-            '/home/pupil/recordings/DATA/2017_10_30/000_THA/000/stimulus_control'
-            ],
-        'file': ['000.data', '000.timestamps']
-        }
-
-    rate(get_paths(d), 38, version='v2')
+    # rate(get_paths(d))
 
 
-    d = {
-        'root': [
-            '/home/pupil/recordings/DATA/2017_10_30/000_LOR/000/stimulus_control'
-            ],
-        'file': ['000.data', '000.timestamps']
-        }
-    rate(get_paths(d), 38, version='v2')
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_JES/000/stimulus_control',
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_JES/001/stimulus_control'
+    #     ],    
+    #     'file': ['000.data', '000.timestamps']
+    # }
 
-    d = {
-        'root': [
-            '/home/pupil/recordings/DATA/2017_10_31/000_DAN/000/stimulus_control'
-            ],
-        'file': ['000.data', '000.timestamps']
-        }
-    rate(get_paths(d), 29, version='v2')
+    # rate(get_paths(d))
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_JUL/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps']
+    #     }
+
+    # rate(get_paths(d))
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_10_30/000_THA/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps']
+    #     }
+
+    # rate(get_paths(d), 38, version='v2')
+
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_10_30/000_LOR/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps']
+    #     }
+    # rate(get_paths(d), 38, version='v2')
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_10_31/000_DAN/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive_01.txt']
+    #     }
+    # rate(get_paths(d), 29, version='v2')
+    load_ini_data()
