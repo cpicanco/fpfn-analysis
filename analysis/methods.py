@@ -113,6 +113,24 @@ def load_fpe_timestamps(path):
     )
     return data
 
+def remove_outside_screen(data, xmax=1, ymax=1, horizontal=True):
+    if horizontal:
+        x = (0 <= data[0, :]) & (data[0, :] < xmax)
+        y = (0 <= data[1, :]) & (data[1, :] < ymax)
+        mask = x & y
+        data_clamped = data[:, mask]
+        deleted_count = data.shape[1] - data_clamped.shape[1]
+    else:
+        x = (0 <= data[:, 0]) & (data[:, 0] < xmax)
+        y = (0 <= data[:, 1]) & (data[:, 1] < ymax)
+        mask = x & y
+        data_clamped = data[mask, :]
+        deleted_count = data.shape[0] - data_clamped.shape[0]
+
+    if deleted_count > 0:
+        print("\nRemoved", deleted_count, "data point(s) with out-of-screen coordinates!")
+    return data_clamped, mask
+
 def window(seq, n=2):
     """
     https://docs.python.org/release/2.3.5/lib/itertools-example.html
