@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+'''
+    Copyright (C) 2017 Rafael Picanço.
+
+    The present file is distributed under the terms of the GNU General Public License (GPL v3.0).
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+'''
 import sys
 sys.path.append('../../analysis')
 from methods import load_ini_data
