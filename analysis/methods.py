@@ -14,7 +14,7 @@ from itertools import islice
 
 from drawing import draw_absolute_rate, draw_relative_rate
 
-def load_ini_data(path='/home/rafael/git/fpfn-analysis/data/positive_01.txt'):
+def load_ini_data(path='../data/positive_01.txt'):
     from configparser import ConfigParser
     Config = ConfigParser()
     Config.read(path)
@@ -27,10 +27,13 @@ def load_ini_data(path='/home/rafael/git/fpfn-analysis/data/positive_01.txt'):
 
     return data
 
-def ellipse(center, width, height, n = 360):
-    thetas = [np.pi*2 * i/n for i in range(n)]
-    points = [(center[0] + np.cos(t) * width, center[1] + np.sin(t) * height) for t in thetas]
-    return np.array(points)
+def load_gaze_data(path, delimiter="\t"):
+    if not os.path.isfile(path):
+        print(path)
+        raise IOError(path+": was not found.")
+
+    return np.genfromtxt(path, delimiter=delimiter,missing_values=["NA"],
+        filling_values=None,names=True, autostrip=True, dtype=None)
 
 def load_fpe_data(path, skip_header):
     """
@@ -364,9 +367,8 @@ def rate(paths, skip_header=13, version='v1'):
         # draw_absolute_rate([positive_data, negative_data],title, False, version)        
         # draw_relative_rate(relative_rate,title, False, version)
 
-        draw_absolute_rate([positive_data, negative_data],title, True, version)        
+        draw_absolute_rate([positive_data, negative_data],title, True, version)
         draw_relative_rate(relative_rate,title, True, version)
-
 
 def get_paths(paths):
     p = []
@@ -377,7 +379,6 @@ def get_paths(paths):
     return p
 
 if __name__ == '__main__':
-    
     # d = {
     #     'root': [
     #         '/home/pupil/recordings/DATA/2017_04_11/000_HER/001/stimulus_control'

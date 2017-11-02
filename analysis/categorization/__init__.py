@@ -7,19 +7,15 @@
     You should have received a copy of the GNU General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
+import os
 import sys
 sys.path.append('../../analysis')
 
-import os
 import numpy as np
+from matplotlib.path import Path as mp
 
-# from drawing import plot_xy as plot
 from correction import unbiased_gaze, ALGORITHM_QUANTILES
-
-from methods import load_data, get_filenames, remove_outside_screen
-from methods import stimuli_onset, all_stimuli, all_responses
-from methods import switching_timestamps
-from methods import rate_in, relative_rate
+from methods import remove_outside_screen
 
 def clean_gaze_data(all_gaze_data):
     x_norm = 'x_norm'
@@ -40,67 +36,7 @@ def clean_gaze_data(all_gaze_data):
 
 def get_gaze_mask(circle, gaze_data, factor=2.):
     shape = mp(circle.points(factor=factor))  
-    print('Data inside shape: %d'%(len(gaze_data)))
     return shape.contains_points(gaze_data.T)
-
-# def relative_rate_left_right(src_dir, target_intervals='all_onsets'):
-#     timestamps = 'time'
-#     paths = sorted(glob(os.path.join(src_dir,'0*')))
-#     data = []
-#     for path in paths:
-#         all_gaze_data = load_data(os.path.join(path,"gaze_coordenates_on_screen.txt"))
-#         left_gaze_mask, right_gaze_mask = gaze_mask_left_right(all_gaze_data)
-#         left_timestamps = all_gaze_data[left_gaze_mask][timestamps] 
-#         right_timestamps = all_gaze_data[right_gaze_mask][timestamps]
-
-#         beha_data = load_data(os.path.join(path,"behavioral_events.txt"))
-#         if 'all_onsets' in target_intervals: 
-#             l_target_intervals = all_stimuli(beha_data)
-#             l_target_intervals = zip(l_target_intervals, l_target_intervals[1:])
-#             left_data = rate_in(l_target_intervals, left_timestamps)
-#             right_data = rate_in(l_target_intervals, right_timestamps)
-#             relative_rate_all = relative_rate(left_data, right_data)
-#             data.append(relative_rate_all)
-
-#         elif 'left_right_onsets':
-#             l_target_intervals = all_stimuli(beha_data)
-#             l_target_intervals = zip(l_target_intervals, l_target_intervals[1:])
-#             left_data = rate_in(l_target_intervals, left_timestamps)
-#             right_data = rate_in(l_target_intervals, right_timestamps)
-#             relative_rate_all = relative_rate(left_data, right_data)
-#             data.append([relative_rate_all[::2],relative_rate_all[1::2]])
-
-#         elif 'red_blue_onsets' in target_intervals:
-#             l_target_intervals = stimuli_onset(beha_data)
-#             red_intervals = zip(l_target_intervals[0], l_target_intervals[1])
-#             blue_intervals = zip(l_target_intervals[1], l_target_intervals[0][1:])
-
-#             left_red_data = rate_in(red_intervals, left_timestamps)
-#             right_red_data = rate_in(red_intervals, right_timestamps)
-#             relative_rate_positive = relative_rate(left_red_data, right_red_data)
-
-#             left_blue_data = rate_in(blue_intervals, left_timestamps)
-#             right_blue_data = rate_in(blue_intervals, right_timestamps)
-#             relative_rate_negative = relative_rate(left_blue_data, right_blue_data)
-#             data.append((relative_rate_positive, relative_rate_negative))
-#     return data
-
-# def relative_rate_blue_red(src_dir, cycles_set=slice(0,8)):
-#     paths = sorted(glob(os.path.join(src_dir,'0*')))
-#     data = []
-#     for path in paths:
-#         beha_data = load_data(os.path.join(path,"behavioral_events.txt"))
-#         target_intervals = stimuli_onset(beha_data)
-#         red_intervals = zip(target_intervals[0], target_intervals[1])
-#         blue_intervals = zip(target_intervals[1], target_intervals[0][1:])
-#         responses = all_responses(beha_data)
-        
-#         red_data = rate_in(red_intervals, responses)
-#         blue_data = rate_in(blue_intervals, responses)
-
-#         relative_rate_all = relative_rate(red_data, blue_data)
-#         data.append(relative_rate_all[cycles_set])
-#     return data
 
 # def rate_switching(src_dir, cycles_set=slice(0,8)):
 #     paths = sorted(glob(os.path.join(src_dir,'0*')))
@@ -185,3 +121,18 @@ def get_gaze_mask(circle, gaze_data, factor=2.):
 #         Y.append(np.nanmean(blue_data)-np.nanmean(red_data))
 
 #     return np.array(X), np.array(Y)
+
+if __name__ == '__main__':
+    from methods import load_gaze_data
+    from stimuli import circular_grid as grid
+
+    all_gaze_data = load_gaze_data('random_gaze_data.txt')
+    gaze_data = clean_gaze_data(all_gaze_data)
+    gaze_masks = [get_gaze_mask(circle, gaze_data) for circle in grid(normalized=True)]
+
+    # todo:    
+    # trial_intervals = load_intervals('random_beha_data.txt') # load_fpe_timestamps
+    # gaze_rates = []
+    # for mask in gaze_masks:
+    #     target_timestamps = all_gaze_data[mask]['time'] 
+    #     gaze_rates.append(rate_in(trial_intervals, target_timestamps))
