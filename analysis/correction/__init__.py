@@ -42,7 +42,7 @@ def unbiased_gaze(data, algorithm, min_block_size=1000,**kwargs):
             y_stat = 0
 
             for quantile in q:
-                rank = (sample_size * quantile)/100
+                rank = (sample_size * quantile)//100
                 x_stat += x[rank]
                 y_stat += y[rank]
 
