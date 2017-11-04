@@ -98,7 +98,7 @@ def draw_absolute_rate(data,title, save=False, version='v1', y_label='Button-pre
     else:
         plt.show()
 
-def plot_xy(data, factor=1.9):
+def plot_xy(data, factor=2.0):
     import matplotlib.patches as patches
     from stimuli import circular_grid as grid 
     axes = plt.gca()

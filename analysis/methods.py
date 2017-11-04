@@ -298,10 +298,11 @@ def get_responses(ts, version='v1'):
     return [time for time, event in session \
         if event.decode('utf-8') == 'R']    
 
-def rate_in(time_interval_pairwise,timestamps):
-    def is_inside(timestamps,rangein, rangeout):
-        return [t for t in timestamps if (t >= rangein) and (t <= rangeout)]
 
+def is_inside(timestamps,rangein, rangeout):
+    return [t for t in timestamps if (t >= rangein) and (t <= rangeout)]
+
+def rate_in(time_interval_pairwise,timestamps):
     return [len(is_inside(timestamps, begin, end))/(end-begin) for begin, end in time_interval_pairwise]
 
 def get_relative_rate(data1, data2):
@@ -506,7 +507,7 @@ if __name__ == '__main__':
 
     d = {
         'root': [
-            '/home/pupil/recordings/DATA/2017_11_03/EU/000/stimulus_control'
+            '/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control'
             ],
         'file': ['000.data', '000.timestamps', 'positive.txt']
         }

@@ -17,7 +17,15 @@ from matplotlib.path import Path as mp
 from correction import unbiased_gaze, ALGORITHM_QUANTILES
 from methods import remove_outside_screen
 
-def clean_gaze_data(all_gaze_data,min_block_size=20000):
+def remove_outside_session_time(target_timestamps, intervals):
+    mask = [False for _ in target_timestamps]
+    for begin, end in intervals:
+        a = target_timestamps >= begin
+        b = target_timestamps <= end
+        mask = mask | (a & b)
+    return mask
+
+def clean_gaze_data(all_gaze_data, intervals, min_block_size=4000):
     x_norm = 'x_norm'
     y_norm = 'y_norm'
     
@@ -25,16 +33,19 @@ def clean_gaze_data(all_gaze_data,min_block_size=20000):
         'screen_center':np.array([0.5, 0.5])
         }
 
-    gaze_data = np.array([all_gaze_data[x_norm], all_gaze_data[y_norm]])
+    mask = remove_outside_session_time(all_gaze_data['gaze_timestamp'], intervals)
+    all_gaze_data = all_gaze_data[mask]
 
+    gaze_data = np.array([all_gaze_data[x_norm], all_gaze_data[y_norm]])
     gaze_data, mask = remove_outside_screen(gaze_data)
     all_gaze_data = all_gaze_data[mask]
+
     gaze_data, _ = unbiased_gaze(gaze_data.T, ALGORITHM_QUANTILES, min_block_size=min_block_size, **keyword_arguments)
-    
     all_gaze_data[x_norm], all_gaze_data[y_norm] = gaze_data.T[0], gaze_data.T[1]
+
     return all_gaze_data
 
-def get_gaze_mask(circle, gaze_data, factor=1.9):
+def get_gaze_mask(circle, gaze_data, factor=2.):
     shape = mp(circle.points(factor=factor))  
     return shape.contains_points(gaze_data.T)
 
@@ -132,24 +143,31 @@ if __name__ == '__main__':
     from stimuli import circular_grid as grid
     from drawing import plot_xy, draw_absolute_rate, draw_relative_rate
 
-    all_gaze_data = load_gaze_data('/home/pupil/recordings/DATA/2017_11_03/EU/000/stimulus_control/gaze_positions_on_surface.csv', delimiter=',')
+    data_file = load_fpe_data('/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control/000.data', 12)
+    timestamps = load_fpe_timestamps('/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control/000.timestamps')
+    features = load_ini_data('/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control/positive.txt')
+    trials = get_events_per_trial_in_bloc(data_file, timestamps, features, target_bloc=2, version='v2')
+    trial_intervals = get_trial_intervals(trials, uncategorized=True) 
+       
+    all_gaze_data = load_gaze_data('/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control/gaze_positions_on_surface.csv', delimiter=',')
     
-    # gaze_data = np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']])
-    # plot_xy(gaze_data)
-    # all_gaze_data = clean_gaze_data(all_gaze_data)
-    # plot_xy(gaze_data)
+    # for begin in range(1,all_gaze_data.shape[0],10000):
+    #     end = begin + 10000
+    #     if end > all_gaze_data.shape[0]:
+    #         end = all_gaze_data.shape[0]
+
+    #     plot_xy(np.array([all_gaze_data['x_norm'][begin:end], all_gaze_data['y_norm'][begin:end]]))
+
+    factor = 1.95
+
+    plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
+    all_gaze_data = clean_gaze_data(all_gaze_data, trial_intervals)
+    plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
 
     gaze_data = np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']])
-    gaze_masks = [get_gaze_mask(circle, gaze_data) for circle in grid(normalized=True)]
+    gaze_masks = [get_gaze_mask(circle, gaze_data, factor) for circle in grid(normalized=True)]
 
-    data_file = load_fpe_data('/home/pupil/recordings/DATA/2017_11_03/EU/000/stimulus_control/000.data', 12)
-    timestamps = load_fpe_timestamps('/home/pupil/recordings/DATA/2017_11_03/EU/000/stimulus_control/000.timestamps')
-    features = load_ini_data('/home/pupil/recordings/DATA/2017_11_03/EU/000/stimulus_control/positive.txt')
-    trials = get_events_per_trial_in_bloc(data_file, timestamps, features, target_bloc=2, version='v2')
-    
-    print(len(features))
-    trial_intervals = get_trial_intervals(trials, uncategorized=True) 
-    #
+
     uncategorized_gaze_rates = []
     for mask in gaze_masks:
         target_circle_timestamps = all_gaze_data[mask]['gaze_timestamp']
@@ -162,13 +180,13 @@ if __name__ == '__main__':
     positive_else_rate = []
     for feature, rates in zip(features, gaze_rates_per_trial):
         if feature:
+            print(rates[feature-1])
             positive_feature_rate.append(rates[feature-1])
             positive_else_rate.append(np.sum(np.delete(rates,feature-1)))
         else:
             pass
 
-    draw_absolute_rate([positive_feature_rate, positive_else_rate], '2017_11_03_EU', True, 'v2',y_label='Looking rate',name='_looking')
-
+    draw_absolute_rate([positive_feature_rate, positive_else_rate], '2017_11_04_EU', False, 'v2',y_label='Looking rate',name='_looking')
 
     relative_rate = get_relative_rate(positive_feature_rate, positive_else_rate)
-    draw_relative_rate(relative_rate, '2017_11_03_EU', True, 'v2',y_label='Looking proportion', name='_looking')
+    draw_relative_rate(relative_rate, '2017_11_04_EU', False, 'v2',y_label='Looking proportion', name='_looking')
