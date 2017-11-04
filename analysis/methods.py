@@ -19,10 +19,19 @@ def load_ini_data(path='../data/positive_01.txt'):
     Config.read(path)
     data = []
     for section in Config.sections():
-        for option in Config.options(section):
-            if 'gaplength' in option:
-                if int(Config.get(section, option)) > 0:
-                    data.append(int(option.replace('c','').replace('gaplength', '')))
+        if not 'T' in section:
+            continue
+
+        if not 'Blc 2' in section:
+            continue
+
+        if Config.get(section, 'Contingency') == 'Positiva':
+            for option in Config.options(section):
+                if 'gaplength' in option:
+                    if int(Config.get(section, option)) > 0:
+                        data.append(int(option.replace('c','').replace('gaplength', '')))
+        elif Config.get(section, 'Contingency') == 'Negativa':
+            data.append(None)
 
     return data
 
@@ -201,7 +210,7 @@ def consecutive_hits(paths, skip_header=13):
 
     print('The participant DO NOT reached %s consecutive hits in %s trials.'%(size,count+size-1),'\n')
  
-def get_events_per_trial_in_bloc(data, ts, target_bloc=2, version='v1'):
+def get_events_per_trial_in_bloc(data, ts, feat, target_bloc=2, version='v1'):
     # print(ts.dtype.names)
     # print(data.dtype.names)
     if version == 'v1':
@@ -214,7 +223,7 @@ def get_events_per_trial_in_bloc(data, ts, target_bloc=2, version='v1'):
         event = ev.decode("utf-8")
         if bloc_id == target_bloc:
             if trial not in events_per_trial:
-                events_per_trial[trial] = {'Type':'','Time':[],'Event':[]}
+                events_per_trial[trial] = {'Type':'','Feature':'','Time':[],'Event':[]}
             
             if event == 'ITI R': # fix for ITI trial number
                 events_per_trial[trial-1]['Time'].append(time)    
@@ -225,14 +234,15 @@ def get_events_per_trial_in_bloc(data, ts, target_bloc=2, version='v1'):
 
 
     if version == 'v1':
-        session = zip(data['TrialNam'], data['Trial_No'])
+        session = zip(data['TrialNam'], data['Trial_No'], feat)
     elif version == 'v2':
-        session = zip(data['TentativaNome'], data['TentativaContador'])
+        session = zip(data['TentativaNome'], data['TentativaContador'], feat)
 
     type1 = 'Positiva'
     type2 = 'Negativa'
-    for trial_name, trial_number in session:
+    for trial_name, trial_number, feature in session:
         name = trial_name.decode('utf-8')
+        events_per_trial[trial_number]['Feature'] = feature
         if type1 in name: 
             events_per_trial[trial_number]['Type'] = type1
 
@@ -241,7 +251,7 @@ def get_events_per_trial_in_bloc(data, ts, target_bloc=2, version='v1'):
 
     return events_per_trial
 
-def get_trial_intervals(trials):
+def get_trial_intervals(trials, uncategorized=False):
     starts = []
     ends = []
     for i, trial in trials.items():
@@ -252,6 +262,8 @@ def get_trial_intervals(trials):
             if event == 'TE':
                 ends.append({'Time':time, 'Type':trial['Type']})
 
+    if uncategorized:
+        return [[start['Time'], end['Time']] for start, end in zip(starts, ends)]
 
     positive_intervals = []
     negative_intervals = []
@@ -347,14 +359,16 @@ def rate(paths, skip_header=13, version='v1'):
     overall_performance = []
     count = 0
     for path in paths:
-        data_file = load_fpe_data(path[0],skip_header)
-        timestamps_file = load_fpe_timestamps(path[1])
-        responses = get_responses(timestamps_file, version=version)
-        trials = get_events_per_trial_in_bloc(data_file,timestamps_file,
+        data_file = load_fpe_data(path[0], skip_header)
+        timestamps = load_fpe_timestamps(path[1])
+        features = load_ini_data(path[2])
+        trials = get_events_per_trial_in_bloc(data_file, timestamps, features,
             target_bloc=2, version=version)
         positive_intervals, negative_intervals = get_trial_intervals(trials)  
-        positive_data = rate_in(positive_intervals,responses)
-        negative_data = rate_in(negative_intervals,responses)
+
+        responses = get_responses(timestamps, version=version)
+        positive_data = rate_in(positive_intervals, responses)
+        negative_data = rate_in(negative_intervals, responses)
 
         relative_rate = get_relative_rate(positive_data, negative_data)
         title = path[0].replace('/home/pupil/recordings/DATA/','')
@@ -366,15 +380,16 @@ def rate(paths, skip_header=13, version='v1'):
         # draw_absolute_rate([positive_data, negative_data],title, False, version)        
         # draw_relative_rate(relative_rate,title, False, version)
 
-        draw_absolute_rate([positive_data, negative_data],title, True, version)
-        draw_relative_rate(relative_rate,title, True, version)
+        draw_absolute_rate([positive_data, negative_data], title, True, version)
+        draw_relative_rate(relative_rate, title, True, version)
 
 def get_paths(paths):
     p = []
     for root in paths['root']:
         p.append([
             os.path.join(root, paths['file'][0]),
-            os.path.join(root, paths['file'][1])])
+            os.path.join(root, paths['file'][1]),
+            os.path.join(root, paths['file'][2])])
     return p
 
 if __name__ == '__main__':
@@ -454,4 +469,47 @@ if __name__ == '__main__':
     #     'file': ['000.data', '000.timestamps', 'positive_01.txt']
     #     }
     # rate(get_paths(d), 29, version='v2')
-    load_ini_data()
+
+    
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_01/000_CES/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
+    #     }
+    # rate(get_paths(d), 28, version='v2')
+    
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_01/000_BIA/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
+    #     }
+    # rate(get_paths(d), 28, version='v2')
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_01/000_SIL/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
+    #     }
+    # rate(get_paths(d), 28, version='v2')
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_01/000_ALX/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
+    #     }
+    # rate(get_paths(d), 28, version='v2')
+
+
+    d = {
+        'root': [
+            '/home/pupil/recordings/DATA/2017_11_03/EU/000/stimulus_control'
+            ],
+        'file': ['000.data', '000.timestamps', 'positive.txt']
+        }
+    rate(get_paths(d), 12, version='v2')
+
+    # load_ini_data()

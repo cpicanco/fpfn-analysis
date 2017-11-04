@@ -14,9 +14,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-def draw_relative_rate(data,title, save=False, version='v1'):
+def draw_relative_rate(data,title, save=False, version='v1', y_label = 'Button-pressing proportion', name=''):
     x_label = 'Trials'
-    y_label = 'Button-pressing proportion'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)
 
@@ -27,7 +26,7 @@ def draw_relative_rate(data,title, save=False, version='v1'):
         plt.plot([0, 54], [.5, .5], 'k--', lw=1)
         plt.xticks([0, 26, 53],[1, 27, 54])
 
-    axes.plot(data,color="k",marker='.', lw=1, label="Right")
+    axes.plot(data,color="k",marker='.', lw=1)
 
 
     # remove outer frame
@@ -47,16 +46,15 @@ def draw_relative_rate(data,title, save=False, version='v1'):
     axes.set_xlabel(x_label)
     if save:
         data_path = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(os.path.dirname(data_path),title+'_relative.png')
+        f = os.path.join(os.path.dirname(data_path),title+'_relative'+name+'.png')
         print(f)
         plt.savefig(f, bbox_inches='tight')
         plt.close()        
     else:
         plt.show()
 
-def draw_absolute_rate(data,title, save=False, version='v1'):
+def draw_absolute_rate(data,title, save=False, version='v1', y_label='Button-pressing rate', name=''):
     x_label = 'Trials'
-    y_label = 'Button-pressing proportion'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)
     
@@ -93,9 +91,31 @@ def draw_absolute_rate(data,title, save=False, version='v1'):
    
     if save:
         data_path = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(os.path.dirname(data_path),title+'_absolute.png')
+        f = os.path.join(os.path.dirname(data_path),title+'_absolute'+name+'.png')
         print(f)
         plt.savefig(f, bbox_inches='tight')
         plt.close()        
     else:
         plt.show()
+
+def plot_xy(data, factor=1.9):
+    import matplotlib.patches as patches
+    from stimuli import circular_grid as grid 
+    axes = plt.gca()
+    axes.set_ylim(ymax = 1, ymin = 0)
+    axes.set_xlim(xmax = 1, xmin = 0)
+    plt.scatter(*data, s=1, c='b')   
+    for circle in grid(normalized=True):
+        axes.add_patch(
+            patches.Ellipse(
+                circle.center,   
+                width=circle.width*factor,          
+                height=circle.height*factor,
+                angle=360,
+                facecolor="gray",
+                edgecolor="red",
+                alpha=0.5        
+            )
+        ) 
+    plt.show()   
+    plt.gcf().clear() 

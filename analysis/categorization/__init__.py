@@ -17,7 +17,7 @@ from matplotlib.path import Path as mp
 from correction import unbiased_gaze, ALGORITHM_QUANTILES
 from methods import remove_outside_screen
 
-def clean_gaze_data(all_gaze_data):
+def clean_gaze_data(all_gaze_data,min_block_size=20000):
     x_norm = 'x_norm'
     y_norm = 'y_norm'
     
@@ -29,12 +29,12 @@ def clean_gaze_data(all_gaze_data):
 
     gaze_data, mask = remove_outside_screen(gaze_data)
     all_gaze_data = all_gaze_data[mask]
-    gaze_data, _ = unbiased_gaze(gaze_data.T, ALGORITHM_QUANTILES, min_block_size=1000, **keyword_arguments)
+    gaze_data, _ = unbiased_gaze(gaze_data.T, ALGORITHM_QUANTILES, min_block_size=min_block_size, **keyword_arguments)
     
     all_gaze_data[x_norm], all_gaze_data[y_norm] = gaze_data.T[0], gaze_data.T[1]
-    return np.array([all_gaze_data[x_norm], all_gaze_data[y_norm]])
+    return all_gaze_data
 
-def get_gaze_mask(circle, gaze_data, factor=2.):
+def get_gaze_mask(circle, gaze_data, factor=1.9):
     shape = mp(circle.points(factor=factor))  
     return shape.contains_points(gaze_data.T)
 
@@ -124,15 +124,51 @@ def get_gaze_mask(circle, gaze_data, factor=2.):
 
 if __name__ == '__main__':
     from methods import load_gaze_data
+    from methods import load_fpe_timestamps
+    from methods import load_fpe_data
+    from methods import load_ini_data
+    from methods import get_events_per_trial_in_bloc, get_trial_intervals
+    from methods import rate_in, get_relative_rate
     from stimuli import circular_grid as grid
+    from drawing import plot_xy, draw_absolute_rate, draw_relative_rate
 
-    all_gaze_data = load_gaze_data('random_gaze_data.txt')
-    gaze_data = clean_gaze_data(all_gaze_data)
+    all_gaze_data = load_gaze_data('/home/pupil/recordings/DATA/2017_11_03/EU/000/stimulus_control/gaze_positions_on_surface.csv', delimiter=',')
+    
+    # gaze_data = np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']])
+    # plot_xy(gaze_data)
+    # all_gaze_data = clean_gaze_data(all_gaze_data)
+    # plot_xy(gaze_data)
+
+    gaze_data = np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']])
     gaze_masks = [get_gaze_mask(circle, gaze_data) for circle in grid(normalized=True)]
 
-    # todo:    
-    # trial_intervals = load_intervals('random_beha_data.txt') # load_fpe_timestamps
-    # gaze_rates = []
-    # for mask in gaze_masks:
-    #     target_timestamps = all_gaze_data[mask]['time'] 
-    #     gaze_rates.append(rate_in(trial_intervals, target_timestamps))
+    data_file = load_fpe_data('/home/pupil/recordings/DATA/2017_11_03/EU/000/stimulus_control/000.data', 12)
+    timestamps = load_fpe_timestamps('/home/pupil/recordings/DATA/2017_11_03/EU/000/stimulus_control/000.timestamps')
+    features = load_ini_data('/home/pupil/recordings/DATA/2017_11_03/EU/000/stimulus_control/positive.txt')
+    trials = get_events_per_trial_in_bloc(data_file, timestamps, features, target_bloc=2, version='v2')
+    
+    print(len(features))
+    trial_intervals = get_trial_intervals(trials, uncategorized=True) 
+    #
+    uncategorized_gaze_rates = []
+    for mask in gaze_masks:
+        target_circle_timestamps = all_gaze_data[mask]['gaze_timestamp']
+        gaze_data = np.array([all_gaze_data[mask]['x_norm'], all_gaze_data[mask]['y_norm']])
+        # plot_xy(gaze_data)
+        uncategorized_gaze_rates.append(rate_in(trial_intervals, target_circle_timestamps))
+
+    gaze_rates_per_trial = np.vstack(uncategorized_gaze_rates).T
+    positive_feature_rate = []
+    positive_else_rate = []
+    for feature, rates in zip(features, gaze_rates_per_trial):
+        if feature:
+            positive_feature_rate.append(rates[feature-1])
+            positive_else_rate.append(np.sum(np.delete(rates,feature-1)))
+        else:
+            pass
+
+    draw_absolute_rate([positive_feature_rate, positive_else_rate], '2017_11_03_EU', True, 'v2',y_label='Looking rate',name='_looking')
+
+
+    relative_rate = get_relative_rate(positive_feature_rate, positive_else_rate)
+    draw_relative_rate(relative_rate, '2017_11_03_EU', True, 'v2',y_label='Looking proportion', name='_looking')
