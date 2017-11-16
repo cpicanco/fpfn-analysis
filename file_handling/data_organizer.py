@@ -8,120 +8,168 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 import sys
+sys.path.append('../analysis')
+
 import os
-import fnmatch
+import shutil
+from glob import glob
 
-# from shutil import copyfile
-from glob import glob, iglob
+import numpy as np
 
-from data_converter import convert
-
-# this script does not delete nor overrides any source data
-# it only creates a folder (raw_data_organized) with interest formated data copied from the source location
-# it DOES overrides any previous copies in the dst location 
-# it must be run after pupil surface data have been exported 
-
-def copy_and_format(pupil_data_directory, destination_directory=None):
-	if destination_directory:
-		destination = destination_directory
-	else:
-		destination = os.path.join(pupil_data_directory,'raw_data_organized')
-
-	print 'base:',pupil_data_directory
-	print 'destination:',destination
-
-	surface_d = None
-	directories = sorted(glob(os.path.join(pupil_data_directory,'0*')))
-	for d in directories:
-		basename = os.path.basename(d)
-		raw_dirs = []
-		for root, dirnames, filenames in os.walk(d):
-			for dirname in fnmatch.filter(dirnames, '*surfaces'):
-				raw_dirs.append(os.path.join(root, dirname))
-		for r_d in raw_dirs:
-			if r_d == []:
-				print 'Warning:', r_d, ' has no surface folder'
-			else:
-				src_base = [r_d, d]
-				dst_base  = os.path.join(destination,basename)
-
-				if not os.path.exists(dst_base):
-					try:
-						os.makedirs(dst_base)
-					except OSError as exc:
-						if exc.errno != errno.EEXIST:
-							raise
-
-				convert(src_base, dst_base, True)
-				# src_files = [
-				# 			glob(os.path.join(r_d, 'fixations_on_surface_Screen*'))[0],
-				# 			glob(os.path.join(r_d, 'gaze_positions_on_surface_Screen*'))[0],
-				# 			glob(os.path.join(d, 'scapp_output.timestamps'))[0],
-				# 			glob(os.path.join(d, 'scapp_output.npy'))[0]
-				# 			]
-
-				# dst_files = [
-				# 			os.path.join(dst_base, 'fixations_on_surface_Screen.csv'),
-				# 			os.path.join(dst_base, 'gaze_positions_on_surface_Screen.csv'),
-				# 			os.path.join(dst_base, 'scapp_output.timestamps'),
-				# 			os.path.join(dst_base, 'scapp_output.npy')
-				# 			]
-
-				# for src, dst in zip(src_files, dst_files):
-				# 	print 'from:', src
-				# 	print '__to:', dst
-
-				# 	# http://stackoverflow.com/a/12517490
-				# 	if not os.path.exists(os.path.dirname(dst)):
-				# 		try:
-				# 			os.makedirs(os.path.dirname(dst))
-				# 		except OSError as exc:
-				# 			if exc.errno != errno.EEXIST:
-				# 				raise
-				# 	if not os.path.exists(dst):
-				# 		copyfile(src, dst)
+from methods import load_fpe_timestamps, load_gaze_data, load_ini_data
 
 
+def copy_file(src, dst):
+    base_directory = os.path.dirname(dst)
+    if not os.path.exists(base_directory):
+        print("Creating directory:", base_directory)
+        os.makedirs(base_directory)
+    shutil.copyfile(src,dst)
+
+def convert_gaze(src, dst, start_time):
+    with open(dst, 'w+') as f:
+        f.write("\t".join(('time','x_norm','y_norm'))+'\n')
+        for timestamp, X, Y in zip(src['gaze_timestamp'], src['x_norm'], src['y_norm']):
+            timestamp -= start_time
+            timestamp = '%.6f'%timestamp
+            X = '%.3f'%round(X, 3)
+            Y = '%.3f'%round(Y, 3)
+            f.write("\t".join((timestamp, X, Y))+'\n')
+
+def convert_beha(src, dst, start_time):
+    with open(dst, 'w+') as f:
+        f.write("\t".join(('time', 'bloc', 'trial', 'event'))+'\n')
+        for timestamp, bloc, trial, event in zip(src['Tempo'], src['BlocoID'], src['TentativaContador'], src['Evento']):
+            timestamp -= start_time
+            timestamp = '%.6f'%timestamp
+            bloc = '%s'%bloc
+            trial = '%s'%trial
+
+            event_converted = event.decode('utf-8')
+
+            if event_converted == 'C':
+                event_converted == 'CONSEQUENCE'
+
+            if event_converted == 'R':
+                event_converted == 'RESPONSE'
+
+            if event_converted == 'ITI R':
+                event_converted == 'ITI_RESPONSE'
+
+            if event_converted == 'TS':
+                event_converted == 'TRIAL_START'
+
+            if event_converted == 'TE':
+                event_converted == 'TRIAL_END'
+
+            f.write("\t".join((timestamp, bloc, trial, event_converted))+'\n')
+
+def convert_fpfn(src, dst):
+    with open(dst, 'w+') as f:
+        f.write('feature_stimulus_per_trial_in_bloc_2\n')
+        for stimulus in src:
+            if stimulus:
+                f.write(str(stimulus) +'\n')
+            else:
+                f.write('NA' +'\n')
+
+def organize(src_directory, dst_directory):
+    """
+    organize does not delete nor overrides any source data
+    it will copy and convert data from source
+    it will rename at destination
+    it DOES overrides any previous copies in destination 
+    it must be run after pupil surface data have been exported     
+    """
+    # destination
+    dst_filenames = ['info.yml',
+                     'session_configuration.ini',
+                     'session_features.txt',
+                     'session_events.txt',
+                     'gaze_coordenates.txt']
+    dst_files = [os.path.join(dst_directory, f) for f in dst_filenames]
+
+    # source
+    target_filters = ['*.yml', '*.txt', '*.data', '*.timestamps', '*surface*']
+    glob_lists = [glob(os.path.join(src_directory, tf)) for tf in target_filters]
+    src_files = [sorted(glob_list)[0] for glob_list in glob_lists]
+    
+    # feedback
+    [print('source:', src) for src in src_files]   
+    [print('destination:', dst) for dst in dst_files]
+
+    # loading
+    fpfn_file = load_ini_data(src_files[1])
+    beha_file = load_fpe_timestamps(src_files[3])
+    gaze_file = load_gaze_data(src_files[4], delimiter=',')
+    start_time = gaze_file['gaze_timestamp'][0]
+
+    # copying
+
+    copy_file(src_files[0], dst_files[0])
+    copy_file(src_files[1], dst_files[1])
+
+    # conversion
+    convert_fpfn(fpfn_file, dst_files[2])
+    convert_beha(beha_file, dst_files[3], start_time=start_time)
+    convert_gaze(gaze_file, dst_files[4], start_time=start_time)
+
+def get_data_path(raw=False):
+    data_path = os.path.dirname(os.path.abspath(__file__))
+    if raw:
+        return os.path.join(os.path.dirname(data_path), 'RAW_DATA')
+    else:
+        return os.path.join(os.path.dirname(data_path), 'DATA')
 
 if __name__ == '__main__':
-	# if len(sys.argv) > 1:
-	# 	source_directories = [directory for directory in sys.argv[1:] if os.path.exists(directory)]
-	# else:
-	print 'origin:',os.path.dirname(os.path.abspath(__file__))
+    PATHS_SOURCE = ['/home/pupil/recordings/2017_11_14_006_ALE/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_14_005_JOA/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_14_004_NEL/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_14_003_LUC/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_14_002_TAT/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_14_001_MAR/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_14_000_SON/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_13_005_KAR/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_13_004_ISA/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_13_003_LIZ/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_13_002_MAX/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_13_001_MAR/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_13_000_GAB/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_09_007_REN/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_09_005_AMA/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_09_004_BEL/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_09_002_EST/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_09_001_KAL/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_09_000_JUL/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_08_003_REU/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_06_000_ROB/stimulus_control/']
 
-	source_dir = '/home/rafael/doutorado/data_doc/'
-	inner_paths = [
-		'004-Cristiane/2015-05-19',
-		'004-Cristiane/2015-05-27',
-		'005-Marco/2015-05-19',
-		'005-Marco/2015-05-20',
-		'006-Renan/2015-05-20',
-		'007-Gabriel/2015-05-20',
-		'008-Thaiane/2015-05-19',
-		'009-Rebeca/2015-05-25',
-		'010-Iguaracy/2015-05-25',
-		'011-Priscila/2015-05-26',
-		'013-Oziele/2015-05-26',
-		'014-Acsa/2015-05-26'
-	]
-	source_directories = [os.path.join(source_dir,s) for s in inner_paths]
 
-	source_dir = '/home/rafael/doutorado/data_org/'
-	inner_paths = [
-		'P001/2015-05-19',
-		'P001/2015-05-27',
-		'P002/2015-05-19',
-		'P002/2015-05-20',
-		'P003/2015-05-20',
-		'P004/2015-05-20',
-		'P005/2015-05-19',
-		'P006/2015-05-25',
-		'P007/2015-05-25',
-		'P008/2015-05-26',
-		'P009/2015-05-26',
-		'P010/2015-05-26'
-	]
-	destinat_directory = [os.path.join(source_dir,s) for s in inner_paths]
+    data_path = get_data_path()
+    PATHS_DESTIN = [ 'P21',
+                     'P20',
+                     'P19',
+                     'P18',
+                     'P17',
+                     'P16',
+                     'P15',
+                     'P14',
+                     'P13',
+                     'P12',
+                     'P11',
+                     'P10',
+                     'P09',
+                     'P08',
+                     'P07',
+                     'P06',
+                     'P05',
+                     'P04',
+                     'P03',
+                     'P02',
+                     'P01']
 
-	for s, d in zip(source_directories, destinat_directory):
-		copy_and_format(s,d)
+    source_directories = [p for p in PATHS_SOURCE]
+    destinat_directory = [os.path.join(data_path, p) for p in PATHS_DESTIN]
+
+    for s, d in zip(source_directories, destinat_directory):
+        organize(s, d)
