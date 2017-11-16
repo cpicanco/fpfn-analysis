@@ -15,8 +15,8 @@ import numpy as np
 import random
 
 STIMULI_COORDENATES = [
-    (874, 334),
-    (808, 517),
+    (874, 334), # <=== right, 0 degree
+    (808, 517), 
     (639, 614),
     (448, 580),
     (323, 431),
@@ -25,13 +25,19 @@ STIMULI_COORDENATES = [
     (639, 54 ),
     (808, 151)]
 
-def normalize(x_px, y_px, inverted_y=False, screen=(1280, 768)):
+STIMULI_WIDTH_PX = 100
+STIMULI_HEIGHT_PX = 100
+
+SCREEN_WIDTH_PX = 1280
+SCREEN_HEIGHT_PX = 768
+
+def normalize(x_px, y_px, inverted_y=False, screen=(SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX)):
     if inverted_y:
         return x_px/screen[0], 1-(y_px/screen[1])
     else:
         return x_px/screen[0], y_px/screen[1]
 
-def denormalize(x_px, y_px,screen=(1280, 768)):
+def denormalize(x_px, y_px,screen=(SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX)):
     return x_px*screen[0], y_px*screen[1]
 
 def ellipse(center, width, height, n = 360):
@@ -85,7 +91,8 @@ class RandomPoint(object):
 
 class Circle(object):
     """Circle"""
-    def __init__(self, left_px, top_px, width_px=100, height_px=100, normalized=True): 
+    def __init__(self, left_px, top_px,
+        width_px=STIMULI_WIDTH_PX, height_px=STIMULI_HEIGHT_PX, normalized=True): 
         if normalized:          
             self.left, self.top = normalize(left_px, top_px, inverted_y=True) 
             self.width, self.height = normalize(width_px, height_px)
@@ -106,7 +113,7 @@ def circular_grid(normalized=False):
 def debug_window():
     from graphics import GraphWin
 
-    win = GraphWin('Floor', 1280, 768)
+    win = GraphWin('Floor', SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX)
     win.setBackground("black")
 
     for circle in circular_grid():
