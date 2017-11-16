@@ -12,6 +12,9 @@ import numpy as np
 from itertools import islice
 
 from drawing import draw_absolute_rate, draw_relative_rate
+    
+fp_strings = ['FP', 'Feature Positive']
+fn_strings = ['FN', 'Feature Negative']
 
 def load_ini_data(path='../data/positive_01.txt'):
     from configparser import ConfigParser
@@ -24,13 +27,25 @@ def load_ini_data(path='../data/positive_01.txt'):
 
         if not 'Blc 2' in section:
             continue
+            
+        bloc_name = Config.get('Blc 2', 'Name')
+        for fp_string in fp_strings:
+            if bloc_name in fp_string:
+                target = 'Positiva'
+                non_target = 'Negativa'
 
-        if Config.get(section, 'Contingency') == 'Positiva':
-            for option in Config.options(section):
-                if 'gaplength' in option:
-                    if int(Config.get(section, option)) > 0:
-                        data.append(int(option.replace('c','').replace('gaplength', '')))
-        elif Config.get(section, 'Contingency') == 'Negativa':
+        for fn_string in fn_strings:
+            if bloc_name in fn_string:
+                target = 'Negativa'
+                non_target = 'Positiva'
+           
+        if Config.get(section, 'Contingency') == target:
+            for n in range(1, 10):
+                option = 'c'+str(n)+'gap'
+                if Config.get(section, option) == '1':
+                    data.append(n)
+
+        elif Config.get(section, 'Contingency') == non_target:
             data.append(None)
 
     return data
@@ -77,7 +92,8 @@ def load_fpe_data(path, skip_header):
         RPrevista    
     """
     if not os.path.isfile(path):
-        raise "Path was not found:"+path
+        print(path)
+        raise "Path was not found:"
 
     data = np.genfromtxt(path,
         delimiter="\t",
@@ -159,10 +175,7 @@ def window(seq, n=2):
 def get_perfomance(data):
     return [line.decode("utf-8") for line in data['__Result']]
 
-def get_session_type(data, version='v1'):
-    fp_strings = ['FP', 'Feature Positive']
-    fn_strings = ['FN', 'Feature Negative']
-    
+def get_session_type(data, version='v1'):    
     if version == 'v1':
         bloc_name = data['Bloc_Nam'][0].decode("utf-8")
     elif version == 'v2':
@@ -273,10 +286,7 @@ def get_trial_intervals(trials, uncategorized=False):
 
         if start['Type'] == 'Negativa':
             negative_intervals.append([start['Time'], end['Time']])
-        
     return positive_intervals, negative_intervals
-
-
 
 def get_all_responses(ts, version='v1'):
     if version == 'v1':
@@ -297,7 +307,6 @@ def get_responses(ts, version='v1'):
 
     return [time for time, event in session \
         if event.decode('utf-8') == 'R']    
-
 
 def is_inside(timestamps,rangein, rangeout):
     return [t for t in timestamps if (t >= rangein) and (t <= rangeout)]
@@ -378,19 +387,19 @@ def rate(paths, skip_header=13, version='v1'):
         title = title+'_'+get_session_type(data_file, version)
         title = title.replace(' ', '_')
 
-        # draw_absolute_rate([positive_data, negative_data],title, False, version)        
-        # draw_relative_rate(relative_rate,title, False, version)
+        draw_absolute_rate([positive_data, negative_data],title, False, version)        
+        draw_relative_rate(relative_rate,title, False, version)
 
-        draw_absolute_rate([positive_data, negative_data], title, True, version)
-        draw_relative_rate(relative_rate, title, True, version)
+        # draw_absolute_rate([positive_data, negative_data], title, True, version)
+        # draw_relative_rate(relative_rate, title, True, version)
 
 def get_paths(paths):
     p = []
     for root in paths['root']:
-        p.append([
-            os.path.join(root, paths['file'][0]),
-            os.path.join(root, paths['file'][1]),
-            os.path.join(root, paths['file'][2])])
+        s = []
+        for path in paths['file']:
+            s.append(os.path.join(root, path))
+        p.append(s)
     return p
 
 if __name__ == '__main__':
@@ -398,7 +407,7 @@ if __name__ == '__main__':
     #     'root': [
     #         '/home/pupil/recordings/DATA/2017_04_11/000_HER/001/stimulus_control'
     #         ],
-    #     'file': ['000.data', '000.timestamps']
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
 
     # rate(get_paths(d),skip_header=14)
@@ -408,19 +417,19 @@ if __name__ == '__main__':
     #         '/home/pupil/recordings/DATA/2017_04_12/000_ATL/000/stimulus_control',
     #         '/home/pupil/recordings/DATA/2017_04_12/000_ATL/001/stimulus_control'
     #         ],
-    #     'file': ['000.data', '000.timestamps']
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
 
     # rate(get_paths(d))
 
     # d = {
     #     'root': [
-    #         '/home/pupil/recordings/DATA/2017_04_29/000_DEM/000/stimulus_control',
-    #         '/home/pupil/recordings/DATA/2017_04_29/000_DEM/001/stimulus_control',
+    #         # '/home/pupil/recordings/DATA/2017_04_29/000_DEM/000/stimulus_control',
+    #         # '/home/pupil/recordings/DATA/2017_04_29/000_DEM/001/stimulus_control',
     #         '/home/pupil/recordings/DATA/2017_04_29/000_DEM/002/stimulus_control'
 
     #         ],
-    #     'file': ['000.data', '000.timestamps']
+    #     'file': ['000.data', '000.timestamps', 'negative.txt']
     #     }
 
     # rate(get_paths(d))
@@ -431,7 +440,7 @@ if __name__ == '__main__':
     #         '/home/pupil/recordings/DATA/2017_04_29/000_JES/000/stimulus_control',
     #         '/home/pupil/recordings/DATA/2017_04_29/000_JES/001/stimulus_control'
     #     ],    
-    #     'file': ['000.data', '000.timestamps']
+    #     'file': ['000.data', '000.timestamps', 'negative.txt']
     # }
 
     # rate(get_paths(d))
@@ -440,7 +449,7 @@ if __name__ == '__main__':
     #     'root': [
     #         '/home/pupil/recordings/DATA/2017_04_29/000_JUL/000/stimulus_control'
     #         ],
-    #     'file': ['000.data', '000.timestamps']
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
 
     # rate(get_paths(d))
@@ -449,7 +458,7 @@ if __name__ == '__main__':
     #     'root': [
     #         '/home/pupil/recordings/DATA/2017_10_30/000_THA/000/stimulus_control'
     #         ],
-    #     'file': ['000.data', '000.timestamps']
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
 
     # rate(get_paths(d), 38, version='v2')
@@ -459,7 +468,7 @@ if __name__ == '__main__':
     #     'root': [
     #         '/home/pupil/recordings/DATA/2017_10_30/000_LOR/000/stimulus_control'
     #         ],
-    #     'file': ['000.data', '000.timestamps']
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
     # rate(get_paths(d), 38, version='v2')
 
@@ -505,12 +514,19 @@ if __name__ == '__main__':
     # rate(get_paths(d), 28, version='v2')
 
 
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
+    #     }
+    # rate(get_paths(d), 12, version='v2')
+
     d = {
         'root': [
-            '/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control'
+            '/home/pupil/recordings/DATA/2017_11_06/000_ROB/000/stimulus_control'
             ],
-        'file': ['000.data', '000.timestamps', 'positive.txt']
+        'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface_3d_ba.csv'],
         }
-    rate(get_paths(d), 12, version='v2')
 
-    # load_ini_data()
+    rate(get_paths(d), version='v2', skip_header=12)

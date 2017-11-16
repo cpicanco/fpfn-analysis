@@ -14,17 +14,54 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+
+def draw_rate(data,title, save=False, version='v1', y_label = 'FPS by trial'):
+    x_label = 'Trials'
+    axes = plt.gca()
+    plt.suptitle(title, fontsize=12)
+
+    plt.xticks([0,(len(data)//2)-1, len(data)-1],[1, len(data)//2, len(data)])
+    axes.plot(data,color="k",marker='.', lw=1)
+
+
+    # remove outer frame
+    axes.spines['top'].set_visible(False)
+    axes.spines['bottom'].set_visible(False)
+    axes.spines['left'].set_visible(False)
+    axes.spines['right'].set_visible(False)
+
+    axes.set_ylim(-0.1,120.)
+    axes.set_xlim(-0.5, len(data)+0.5)
+
+    #remove ticks
+    axes.xaxis.set_ticks_position('none')
+    axes.yaxis.set_ticks_position('none')
+
+    axes.set_ylabel(y_label)
+    axes.set_xlabel(x_label)
+    if save:
+        data_path = os.path.dirname(os.path.abspath(__file__))
+        f = os.path.join(os.path.dirname(data_path),title+'_fps.png')
+        print(f)
+        plt.savefig(f, bbox_inches='tight')
+        plt.close()        
+    else:
+        plt.show()
+
+
 def draw_relative_rate(data,title, save=False, version='v1', y_label = 'Button-pressing proportion', name=''):
     x_label = 'Trials'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)
 
-    if version == 'v1':
-        plt.plot([0, 36], [.5, .5], 'k--', lw=1)
-        plt.xticks([0,14, 35],[1, 15, 36])
-    elif version == 'v2':
-        plt.plot([0, 54], [.5, .5], 'k--', lw=1)
-        plt.xticks([0, 26, 53],[1, 27, 54])
+    if 'looking' in name:
+        plt.plot([0, len(data)], [1./9, 1./9], 'k--', lw=1)
+    
+    else:
+        plt.plot([0, len(data)], [1./2, 1./2], 'k--', lw=1)
+
+    
+    plt.xticks([0,(len(data)//2)-1, len(data)-1],[1, len(data)//2, len(data)])
 
     axes.plot(data,color="k",marker='.', lw=1)
 

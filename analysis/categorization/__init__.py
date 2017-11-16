@@ -25,7 +25,7 @@ def remove_outside_session_time(target_timestamps, intervals):
         mask = mask | (a & b)
     return mask
 
-def clean_gaze_data(all_gaze_data, intervals, min_block_size=4000):
+def clean_gaze_data(all_gaze_data, intervals, min_block_size=1000, do_remove_outside_screen=True):
     x_norm = 'x_norm'
     y_norm = 'y_norm'
     
@@ -37,8 +37,9 @@ def clean_gaze_data(all_gaze_data, intervals, min_block_size=4000):
     all_gaze_data = all_gaze_data[mask]
 
     gaze_data = np.array([all_gaze_data[x_norm], all_gaze_data[y_norm]])
-    gaze_data, mask = remove_outside_screen(gaze_data)
-    all_gaze_data = all_gaze_data[mask]
+    if do_remove_outside_screen:
+        gaze_data, mask = remove_outside_screen(gaze_data)
+        all_gaze_data = all_gaze_data[mask]
 
     gaze_data, _ = unbiased_gaze(gaze_data.T, ALGORITHM_QUANTILES, min_block_size=min_block_size, **keyword_arguments)
     all_gaze_data[x_norm], all_gaze_data[y_norm] = gaze_data.T[0], gaze_data.T[1]
@@ -133,40 +134,39 @@ def get_gaze_mask(circle, gaze_data, factor=2.):
 
 #     return np.array(X), np.array(Y)
 
-if __name__ == '__main__':
-    from methods import load_gaze_data
-    from methods import load_fpe_timestamps
-    from methods import load_fpe_data
-    from methods import load_ini_data
-    from methods import get_events_per_trial_in_bloc, get_trial_intervals
-    from methods import rate_in, get_relative_rate
-    from stimuli import circular_grid as grid
-    from drawing import plot_xy, draw_absolute_rate, draw_relative_rate
+from methods import load_gaze_data
+from methods import load_fpe_timestamps
+from methods import load_fpe_data
+from methods import load_ini_data
+from methods import get_events_per_trial_in_bloc, get_trial_intervals, get_session_type, get_paths
+from methods import rate_in, get_relative_rate
+from stimuli import circular_grid as grid
+from drawing import plot_xy, draw_absolute_rate, draw_relative_rate, draw_rate
 
-    data_file = load_fpe_data('/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control/000.data', 12)
-    timestamps = load_fpe_timestamps('/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control/000.timestamps')
-    features = load_ini_data('/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control/positive.txt')
-    trials = get_events_per_trial_in_bloc(data_file, timestamps, features, target_bloc=2, version='v2')
-    trial_intervals = get_trial_intervals(trials, uncategorized=True) 
-       
-    all_gaze_data = load_gaze_data('/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control/gaze_positions_on_surface.csv', delimiter=',')
+def gaze_rate(paths, skip_header=13, version='v1', factor=1.95, min_block_size=1000,do_remove_outside_screen=True):
+    # load from file
+    data_file = load_fpe_data(paths[0], skip_header=skip_header)
+    timestamps = load_fpe_timestamps(paths[1])
+    features = load_ini_data(paths[2])   
+    all_gaze_data = load_gaze_data(paths[3], delimiter=',')
     
+    # extract information from raw data
+    trials = get_events_per_trial_in_bloc(data_file, timestamps, features, target_bloc=2, version=version)
+    trial_intervals = get_trial_intervals(trials, uncategorized=True) 
+
+    # visual inspection
     # for begin in range(1,all_gaze_data.shape[0],10000):
     #     end = begin + 10000
     #     if end > all_gaze_data.shape[0]:
     #         end = all_gaze_data.shape[0]
-
     #     plot_xy(np.array([all_gaze_data['x_norm'][begin:end], all_gaze_data['y_norm'][begin:end]]))
 
-    factor = 1.95
-
-    plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
-    all_gaze_data = clean_gaze_data(all_gaze_data, trial_intervals)
-    plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
+    #plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
+    all_gaze_data = clean_gaze_data(all_gaze_data, trial_intervals,min_block_size=min_block_size,do_remove_outside_screen=do_remove_outside_screen)
+    # plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
 
     gaze_data = np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']])
     gaze_masks = [get_gaze_mask(circle, gaze_data, factor) for circle in grid(normalized=True)]
-
 
     uncategorized_gaze_rates = []
     for mask in gaze_masks:
@@ -180,13 +180,160 @@ if __name__ == '__main__':
     positive_else_rate = []
     for feature, rates in zip(features, gaze_rates_per_trial):
         if feature:
-            print(rates[feature-1])
+            # print(rates[feature-1])
             positive_feature_rate.append(rates[feature-1])
             positive_else_rate.append(np.sum(np.delete(rates,feature-1)))
         else:
             pass
 
-    draw_absolute_rate([positive_feature_rate, positive_else_rate], '2017_11_04_EU', False, 'v2',y_label='Looking rate',name='_looking')
+    title = paths[0].replace('/home/pupil/recordings/DATA/','')
+    title = title.replace('/stimulus_control/000.data','')
+    title = title.replace('/','_')
+    title = title+'_'+get_session_type(data_file, version)
+    title = title.replace(' ', '_')
+
+
+    draw_rate(rate_in(trial_intervals, all_gaze_data[:]['gaze_timestamp']), title, save=False)
+
+
+    draw_absolute_rate([positive_feature_rate, positive_else_rate], title, False, version, y_label='Looking rate',name='_looking')
 
     relative_rate = get_relative_rate(positive_feature_rate, positive_else_rate)
-    draw_relative_rate(relative_rate, '2017_11_04_EU', False, 'v2',y_label='Looking proportion', name='_looking')
+    draw_relative_rate(relative_rate, title, False, version, y_label='Looking proportion', name='_looking')
+
+if __name__ == '__main__':
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_06/000_ROB/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface_3d_ba.csv'],
+    #     }
+
+    # for paths in get_paths(d):
+    #     gaze_rate(paths, version='v2', skip_header=12, min_block_size=5000, do_remove_outside_screen=False)
+
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_04_11/000_HER/001/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface_3d_ba.csv'],
+    #     'note':'lost'
+    #     }
+
+    # for paths in get_paths(d):
+    #     gaze_rate(paths, skip_header=14, min_block_size=3000,do_remove_outside_screen=False)
+
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_04_12/000_ATL/000/stimulus_control',
+    #         '/home/pupil/recordings/DATA/2017_04_12/000_ATL/001/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface_3d_ba.csv']
+    #     }
+
+    # for paths in get_paths(d):
+    #     gaze_rate(paths, min_block_size=1000)
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_DEM/000/stimulus_control',
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_DEM/001/stimulus_control',
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_DEM/002/stimulus_control'
+
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'negative.txt', 'gaze_positions_on_surface_3d_ba.csv']
+    #     }
+
+    # for paths in get_paths(d):
+    #     gaze_rate(paths, min_block_size=1000)
+
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_JES/000/stimulus_control',
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_JES/001/stimulus_control'
+    #     ],    
+    #     'file': ['000.data', '000.timestamps', 'negative.txt', 'gaze_positions_on_surface.csv']
+    # }
+
+    # gaze_rate(get_paths(d))
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_04_29/000_JUL/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt']
+    #     }
+
+    # gaze_rate(get_paths(d))
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_10_30/000_THA/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface.csv']
+    #     }
+
+    # gaze_rate(get_paths(d), 38, version='v2')
+
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_10_30/000_LOR/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface.csv']
+    #     }
+    # gaze_rate(get_paths(d), 38, version='v2')
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_10_31/000_DAN/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive_01.txt', 'gaze_positions_on_surface.csv']
+    #     }
+    # gaze_rate(get_paths(d), 29, version='v2')
+
+    
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_01/000_CES/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface.csv']
+    #     }
+    # gaze_rate(get_paths(d), 28, version='v2')
+    
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_01/000_BIA/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface.csv']
+    #     }
+    # gaze_rate(get_paths(d), 28, version='v2')
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_01/000_SIL/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface.csv']
+    #     }
+    # gaze_rate(get_paths(d), 28, version='v2')
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_01/000_ALX/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface.csv']
+    #     }
+    # gaze_rate(get_paths(d), 28, version='v2')
+
+
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_04/EU/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface.csv']
+    #     }
+    # gaze_rate(get_paths(d), 12, version='v2')
