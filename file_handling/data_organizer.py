@@ -46,21 +46,20 @@ def convert_beha(src, dst, start_time):
             trial = '%s'%trial
 
             event_converted = event.decode('utf-8')
-
             if event_converted == 'C':
-                event_converted == 'CONSEQUENCE'
+                event_converted = 'CONSEQUENCE'
 
             if event_converted == 'R':
-                event_converted == 'RESPONSE'
+                event_converted = 'RESPONSE'
 
             if event_converted == 'ITI R':
-                event_converted == 'ITI_RESPONSE'
+                event_converted = 'ITI_RESPONSE'
 
             if event_converted == 'TS':
-                event_converted == 'TRIAL_START'
+                event_converted = 'TRIAL_START'
 
             if event_converted == 'TE':
-                event_converted == 'TRIAL_END'
+                event_converted = 'TRIAL_END'
 
             f.write("\t".join((timestamp, bloc, trial, event_converted))+'\n')
 
@@ -122,7 +121,11 @@ def get_data_path(raw=False):
         return os.path.join(os.path.dirname(data_path), 'DATA')
 
 if __name__ == '__main__':
-    PATHS_SOURCE = ['/home/pupil/recordings/2017_11_14_006_ALE/stimulus_control/',
+    PATHS_SOURCE = ['/home/pupil/recordings/2017_11_16_003_ALI/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_16_002_LAR/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_16_001_MAT/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_16_000_VIN/stimulus_control/',
+                    '/home/pupil/recordings/2017_11_14_006_ALE/stimulus_control/',
                     '/home/pupil/recordings/2017_11_14_005_JOA/stimulus_control/',
                     '/home/pupil/recordings/2017_11_14_004_NEL/stimulus_control/',
                     '/home/pupil/recordings/2017_11_14_003_LUC/stimulus_control/',
@@ -146,7 +149,11 @@ if __name__ == '__main__':
 
 
     data_path = get_data_path()
-    PATHS_DESTIN = [ 'P21',
+    PATHS_DESTIN = [ 'P25',
+                     'P24',
+                     'P23',   
+                     'P22',
+                     'P21',
                      'P20',
                      'P19',
                      'P18',
