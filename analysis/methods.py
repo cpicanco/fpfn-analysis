@@ -8,13 +8,20 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 import sys, os
-import numpy as np
+from glob import glob
 from itertools import islice
+
+import numpy as np
 
 from drawing import draw_absolute_rate, draw_relative_rate
     
 fp_strings = ['FP', 'Feature Positive']
 fn_strings = ['FN', 'Feature Negative']
+
+def load_yaml_data(path):
+    import yaml
+    with open(path, 'r') as stream:
+        return yaml.load(stream)
 
 def load_ini_data(path='../data/positive_01.txt'):
     from configparser import ConfigParser
@@ -365,33 +372,31 @@ def get_relative_rate(data1, data2):
 #         title = title.replace(' ', '_')
 #         draw_relative_rate(relative_rate,title, False)
 
-def rate(paths, skip_header=13, version='v1'):
-    overall_performance = []
-    count = 0
+def rates(paths, skip_header=13, version='v1'):
     for path in paths:
-        data_file = load_fpe_data(path[0], skip_header)
-        timestamps = load_fpe_timestamps(path[1])
-        features = load_ini_data(path[2])
-        trials = get_events_per_trial_in_bloc(data_file, timestamps, features,
-            target_bloc=2, version=version)
-        positive_intervals, negative_intervals = get_trial_intervals(trials)  
-
-        responses = get_responses(timestamps, version=version)
-        positive_data = rate_in(positive_intervals, responses)
-        negative_data = rate_in(negative_intervals, responses)
-
-        relative_rate = get_relative_rate(positive_data, negative_data)
         title = path[0].replace('/home/pupil/recordings/DATA/','')
         title = title.replace('/stimulus_control/000.data','')
         title = title.replace('/','_')
         title = title+'_'+get_session_type(data_file, version)
         title = title.replace(' ', '_')
+        rate(path, skip_header, version, title)
 
-        draw_absolute_rate([positive_data, negative_data],title, False, version)        
-        draw_relative_rate(relative_rate,title, False, version)
+def rate(data_file, timestamps, features, version, title=''):
+    trials = get_events_per_trial_in_bloc(data_file, timestamps, features,
+        target_bloc=2, version=version)
+    positive_intervals, negative_intervals = get_trial_intervals(trials)  
 
-        # draw_absolute_rate([positive_data, negative_data], title, True, version)
-        # draw_relative_rate(relative_rate, title, True, version)
+    responses = get_responses(timestamps, version=version)
+    positive_data = rate_in(positive_intervals, responses)
+    negative_data = rate_in(negative_intervals, responses)
+
+    relative_rate = get_relative_rate(positive_data, negative_data)
+
+    draw_absolute_rate([positive_data, negative_data],title, False, version)        
+    draw_relative_rate(relative_rate,title, False, version)
+
+    # draw_absolute_rate([positive_data, negative_data], title, True, version)
+    # draw_relative_rate(relative_rate, title, True, version)
 
 def get_paths(paths):
     p = []
@@ -402,7 +407,13 @@ def get_paths(paths):
         p.append(s)
     return p
 
+def get_source_files(src_directory, gaze_file_filter='*surface_2d_pr*'):
+    target_filters = ['*.yml', '*.txt', '*.data', '*.timestamps', gaze_file_filter]
+    glob_lists = [glob(os.path.join(src_directory, tf)) for tf in target_filters]
+    return [sorted(glob_list)[0] for glob_list in glob_lists]
+
 if __name__ == '__main__':
+    pass
     # d = {
     #     'root': [
     #         '/home/pupil/recordings/DATA/2017_04_11/000_HER/001/stimulus_control'
@@ -410,7 +421,7 @@ if __name__ == '__main__':
     #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
 
-    # rate(get_paths(d),skip_header=14)
+    # rates(get_paths(d),skip_header=14)
 
     # d = {
     #     'root': [
@@ -420,7 +431,7 @@ if __name__ == '__main__':
     #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
 
-    # rate(get_paths(d))
+    # rates(get_paths(d))
 
     # d = {
     #     'root': [
@@ -432,7 +443,7 @@ if __name__ == '__main__':
     #     'file': ['000.data', '000.timestamps', 'negative.txt']
     #     }
 
-    # rate(get_paths(d))
+    # rates(get_paths(d))
 
 
     # d = {
@@ -443,7 +454,7 @@ if __name__ == '__main__':
     #     'file': ['000.data', '000.timestamps', 'negative.txt']
     # }
 
-    # rate(get_paths(d))
+    # rates(get_paths(d))
 
     # d = {
     #     'root': [
@@ -452,7 +463,7 @@ if __name__ == '__main__':
     #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
 
-    # rate(get_paths(d))
+    # rates(get_paths(d))
 
     # d = {
     #     'root': [
@@ -461,7 +472,7 @@ if __name__ == '__main__':
     #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
 
-    # rate(get_paths(d), 38, version='v2')
+    # rates(get_paths(d), 38, version='v2')
 
 
     # d = {
@@ -470,7 +481,7 @@ if __name__ == '__main__':
     #         ],
     #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
-    # rate(get_paths(d), 38, version='v2')
+    # rates(get_paths(d), 38, version='v2')
 
     # d = {
     #     'root': [
@@ -478,7 +489,7 @@ if __name__ == '__main__':
     #         ],
     #     'file': ['000.data', '000.timestamps', 'positive_01.txt']
     #     }
-    # rate(get_paths(d), 29, version='v2')
+    # rates(get_paths(d), 29, version='v2')
 
     
     # d = {
@@ -487,7 +498,7 @@ if __name__ == '__main__':
     #         ],
     #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
-    # rate(get_paths(d), 28, version='v2')
+    # rates(get_paths(d), 28, version='v2')
     
     # d = {
     #     'root': [
@@ -495,7 +506,7 @@ if __name__ == '__main__':
     #         ],
     #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
-    # rate(get_paths(d), 28, version='v2')
+    # rates(get_paths(d), 28, version='v2')
 
     # d = {
     #     'root': [
@@ -503,7 +514,7 @@ if __name__ == '__main__':
     #         ],
     #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
-    # rate(get_paths(d), 28, version='v2')
+    # rates(get_paths(d), 28, version='v2')
 
     # d = {
     #     'root': [
@@ -511,7 +522,7 @@ if __name__ == '__main__':
     #         ],
     #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
-    # rate(get_paths(d), 28, version='v2')
+    # rates(get_paths(d), 28, version='v2')
 
 
     # d = {
@@ -520,13 +531,13 @@ if __name__ == '__main__':
     #         ],
     #     'file': ['000.data', '000.timestamps', 'positive.txt']
     #     }
-    # rate(get_paths(d), 12, version='v2')
+    # rates(get_paths(d), 12, version='v2')
 
-    d = {
-        'root': [
-            '/home/pupil/recordings/DATA/2017_11_06/000_ROB/000/stimulus_control'
-            ],
-        'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface_3d_ba.csv'],
-        }
+    # d = {
+    #     'root': [
+    #         '/home/pupil/recordings/DATA/2017_11_06/000_ROB/000/stimulus_control'
+    #         ],
+    #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface_3d_ba.csv'],
+    #     }
 
-    rate(get_paths(d), version='v2', skip_header=12)
+    # rates(get_paths(d), version='v2', skip_header=12)

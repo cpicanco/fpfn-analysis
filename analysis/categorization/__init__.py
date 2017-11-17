@@ -16,6 +16,7 @@ from matplotlib.path import Path as mp
 
 from correction import unbiased_gaze, ALGORITHM_QUANTILES
 from methods import remove_outside_screen
+from drawing import plot_xy, draw_absolute_rate, draw_relative_rate, draw_rate
 
 def remove_outside_session_time(target_timestamps, intervals):
     mask = [False for _ in target_timestamps]
@@ -25,7 +26,11 @@ def remove_outside_session_time(target_timestamps, intervals):
         mask = mask | (a & b)
     return mask
 
-def clean_gaze_data(all_gaze_data, intervals, min_block_size=1000, do_remove_outside_screen=True):
+def clean_gaze_data(all_gaze_data, intervals,
+    min_block_size=1000,
+    do_remove_outside_screen=True,
+    do_remove_outside_session_time=True,
+    inspect=False):
     x_norm = 'x_norm'
     y_norm = 'y_norm'
     
@@ -33,14 +38,26 @@ def clean_gaze_data(all_gaze_data, intervals, min_block_size=1000, do_remove_out
         'screen_center':np.array([0.5, 0.5])
         }
 
-    mask = remove_outside_session_time(all_gaze_data['gaze_timestamp'], intervals)
-    all_gaze_data = all_gaze_data[mask]
+    if do_remove_outside_session_time:
+        mask = remove_outside_session_time(all_gaze_data['gaze_timestamp'], intervals)
+        all_gaze_data = all_gaze_data[mask]
 
     gaze_data = np.array([all_gaze_data[x_norm], all_gaze_data[y_norm]])
     if do_remove_outside_screen:
         gaze_data, mask = remove_outside_screen(gaze_data)
         all_gaze_data = all_gaze_data[mask]
 
+    if inspect:
+        data_count = all_gaze_data.shape[0]
+        for block_start in range(0, data_count, min_block_size):
+            block_end = block_start + min_block_size
+            if block_end <= data_count:
+                pass  
+            else:
+                block_end = data_count
+            plot_xy(np.array([all_gaze_data['x_norm'][block_start:block_end],
+                              all_gaze_data['y_norm'][block_start:block_end]]))
+        
     gaze_data, _ = unbiased_gaze(gaze_data.T, ALGORITHM_QUANTILES, min_block_size=min_block_size, **keyword_arguments)
     all_gaze_data[x_norm], all_gaze_data[y_norm] = gaze_data.T[0], gaze_data.T[1]
 
@@ -141,29 +158,28 @@ from methods import load_ini_data
 from methods import get_events_per_trial_in_bloc, get_trial_intervals, get_session_type, get_paths
 from methods import rate_in, get_relative_rate
 from stimuli import circular_grid as grid
-from drawing import plot_xy, draw_absolute_rate, draw_relative_rate, draw_rate
 
-def gaze_rate(paths, skip_header=13, version='v1', factor=1.95, min_block_size=1000,do_remove_outside_screen=True):
-    # load from file
-    data_file = load_fpe_data(paths[0], skip_header=skip_header)
-    timestamps = load_fpe_timestamps(paths[1])
-    features = load_ini_data(paths[2])   
-    all_gaze_data = load_gaze_data(paths[3], delimiter=',')
-    
+def gaze_rate(data_file, timestamps, features, all_gaze_data, title,
+    version='v1', factor=1.95,
+    min_block_size=1000,
+    do_remove_outside_screen=True,
+    do_remove_outside_session_time=True,
+    inspect=False):
     # extract information from raw data
     trials = get_events_per_trial_in_bloc(data_file, timestamps, features, target_bloc=2, version=version)
     trial_intervals = get_trial_intervals(trials, uncategorized=True) 
 
-    # visual inspection
-    # for begin in range(1,all_gaze_data.shape[0],10000):
-    #     end = begin + 10000
-    #     if end > all_gaze_data.shape[0]:
-    #         end = all_gaze_data.shape[0]
-    #     plot_xy(np.array([all_gaze_data['x_norm'][begin:end], all_gaze_data['y_norm'][begin:end]]))
-
-    #plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
-    all_gaze_data = clean_gaze_data(all_gaze_data, trial_intervals,min_block_size=min_block_size,do_remove_outside_screen=do_remove_outside_screen)
-    # plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
+    if inspect:
+        plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
+    
+    all_gaze_data = clean_gaze_data(all_gaze_data, trial_intervals,
+        min_block_size=min_block_size,
+        do_remove_outside_screen=do_remove_outside_screen,
+        do_remove_outside_session_time=do_remove_outside_session_time,
+        inspect=False)
+    
+    if inspect:
+        plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
 
     gaze_data = np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']])
     gaze_masks = [get_gaze_mask(circle, gaze_data, factor) for circle in grid(normalized=True)]
@@ -186,23 +202,14 @@ def gaze_rate(paths, skip_header=13, version='v1', factor=1.95, min_block_size=1
         else:
             pass
 
-    title = paths[0].replace('/home/pupil/recordings/DATA/','')
-    title = title.replace('/stimulus_control/000.data','')
-    title = title.replace('/','_')
-    title = title+'_'+get_session_type(data_file, version)
-    title = title.replace(' ', '_')
-
-
     draw_rate(rate_in(trial_intervals, all_gaze_data[:]['gaze_timestamp']), title, save=False)
-
-
     draw_absolute_rate([positive_feature_rate, positive_else_rate], title, False, version, y_label='Looking rate',name='_looking')
 
     relative_rate = get_relative_rate(positive_feature_rate, positive_else_rate)
     draw_relative_rate(relative_rate, title, False, version, y_label='Looking proportion', name='_looking')
 
 if __name__ == '__main__':
-
+    pass
     # d = {
     #     'root': [
     #         '/home/pupil/recordings/DATA/2017_11_06/000_ROB/000/stimulus_control'
@@ -210,8 +217,14 @@ if __name__ == '__main__':
     #     'file': ['000.data', '000.timestamps', 'positive.txt', 'gaze_positions_on_surface_3d_ba.csv'],
     #     }
 
+    # version='v2'
     # for paths in get_paths(d):
-    #     gaze_rate(paths, version='v2', skip_header=12, min_block_size=5000, do_remove_outside_screen=False)
+    #     title = paths[0].replace('/home/pupil/recordings/DATA/','')
+    #     title = title.replace('/stimulus_control/000.data','')
+    #     title = title.replace('/','_')
+    #     title = title+'_'+get_session_type(data_file, version)
+    #     title = title.replace(' ', '_')
+    #     gaze_rate(paths, title=titleversion=version, skip_header=12, min_block_size=5000, do_remove_outside_screen=False)
 
 
     # d = {

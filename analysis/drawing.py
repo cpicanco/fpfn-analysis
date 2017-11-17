@@ -139,8 +139,8 @@ def plot_xy(data, factor=2.0):
     import matplotlib.patches as patches
     from stimuli import circular_grid as grid 
     axes = plt.gca()
-    axes.set_ylim(ymax = 1, ymin = 0)
-    axes.set_xlim(xmax = 1, xmin = 0)
+    axes.set_ylim(ymax = 2, ymin = -1)
+    axes.set_xlim(xmax = 2, xmin = -1)
     plt.scatter(*data, s=1, c='b')   
     for circle in grid(normalized=True):
         axes.add_patch(
