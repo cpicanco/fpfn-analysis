@@ -12,11 +12,10 @@ sys.path.append('../analysis')
 
 import os
 import shutil
-from glob import glob
 
 import numpy as np
 
-from methods import load_fpe_timestamps, load_gaze_data, load_ini_data
+from methods import load_fpe_timestamps, load_gaze_data, load_ini_data, get_source_files
 
 
 def copy_file(src, dst):
@@ -85,13 +84,11 @@ def organize(src_directory, dst_directory):
                      'session_configuration.ini',
                      'session_features.txt',
                      'session_events.txt',
-                     'gaze_coordenates.txt']
+                     'gaze_coordenates_3d_pr.txt']
     dst_files = [os.path.join(dst_directory, f) for f in dst_filenames]
 
     # source
-    target_filters = ['*.yml', '*.txt', '*.data', '*.timestamps', '*surface*']
-    glob_lists = [glob(os.path.join(src_directory, tf)) for tf in target_filters]
-    src_files = [sorted(glob_list)[0] for glob_list in glob_lists]
+    src_files = get_source_files(src_directory, gaze_file_filter='*surface_3d_pr*')
     
     # feedback
     [print('source:', src) for src in src_files]   
@@ -105,12 +102,12 @@ def organize(src_directory, dst_directory):
 
     # copying
 
-    copy_file(src_files[0], dst_files[0])
-    copy_file(src_files[1], dst_files[1])
+    # copy_file(src_files[0], dst_files[0])
+    # copy_file(src_files[1], dst_files[1])
 
     # conversion
-    convert_fpfn(fpfn_file, dst_files[2])
-    convert_beha(beha_file, dst_files[3], start_time=start_time)
+    # convert_fpfn(fpfn_file, dst_files[2])
+    # convert_beha(beha_file, dst_files[3], start_time=start_time)
     convert_gaze(gaze_file, dst_files[4], start_time=start_time)
 
 def get_data_path(raw=False):
@@ -120,63 +117,88 @@ def get_data_path(raw=False):
     else:
         return os.path.join(os.path.dirname(data_path), 'DATA')
 
+
+DATA_SKIP_HEADER = [38,
+                    29,
+                    31,
+                    42,
+                    44,
+                    27,
+                    32,
+                    38,
+                    33,
+                    41,
+                    44,
+                    35,
+                    40,
+                    35,
+                    38,
+                    44,
+                    35,
+                    32,
+                    35,
+                    41,
+                    43,
+                    39,
+                    38,
+                    41,
+                    12]
+
+PATHS_SOURCE = ['/home/pupil/recordings/2017_11_16_003_ALI/stimulus_control/',
+                '/home/pupil/recordings/2017_11_16_002_LAR/stimulus_control/',
+                '/home/pupil/recordings/2017_11_16_001_MAT/stimulus_control/',
+                '/home/pupil/recordings/2017_11_16_000_VIN/stimulus_control/',
+                '/home/pupil/recordings/2017_11_14_006_ALE/stimulus_control/',
+                '/home/pupil/recordings/2017_11_14_005_JOA/stimulus_control/',
+                '/home/pupil/recordings/2017_11_14_004_NEL/stimulus_control/',
+                '/home/pupil/recordings/2017_11_14_003_LUC/stimulus_control/',
+                '/home/pupil/recordings/2017_11_14_002_TAT/stimulus_control/',
+                '/home/pupil/recordings/2017_11_14_001_MAR/stimulus_control/',
+                '/home/pupil/recordings/2017_11_14_000_SON/stimulus_control/',
+                '/home/pupil/recordings/2017_11_13_005_KAR/stimulus_control/',
+                '/home/pupil/recordings/2017_11_13_004_ISA/stimulus_control/',
+                '/home/pupil/recordings/2017_11_13_003_LIZ/stimulus_control/',
+                '/home/pupil/recordings/2017_11_13_002_MAX/stimulus_control/',
+                '/home/pupil/recordings/2017_11_13_001_MAR/stimulus_control/',
+                '/home/pupil/recordings/2017_11_13_000_GAB/stimulus_control/',
+                '/home/pupil/recordings/2017_11_09_007_REN/stimulus_control/',
+                '/home/pupil/recordings/2017_11_09_005_AMA/stimulus_control/',
+                '/home/pupil/recordings/2017_11_09_004_BEL/stimulus_control/',
+                '/home/pupil/recordings/2017_11_09_002_EST/stimulus_control/',
+                '/home/pupil/recordings/2017_11_09_001_KAL/stimulus_control/',
+                '/home/pupil/recordings/2017_11_09_000_JUL/stimulus_control/',
+                '/home/pupil/recordings/2017_11_08_003_REU/stimulus_control/',
+                '/home/pupil/recordings/2017_11_06_000_ROB/stimulus_control/']
+
+PATHS_DESTIN = [ 'P25',
+                 'P24',
+                 'P23',   
+                 'P22',
+                 'P21',
+                 'P20',
+                 'P19',
+                 'P18',
+                 'P17',
+                 'P16',
+                 'P15',
+                 'P14',
+                 'P13',
+                 'P12',
+                 'P11',
+                 'P10',
+                 'P09',
+                 'P08',
+                 'P07',
+                 'P06',
+                 'P05',
+                 'P04',
+                 'P03',
+                 'P02',
+                 'P01']
+
 if __name__ == '__main__':
-    PATHS_SOURCE = ['/home/pupil/recordings/2017_11_16_003_ALI/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_16_002_LAR/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_16_001_MAT/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_16_000_VIN/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_14_006_ALE/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_14_005_JOA/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_14_004_NEL/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_14_003_LUC/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_14_002_TAT/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_14_001_MAR/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_14_000_SON/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_13_005_KAR/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_13_004_ISA/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_13_003_LIZ/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_13_002_MAX/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_13_001_MAR/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_13_000_GAB/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_09_007_REN/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_09_005_AMA/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_09_004_BEL/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_09_002_EST/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_09_001_KAL/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_09_000_JUL/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_08_003_REU/stimulus_control/',
-                    '/home/pupil/recordings/2017_11_06_000_ROB/stimulus_control/']
-
-
     data_path = get_data_path()
-    PATHS_DESTIN = [ 'P25',
-                     'P24',
-                     'P23',   
-                     'P22',
-                     'P21',
-                     'P20',
-                     'P19',
-                     'P18',
-                     'P17',
-                     'P16',
-                     'P15',
-                     'P14',
-                     'P13',
-                     'P12',
-                     'P11',
-                     'P10',
-                     'P09',
-                     'P08',
-                     'P07',
-                     'P06',
-                     'P05',
-                     'P04',
-                     'P03',
-                     'P02',
-                     'P01']
-
     source_directories = [p for p in PATHS_SOURCE]
     destinat_directory = [os.path.join(data_path, p) for p in PATHS_DESTIN]
-
     for s, d in zip(source_directories, destinat_directory):
         organize(s, d)
