@@ -16,5 +16,5 @@ Each participant has its own folder inside `DATA`. Each participant folder is a 
 
 - `session_features.txt`
    - File containing locations of the distinctive stimulus.
-   - The distinctive stimulus may be one of nine stimuli [1, 2 .. 9], `1` is the right most stimulus, clock-wise.
+   - The distinctive stimulus may be one of nine stimuli [1, 2 .. 9], `1` being the right most stimulus, increments being clock-wise.
    - Stimuli size, stimuli position and screen size can be found in `/analysis/categorization/stimuli.py`
