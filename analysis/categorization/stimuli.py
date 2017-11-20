@@ -8,11 +8,26 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 import sys
+from time import sleep
 sys.path.append('../../analysis')
 from methods import load_ini_data
 
 import numpy as np
 import random
+
+EXTERNAL_SCREEN_RECT = [
+    256, # left 
+    0, # top
+    768, # width
+    768  # height
+]
+
+INTERNAL_SCREEN_RECT = [
+    456, # left 
+    200, # top
+    368, # width
+    368  # height
+]
 
 STIMULI_COORDENATES = [
     (874, 334), # <=== right, 0 degree
@@ -40,8 +55,8 @@ def normalize(x_px, y_px, inverted_y=False, screen=(SCREEN_WIDTH_PX, SCREEN_HEIG
 def denormalize(x_px, y_px,screen=(SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX)):
     return x_px*screen[0], y_px*screen[1]
 
-def ellipse(center, width, height, n = 360):
-    thetas = [np.pi*2 * i/n for i in range(n)]
+def ellipse(center, width, height, start = 0, end = 360, step=1):
+    thetas = [np.pi*2 * i/360 for i in range(start, end, step)]
     points = [(center[0] + np.cos(t) * width, center[1] + np.sin(t) * height) for t in thetas]
     return np.array(points)
 
@@ -92,24 +107,82 @@ class RandomPoint(object):
 class Circle(object):
     """Circle"""
     def __init__(self, left_px, top_px,
-        width_px=STIMULI_WIDTH_PX, height_px=STIMULI_HEIGHT_PX, normalized=True): 
+        width_px=STIMULI_WIDTH_PX, height_px=STIMULI_HEIGHT_PX, normalized=True, inverted_y=True): 
         if normalized:          
-            self.left, self.top = normalize(left_px, top_px, inverted_y=True) 
+            self.left, self.top = normalize(left_px, top_px, inverted_y=inverted_y) 
             self.width, self.height = normalize(width_px, height_px)
             self.radius = [self.width/2, self.height/2]
-            self.center = normalize(left_px+(width_px/2), top_px+(height_px/2), inverted_y=True)
+            self.center = normalize(left_px+(width_px/2), top_px+(height_px/2), inverted_y=inverted_y)
         else:
             self.left, self.top = left_px, top_px 
             self.width, self.height = width_px, height_px
             self.radius = self.width/2, self.height/2
             self.center = left_px+(width_px/2), top_px+(height_px/2)
 
-    def points(self, factor=1.):
-        return ellipse(self.center, self.radius[0]*factor, self.radius[1]*factor)
+    def points(self, factor=1., low=0, high=360, step=1):
+        return ellipse(self.center, self.radius[0]*factor, self.radius[1]*factor, low, high, step)
 
 def circular_grid(normalized=False):
     return [Circle(x, y, normalized=normalized) for (x, y) in STIMULI_COORDENATES]  
   
+
+def donut_grid(normalized=False, inverted_y=True):
+    grid = []
+    step = 40
+
+    # loop for the rest
+    for i in range(20, 301, step):
+        external_arc = Circle(
+                left_px=EXTERNAL_SCREEN_RECT[0],
+                top_px=EXTERNAL_SCREEN_RECT[1],
+                width_px=EXTERNAL_SCREEN_RECT[2],
+                height_px=EXTERNAL_SCREEN_RECT[3],
+                normalized=normalized,
+                inverted_y=inverted_y).points(low=i, high=i+step+1)
+        internal_arc = Circle(
+                left_px=INTERNAL_SCREEN_RECT[0],
+                top_px=INTERNAL_SCREEN_RECT[1],
+                width_px=INTERNAL_SCREEN_RECT[2],
+                height_px=INTERNAL_SCREEN_RECT[3],
+                normalized=normalized,
+                inverted_y=inverted_y).points(low=i+step, high=i-1, step=-1)
+        grid.append(np.vstack([external_arc, internal_arc]))
+
+    # last/first requires especial treatment
+    a = Circle(
+            left_px=EXTERNAL_SCREEN_RECT[0],
+            top_px=EXTERNAL_SCREEN_RECT[1],
+            width_px=EXTERNAL_SCREEN_RECT[2],
+            height_px=EXTERNAL_SCREEN_RECT[3],
+            normalized=normalized,
+            inverted_y=inverted_y).points(low=340, high=360)
+    b = Circle(
+            left_px=EXTERNAL_SCREEN_RECT[0],
+            top_px=EXTERNAL_SCREEN_RECT[1],
+            width_px=EXTERNAL_SCREEN_RECT[2],
+            height_px=EXTERNAL_SCREEN_RECT[3],
+            normalized=normalized,
+            inverted_y=inverted_y).points(low=0, high=20+1)
+    external_arc = np.vstack([a, b])
+    a = Circle(
+            left_px=INTERNAL_SCREEN_RECT[0],
+            top_px=INTERNAL_SCREEN_RECT[1],
+            width_px=INTERNAL_SCREEN_RECT[2],
+            height_px=INTERNAL_SCREEN_RECT[3],
+            normalized=normalized,
+            inverted_y=inverted_y).points(low=20, high=-1, step=-1)
+    b = Circle(
+            left_px=INTERNAL_SCREEN_RECT[0],
+            top_px=INTERNAL_SCREEN_RECT[1],
+            width_px=INTERNAL_SCREEN_RECT[2],
+            height_px=INTERNAL_SCREEN_RECT[3],
+            normalized=normalized,
+            inverted_y=inverted_y).points(low=359, high=339, step=-1)
+    internal_arc = np.vstack([a, b])
+    grid.append(np.vstack([external_arc, internal_arc]))
+
+    return grid
+
 def debug_window():
     from graphics import GraphWin
 
@@ -119,6 +192,11 @@ def debug_window():
     for circle in circular_grid():
         for [x, y] in circle.points():
             win.plotPixel(x, y, "white")
+
+    for donut_slice in donut_grid():
+        for [x, y] in donut_slice:
+            win.plotPixel(x, y, "white")
+            # sleep(0.01)
 
     # gaze = RandomPoint.pick()
     # stimulus = random.choice(STIMULI_COORDENATES)

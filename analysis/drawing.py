@@ -156,3 +156,23 @@ def plot_xy(data, factor=2.0):
         ) 
     plt.show()   
     plt.gcf().clear() 
+
+def plot_xy_donut(data):
+    import matplotlib.patches as patches
+    from matplotlib.path import Path as mp
+    from stimuli import donut_grid as grid 
+    axes = plt.gca()
+    axes.set_ylim(ymax = 2, ymin = -1)
+    axes.set_xlim(xmax = 2, xmin = -1)
+    plt.scatter(*data, s=1, c='b')   
+    for donut in grid(normalized=True):
+        axes.add_patch(
+            patches.PathPatch(
+                mp(donut),
+                facecolor="gray",
+                edgecolor="red",
+                alpha=0.5        
+            )
+        ) 
+    plt.show()   
+    plt.gcf().clear() 

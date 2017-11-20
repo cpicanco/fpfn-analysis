@@ -381,7 +381,7 @@ def rates(paths, skip_header=13, version='v1'):
         title = title.replace(' ', '_')
         rate(path, skip_header, version, title)
 
-def rate(data_file, timestamps, features, version, title=''):
+def rate(data_file, timestamps, features, version, title='', save=False):
     trials = get_events_per_trial_in_bloc(data_file, timestamps, features,
         target_bloc=2, version=version)
     positive_intervals, negative_intervals = get_trial_intervals(trials)  
@@ -392,11 +392,8 @@ def rate(data_file, timestamps, features, version, title=''):
 
     relative_rate = get_relative_rate(positive_data, negative_data)
 
-    draw_absolute_rate([positive_data, negative_data],title, False, version)        
-    draw_relative_rate(relative_rate,title, False, version)
-
-    # draw_absolute_rate([positive_data, negative_data], title, True, version)
-    # draw_relative_rate(relative_rate, title, True, version)
+    draw_absolute_rate([positive_data, negative_data],title, save, version)        
+    draw_relative_rate(relative_rate,title, save, version)
 
 def get_paths(paths):
     p = []
