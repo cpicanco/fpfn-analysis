@@ -130,6 +130,14 @@ def donut_grid(normalized=False, inverted_y=True):
     grid = []
     step = 40
 
+    grid.append(Circle(
+                left_px=INTERNAL_SCREEN_RECT[0],
+                top_px=INTERNAL_SCREEN_RECT[1],
+                width_px=INTERNAL_SCREEN_RECT[2],
+                height_px=INTERNAL_SCREEN_RECT[3],
+                normalized=normalized,
+                inverted_y=inverted_y).points())
+
     # loop for the rest
     for i in range(20, 301, step):
         external_arc = Circle(

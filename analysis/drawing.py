@@ -14,7 +14,6 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-
 def draw_rate(data,title, save=False, version='v1', y_label = 'FPS by trial'):
     x_label = 'Trials'
     axes = plt.gca()
@@ -90,16 +89,22 @@ def draw_relative_rate(data,title, save=False, version='v1', y_label = 'Button-p
     else:
         plt.show()
 
-def draw_absolute_rate(data,title, save=False, version='v1', y_label='Button-pressing rate', name=''):
+def draw_absolute_rate(data,title, save=False, version='v1',
+    y_label='Button-pressing rate',
+    name='',
+    single=False,
+    first_label="positive",
+    second_label="negative"):
     x_label = 'Trials'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)
     
     # positive
-    axes.plot(data[0],color="k",marker='.', lw=1, label="positive")
+    axes.plot(data[0],color="k",marker='.', lw=1, label=first_label)
 
     # negative
-    axes.plot(data[1],color="k",marker='x',ls='--', lw=1, label="negative")
+    if not single:
+        axes.plot(data[1],color="k",marker='x',ls='--', lw=1, label=second_label)
 
     if version == 'v1':
         plt.xticks([0,14, 35],[1, 15, 36])

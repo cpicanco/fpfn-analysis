@@ -22,28 +22,28 @@ version = 'v2'
 p = [
 
     # '2017_11_16_003_ALI'
-    {'min_block_size':20000,
+    {'min_block_size':10000,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
      'excluded':False},
     
     # '2017_11_16_002_LAR'
-    {'min_block_size':20000,
+    {'min_block_size':10000,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
      'excluded':False},
 
     # '2017_11_16_001_MAT'
-    {'min_block_size':5000,
+    {'min_block_size':5000,             # <<<<<<<<<<<<<<<<<< complicated eyes
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
      'excluded':False},
 
     # '2017_11_16_000_VIN'
-    {'min_block_size':1000,
+    {'min_block_size':2000,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
@@ -53,14 +53,14 @@ p = [
     {'min_block_size':2000,             # <<<<<<<<<<<<<<<<<< complicated eyes
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_2d*',
+     'gaze_file_filter':'*surface_3d*',
      'excluded':True},
 
     # '2017_11_14_005_JOA'
-    {'min_block_size':5000,
-     'do_remove_outside_screen':True,
+    {'min_block_size':10000,
+     'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_2d*',
+     'gaze_file_filter':'*surface_3d*',
      'excluded':False},
     
     # '2017_11_14_004_NEL'
@@ -72,45 +72,45 @@ p = [
 
     # '2017_11_14_003_LUC'
     {'min_block_size':10000,
-     'do_remove_outside_screen':True,
+     'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_2d*',
+     'gaze_file_filter':'*surface_3d*',
      'excluded':False},
 
     # '2017_11_14_002_TAT'
-    {'min_block_size':20000,
+    {'min_block_size':10000,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
      'excluded':False},
 
     # '2017_11_14_001_MAR'
-    {'min_block_size':20000,
+    {'min_block_size':10000,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
      'excluded':False},
 
     # '2017_11_14_000_SON'
+    {'min_block_size':10000,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_13_005_KAR'  #***********
     {'min_block_size':20000,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
      'excluded':False},
 
-    # '2017_11_13_005_KAR'
-    {'min_block_size':10000,
-     'do_remove_outside_screen':False,
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_2d*',
-     'excluded':False},
-
     # '2017_11_13_004_ISA'
-    {'min_block_size':20000,
-     'do_remove_outside_screen':False,
+    {'min_block_size':20000,             # <<<<<<<<<<<<<<<<<< complicated eyes
+     'do_remove_outside_screen':True,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_2d*',
-     'excluded':False},
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':True},
 
     # '2017_11_13_003_LIZ'
     {'min_block_size':10000,
@@ -119,25 +119,25 @@ p = [
      'gaze_file_filter':'*surface_2d*',
      'excluded':False},
 
-    # '2017_11_13_002_MAX'
+    # '2017_11_13_002_MAX'   
+    {'min_block_size':1000,         # <<<<<<<<<<<<<<<<<< complicated eyes
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':False,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':True},
+
+    # '2017_11_13_001_MAR'
     {'min_block_size':10000,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_2d*',
-     'excluded':False},
-
-    # '2017_11_13_001_MAR'
-    {'min_block_size':20000,
-     'do_remove_outside_screen':False,
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_2d*',
+     'gaze_file_filter':'*surface_3d*',
      'excluded':False},
 
     # '2017_11_13_000_GAB'
     {'min_block_size':10000,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_2d*',
+     'gaze_file_filter':'*surface_3d*',
      'excluded':False},
 
     # '2017_11_09_007_REN'
@@ -186,7 +186,7 @@ p = [
     {'min_block_size':5000,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_2d*',
+     'gaze_file_filter':'*surface_3d*',
      'excluded':False},
 
     # '2017_11_06_000_ROB'
@@ -206,7 +206,7 @@ def analyse(i, parameters):
     timestamps = load_fpe_timestamps(source_files[3])
     all_gaze_data = load_gaze_data(source_files[4], delimiter=',')
     title = str(i)+' - '+info['nickname']+'-'+info['group']
-    # rate(data_file, timestamps, features, version, title=title, save=False)
+    rate(data_file, timestamps, features, version, title=title, save=False)
 
     gaze_rate(data_file, timestamps, features, all_gaze_data,
         title=title,
@@ -215,16 +215,19 @@ def analyse(i, parameters):
         min_block_size=parameters['min_block_size'],
         do_remove_outside_screen=parameters['do_remove_outside_screen'],
         do_remove_outside_session_time=parameters['do_remove_outside_session_time'],
-        inspect=False,
-        save=True
+        inspect=True,
+        save=False
 )
 
 
-# i = 24
-# analyse(i, p[i])
+i = 14
+analyse(i, p[i])
 
-for path in PATHS_SOURCE:
-    i = PATHS_SOURCE.index(path)
+# for path in PATHS_SOURCE:
+#     i = PATHS_SOURCE.index(path)
 
-    if not p[i]['excluded']:
-        analyse(i, p[i])
+#     if not p[i]['excluded']:
+#         analyse(i, p[i])
+
+
+        # vin, liz, max
