@@ -21,13 +21,26 @@ from drawing import draw_rates
 version = 'v2'
 
 p = [
+    # '2017_11_22_001_TIA'
+    {'min_block_size':10000,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_22_000_EUL'          # <<<<<<<<<<<<<<<<<< complicated eyes
+    {'min_block_size':10000,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':True},
 
     # '2017_11_16_003_ALI'
     {'min_block_size':10000,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
-     'excluded':True},
+     'excluded':False},
     
     # '2017_11_16_002_LAR'
     {'min_block_size':10000,
@@ -221,7 +234,7 @@ def analyse(i, parameters):
     )
     return info, looking_rate, button_rate
 
-# i = 13
+# i = 1
 # analyse(i, p[i])
 
 positive = []

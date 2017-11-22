@@ -121,7 +121,7 @@ def draw_rates(data,title, save=False,
     axes.spines['right'].set_visible(False)
 
     if y_limit:
-        axes.set_ylim(0.,1.)
+        axes.set_ylim(-0.1,1.1)
     axes.set_xlim(-0.5, len(data[0])+0.5)
 
     #remove ticks
