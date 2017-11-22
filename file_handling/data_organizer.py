@@ -102,12 +102,12 @@ def organize(src_directory, dst_directory):
 
     # copying
 
-    # copy_file(src_files[0], dst_files[0])
-    # copy_file(src_files[1], dst_files[1])
+    copy_file(src_files[0], dst_files[0])
+    copy_file(src_files[1], dst_files[1])
 
-    # conversion
-    # convert_fpfn(fpfn_file, dst_files[2])
-    # convert_beha(beha_file, dst_files[3], start_time=start_time)
+    #conversion
+    convert_fpfn(fpfn_file, dst_files[2])
+    convert_beha(beha_file, dst_files[3], start_time=start_time)
     convert_gaze(gaze_file, dst_files[4], start_time=start_time)
 
 def get_data_path(raw=False):
@@ -118,7 +118,9 @@ def get_data_path(raw=False):
         return os.path.join(os.path.dirname(data_path), 'DATA')
 
 
-DATA_SKIP_HEADER = [38,
+DATA_SKIP_HEADER = [32,
+                    34,
+                    38,
                     29,
                     31,
                     42,
@@ -144,7 +146,9 @@ DATA_SKIP_HEADER = [38,
                     41,
                     12]
 
-PATHS_SOURCE = ['/home/pupil/recordings/2017_11_16_003_ALI/stimulus_control/',
+PATHS_SOURCE = ['/home/pupil/recordings/2017_11_22_001_TIA/stimulus_control/',
+                '/home/pupil/recordings/2017_11_22_000_EUL/stimulus_control/',
+                '/home/pupil/recordings/2017_11_16_003_ALI/stimulus_control/',
                 '/home/pupil/recordings/2017_11_16_002_LAR/stimulus_control/',
                 '/home/pupil/recordings/2017_11_16_001_MAT/stimulus_control/',
                 '/home/pupil/recordings/2017_11_16_000_VIN/stimulus_control/',
@@ -170,7 +174,9 @@ PATHS_SOURCE = ['/home/pupil/recordings/2017_11_16_003_ALI/stimulus_control/',
                 '/home/pupil/recordings/2017_11_08_003_REU/stimulus_control/',
                 '/home/pupil/recordings/2017_11_06_000_ROB/stimulus_control/']
 
-PATHS_DESTIN = [ 'P25',
+PATHS_DESTIN = [ 'P27',
+                 'P26',   
+                 'P25',
                  'P24',
                  'P23',   
                  'P22',
@@ -201,4 +207,5 @@ if __name__ == '__main__':
     source_directories = [p for p in PATHS_SOURCE]
     destinat_directory = [os.path.join(data_path, p) for p in PATHS_DESTIN]
     for s, d in zip(source_directories, destinat_directory):
-        organize(s, d)
+        if 'P26' in d or 'P27' in d:
+            organize(s, d)
