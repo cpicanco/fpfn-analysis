@@ -15,18 +15,15 @@ import numpy as np
 from matplotlib.path import Path as mp
 
 from correction import unbiased_gaze, ALGORITHM_QUANTILES
+from drawing import plot_xy, plot_xy_donut, draw_rates
+from drawing import draw_relative_rate, draw_rate
 from methods import remove_outside_screen
-from drawing import plot_xy, plot_xy_donut, draw_absolute_rate, draw_relative_rate, draw_rate
-
-
-from methods import load_gaze_data
-from methods import load_fpe_timestamps
-from methods import load_fpe_data
-from methods import load_ini_data
-from methods import get_events_per_trial_in_bloc, get_trial_intervals, get_session_type, get_paths
+from methods import load_fpe_data, load_ini_data, load_fpe_timestamps, load_gaze_data
+from methods import get_events_per_trial_in_bloc, get_trial_intervals
+from methods import get_session_type, get_paths
 from methods import rate_in, get_relative_rate
-from stimuli import circular_grid
-from stimuli import donut_grid
+from .stimuli import circular_grid
+from .stimuli import donut_grid
 
 def remove_outside_session_time(target_timestamps, intervals):
     mask = [False for _ in target_timestamps]
@@ -100,7 +97,7 @@ def gaze_rate(data_file, timestamps, features, all_gaze_data, title,
         min_block_size=min_block_size,
         do_remove_outside_screen=do_remove_outside_screen,
         do_remove_outside_session_time=do_remove_outside_session_time,
-        inspect=False)
+        inspect=inspect)
     
     if inspect:
         # plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
@@ -129,19 +126,21 @@ def gaze_rate(data_file, timestamps, features, all_gaze_data, title,
             positive_else_rate.append(np.sum(np.delete(rates,feature-1)))
         else:
             pass
+    relative_rate = get_relative_rate(positive_feature_rate, positive_else_rate)
 
-    # draw_rate(rate_in(trial_intervals, all_gaze_data[:]['gaze_timestamp']), title, save=save)
-    draw_absolute_rate([positive_feature_rate, positive_else_rate],
-        title, save, version,
-        y_label='Looking rate',
-        name='_looking',
-        single=True,
-        first_label='distinctive feature',
-        second_label='common features and center'
-        )
-
-    # relative_rate = get_relative_rate(positive_feature_rate, positive_else_rate)
-    # draw_relative_rate(relative_rate, title, save, version, y_label='Looking proportion', name='_looking')
+    if inspect:
+        draw_rate(rate_in(trial_intervals, all_gaze_data[:]['gaze_timestamp']), title, save=save)
+        draw_rates([positive_feature_rate, positive_else_rate], title, save,
+            y_label='Looking rate',
+            name='_absolute_looking',
+            single=False,
+            first_label='distinctive feature',
+            second_label='common features and center',
+            y_limit=False
+            )
+        draw_relative_rate(relative_rate, title, save, y_label='Looking proportion', name='_looking')
+    
+    return relative_rate
 
 if __name__ == '__main__':
     pass

@@ -13,7 +13,7 @@ from itertools import islice
 
 import numpy as np
 
-from drawing import draw_absolute_rate, draw_relative_rate
+from drawing import draw_rates, draw_relative_rate
     
 fp_strings = ['FP', 'Feature Positive']
 fn_strings = ['FN', 'Feature Negative']
@@ -381,7 +381,7 @@ def rates(paths, skip_header=13, version='v1'):
         title = title.replace(' ', '_')
         rate(path, skip_header, version, title)
 
-def rate(data_file, timestamps, features, version, title='', save=False):
+def rate(data_file, timestamps, features, version, title='', save=False, inspect=False):
     trials = get_events_per_trial_in_bloc(data_file, timestamps, features,
         target_bloc=2, version=version)
     positive_intervals, negative_intervals = get_trial_intervals(trials)  
@@ -392,9 +392,12 @@ def rate(data_file, timestamps, features, version, title='', save=False):
 
     relative_rate = get_relative_rate(positive_data, negative_data)
 
-    draw_absolute_rate([positive_data, negative_data],title, save, version)        
-    draw_relative_rate(relative_rate,title, save, version)
+    if inspect:
+        draw_absolute_rate([positive_data, negative_data],title, save, version)        
+        draw_relative_rate(relative_rate,title, save, version)
 
+    return relative_rate
+    
 def get_paths(paths):
     p = []
     for root in paths['root']:
@@ -404,7 +407,7 @@ def get_paths(paths):
         p.append(s)
     return p
 
-def get_source_files(src_directory, gaze_file_filter='*surface_2d_pr*'):
+def get_source_files(src_directory, gaze_file_filter='*surface_3d_pr*'):
     target_filters = ['*.yml', '*.txt', '*.data', '*.timestamps', gaze_file_filter]
     glob_lists = [glob(os.path.join(src_directory, tf)) for tf in target_filters]
     return [sorted(glob_list)[0] for glob_list in glob_lists]

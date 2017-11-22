@@ -48,7 +48,7 @@ def draw_rate(data,title, save=False, version='v1', y_label = 'FPS by trial'):
         plt.show()
 
 
-def draw_relative_rate(data,title, save=False, version='v1', y_label = 'Button-pressing proportion', name=''):
+def draw_relative_rate(data,title, save=False, y_label = 'Button-pressing proportion', name=''):
     x_label = 'Trials'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)
@@ -89,12 +89,13 @@ def draw_relative_rate(data,title, save=False, version='v1', y_label = 'Button-p
     else:
         plt.show()
 
-def draw_absolute_rate(data,title, save=False, version='v1',
+def draw_rates(data,title, save=False,
     y_label='Button-pressing rate',
     name='',
     single=False,
     first_label="positive",
-    second_label="negative"):
+    second_label="negative",
+    y_limit=False):
     x_label = 'Trials'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)
@@ -106,10 +107,12 @@ def draw_absolute_rate(data,title, save=False, version='v1',
     if not single:
         axes.plot(data[1],color="k",marker='x',ls='--', lw=1, label=second_label)
 
-    if version == 'v1':
-        plt.xticks([0,14, 35],[1, 15, 36])
-    elif version == 'v2':
-        plt.xticks([0, 26, 53],[1, 27, 54])
+    # if version == 'v1':
+    #     plt.xticks([0,14, 35],[1, 15, 36])
+    # elif version == 'v2':
+    #     plt.xticks([0, 26, 53],[1, 27, 54])
+
+    plt.xticks([0,(len(data[0])//2)-1, len(data[0])-1],[1, len(data[0])//2, len(data[0])])
 
     # remove outer frame
     axes.spines['top'].set_visible(False)
@@ -117,7 +120,8 @@ def draw_absolute_rate(data,title, save=False, version='v1',
     axes.spines['left'].set_visible(False)
     axes.spines['right'].set_visible(False)
 
-    # axes.set_ylim(0.,1.)
+    if y_limit:
+        axes.set_ylim(0.,1.)
     axes.set_xlim(-0.5, len(data[0])+0.5)
 
     #remove ticks
@@ -127,13 +131,12 @@ def draw_absolute_rate(data,title, save=False, version='v1',
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
 
-
     handles, labels = axes.get_legend_handles_labels()
     axes.legend(handles, labels)
    
     if save:
         data_path = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(os.path.dirname(data_path),title+'_absolute'+name+'.png')
+        f = os.path.join(os.path.dirname(data_path),title+name+'.png')
         print(f)
         plt.savefig(f, bbox_inches='tight')
         plt.close()        
@@ -142,7 +145,7 @@ def draw_absolute_rate(data,title, save=False, version='v1',
 
 def plot_xy(data, factor=2.0):
     import matplotlib.patches as patches
-    from stimuli import circular_grid as grid 
+    from categorization.stimuli import circular_grid as grid 
     axes = plt.gca()
     axes.set_ylim(ymax = 2, ymin = -1)
     axes.set_xlim(xmax = 2, xmin = -1)
@@ -165,7 +168,7 @@ def plot_xy(data, factor=2.0):
 def plot_xy_donut(data):
     import matplotlib.patches as patches
     from matplotlib.path import Path as mp
-    from stimuli import donut_grid as grid 
+    from categorization.stimuli import donut_grid as grid 
     axes = plt.gca()
     axes.set_ylim(ymax = 2, ymin = -1)
     axes.set_xlim(xmax = 2, xmin = -1)
