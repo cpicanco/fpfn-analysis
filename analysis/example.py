@@ -21,6 +21,55 @@ from drawing import draw_rates
 version = 'v2'
 
 p = [
+    # '2017_11_23_006_MAY'
+    {'min_block_size':10000,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_23_005_RAU'
+    {'min_block_size':10000,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_23_004_YUR'
+    {'min_block_size':10000,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_23_003_EIL'
+    {'min_block_size':10000,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_23_002_JOS'
+    {'min_block_size':10000,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_23_001_DEN'
+    {'min_block_size':20567,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_23_000_DEN'
+    {'min_block_size':20567,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
     # '2017_11_22_001_TIA'
     {'min_block_size':10000,
      'do_remove_outside_screen':False,
@@ -229,62 +278,62 @@ def analyse(i, parameters):
         min_block_size=parameters['min_block_size'],
         do_remove_outside_screen=parameters['do_remove_outside_screen'],
         do_remove_outside_session_time=parameters['do_remove_outside_session_time'],
-        inspect=False,
+        inspect=True,
         save=False
     )
     return info, looking_rate, button_rate
 
-# i = 1
-# analyse(i, p[i])
+i = 0
+analyse(i, p[i])
 
-positive = []
-negative = []
+# positive = []
+# negative = []
 
-positive_button = []
-negative_button = []
-for path in PATHS_SOURCE:
-    i = PATHS_SOURCE.index(path)
+# positive_button = []
+# negative_button = []
+# for path in PATHS_SOURCE:
+#     i = PATHS_SOURCE.index(path)
 
-    if not p[i]['excluded']:
-        info, looking_rate, button_rate = analyse(i, p[i])
-        if info['group'] == 'positive':
-            positive.append(np.array(looking_rate))
-            positive_button.append(np.array(button_rate))
+#     if not p[i]['excluded']:
+#         info, looking_rate, button_rate = analyse(i, p[i])
+#         if info['group'] == 'positive':
+#             positive.append(np.array(looking_rate))
+#             positive_button.append(np.array(button_rate))
 
-        elif info['group'] == 'negative':
-            negative.append(np.array(looking_rate))
-            negative_button.append(np.array(button_rate))
+#         elif info['group'] == 'negative':
+#             negative.append(np.array(looking_rate))
+#             negative_button.append(np.array(button_rate))
 
-positive = np.vstack(positive)
-negative = np.vstack(negative)
-positive = [np.nanmean(positive[:,i]) for i in range(positive.shape[1])]
-negative = [np.nanmean(negative[:,i]) for i in range(negative.shape[1])]
+# positive = np.vstack(positive)
+# negative = np.vstack(negative)
+# positive = [np.nanmean(positive[:,i]) for i in range(positive.shape[1])]
+# negative = [np.nanmean(negative[:,i]) for i in range(negative.shape[1])]
 
-draw_rates(
-    data=[positive, negative],
-    title='mean looking proportion per trial with distinctive S',
-    save= True,
-    y_label='Mean looking proportion',
-    name='_looking_mean',
-    single=False,
-    first_label='FP group',
-    second_label='FN group',
-    y_limit=True
-    )
+# draw_rates(
+#     data=[positive, negative],
+#     title='mean looking proportion per trial with distinctive S',
+#     save= True,
+#     y_label='Mean looking proportion',
+#     name='_looking_mean',
+#     single=False,
+#     first_label='FP group',
+#     second_label='FN group',
+#     y_limit=True
+#     )
 
-positive_button = np.vstack(positive_button)
-negative_button = np.vstack(negative_button)
-positive_button = [np.nanmean(positive_button[:,i]) for i in range(positive_button.shape[1])]
-negative_button = [np.nanmean(negative_button[:,i]) for i in range(negative_button.shape[1])]
+# positive_button = np.vstack(positive_button)
+# negative_button = np.vstack(negative_button)
+# positive_button = [np.nanmean(positive_button[:,i]) for i in range(positive_button.shape[1])]
+# negative_button = [np.nanmean(negative_button[:,i]) for i in range(negative_button.shape[1])]
 
-draw_rates(
-    data=[positive_button, negative_button],
-    title='mean button-pressing proportion along trials',
-    save= True,
-    y_label='mean button-pressing proportion',
-    name='_button_mean',
-    single=False,
-    first_label='FP group',
-    second_label='FN group',
-    y_limit=True
-    )
+# draw_rates(
+#     data=[positive_button, negative_button],
+#     title='mean button-pressing proportion along trials',
+#     save= True,
+#     y_label='mean button-pressing proportion',
+#     name='_button_mean',
+#     single=False,
+#     first_label='FP group',
+#     second_label='FN group',
+#     y_limit=True
+#     )
