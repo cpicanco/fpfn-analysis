@@ -118,7 +118,14 @@ def get_data_path(raw=False):
         return os.path.join(os.path.dirname(data_path), 'DATA')
 
 
-DATA_SKIP_HEADER = [32,
+DATA_SKIP_HEADER = [34,
+                    44,
+                    43,
+                    35,
+                    28,
+                    36,
+                    39,
+                    32,
                     34,
                     38,
                     29,
@@ -146,7 +153,15 @@ DATA_SKIP_HEADER = [32,
                     41,
                     12]
 
-PATHS_SOURCE = ['/home/pupil/recordings/2017_11_22_001_TIA/stimulus_control/',
+PATHS_SOURCE = [
+                '/home/pupil/recordings/2017_11_23_006_MAY/stimulus_control/',
+                '/home/pupil/recordings/2017_11_23_005_RAU/stimulus_control/',
+                '/home/pupil/recordings/2017_11_23_004_ROM/stimulus_control/',
+                '/home/pupil/recordings/2017_11_23_003_YUR/stimulus_control/',
+                '/home/pupil/recordings/2017_11_23_002_EIL/stimulus_control/',
+                '/home/pupil/recordings/2017_11_23_001_JOS/stimulus_control/',
+                '/home/pupil/recordings/2017_11_23_000_DEN/stimulus_control/',
+                '/home/pupil/recordings/2017_11_22_001_TIA/stimulus_control/',
                 '/home/pupil/recordings/2017_11_22_000_EUL/stimulus_control/',
                 '/home/pupil/recordings/2017_11_16_003_ALI/stimulus_control/',
                 '/home/pupil/recordings/2017_11_16_002_LAR/stimulus_control/',
@@ -174,7 +189,14 @@ PATHS_SOURCE = ['/home/pupil/recordings/2017_11_22_001_TIA/stimulus_control/',
                 '/home/pupil/recordings/2017_11_08_003_REU/stimulus_control/',
                 '/home/pupil/recordings/2017_11_06_000_ROB/stimulus_control/']
 
-PATHS_DESTIN = [ 'P27',
+PATHS_DESTIN = [ 'P34',
+                 'P33',
+                 'P32',
+                 'P31',
+                 'P30',
+                 'P29',
+                 'P28',
+                 'P27',
                  'P26',   
                  'P25',
                  'P24',
@@ -207,5 +229,5 @@ if __name__ == '__main__':
     source_directories = [p for p in PATHS_SOURCE]
     destinat_directory = [os.path.join(data_path, p) for p in PATHS_DESTIN]
     for s, d in zip(source_directories, destinat_directory):
-        if 'P26' in d or 'P27' in d:
+        if 'P29' or 'P30' or 'P31' or 'P32' or 'P33' or 'P34' in d:
             organize(s, d)
