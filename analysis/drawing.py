@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-def draw_rate(data,title, save=False, version='v1', y_label = 'FPS by trial'):
+def draw_rate(data,title, save=False, y_label = 'FPS by trial'):
     x_label = 'Trials'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)

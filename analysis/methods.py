@@ -393,8 +393,8 @@ def rate(data_file, timestamps, features, version, title='', save=False, inspect
     relative_rate = get_relative_rate(positive_data, negative_data)
 
     if inspect:
-        draw_absolute_rate([positive_data, negative_data],title, save, version)        
-        draw_relative_rate(relative_rate,title, save, version)
+        draw_rates([positive_data, negative_data], title, save, y_label = 'FPS by trial')        
+        draw_relative_rate(relative_rate,title, save, y_label = 'Button-pressing proportion')
 
     return relative_rate
     

@@ -35,6 +35,7 @@ def remove_outside_session_time(target_timestamps, intervals):
 
 def clean_gaze_data(all_gaze_data, intervals,
     min_block_size=1000,
+    do_correction=True,
     do_remove_outside_screen=True,
     do_remove_outside_session_time=True,
     inspect=False):
@@ -64,9 +65,9 @@ def clean_gaze_data(all_gaze_data, intervals,
                 block_end = data_count
             plot_xy_donut(np.array([all_gaze_data['x_norm'][block_start:block_end],
                               all_gaze_data['y_norm'][block_start:block_end]]))
-        
-    gaze_data, _ = unbiased_gaze(gaze_data.T, ALGORITHM_QUANTILES, min_block_size=min_block_size, **keyword_arguments)
-    all_gaze_data[x_norm], all_gaze_data[y_norm] = gaze_data.T[0], gaze_data.T[1]
+    if do_correction:    
+        gaze_data, _ = unbiased_gaze(gaze_data.T, ALGORITHM_QUANTILES, min_block_size=min_block_size, **keyword_arguments)
+        all_gaze_data[x_norm], all_gaze_data[y_norm] = gaze_data.T[0], gaze_data.T[1]
 
     return all_gaze_data
 
@@ -81,6 +82,7 @@ def get_gaze_mask_donut(shape, gaze_data):
 def gaze_rate(data_file, timestamps, features, all_gaze_data, title,
     version='v1', factor=1.95,
     min_block_size=1000,
+    do_correction=True,
     do_remove_outside_screen=True,
     do_remove_outside_session_time=True,
     inspect=False,
@@ -95,6 +97,7 @@ def gaze_rate(data_file, timestamps, features, all_gaze_data, title,
 
     all_gaze_data = clean_gaze_data(all_gaze_data, trial_intervals,
         min_block_size=min_block_size,
+        do_correction=do_correction,
         do_remove_outside_screen=do_remove_outside_screen,
         do_remove_outside_session_time=do_remove_outside_session_time,
         inspect=inspect)
