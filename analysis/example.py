@@ -114,70 +114,30 @@ def analyse_experiment(feature_degree):
         )
 
 if __name__ == '__main__':
-    positive = []
-    negative = []
+    analyse_experiment(feature_degree=90)
 
-    positive_button = []
-    negative_button = []
-    for path in PATHS_SOURCE:
-        i = PATHS_SOURCE.index(path)
-        if not p[i]['excluded']:
-            source_files = get_source_files(PATHS_SOURCE[i], gaze_file_filter=p[i]['gaze_file_filter'])
-            info_file = load_yaml_data(source_files[0])
-            if info_file['feature_degree'] == 9:
-                looking_rate, button_rate = analyse(
-                    i, p[i], source_files,
-                    inspect=False,
-                    info_file=info_file)
+    # negative = ['2017_11_16_000_VIN',
+    #             '2017_11_14_005_JOA',
+    #             '2017_11_14_004_NEL',
+    #             '2017_11_14_003_LUC',
+    #             '2017_11_14_002_TAT',
+    #             '2017_11_14_001_MAR',
+    #             '2017_11_14_000_SON']
 
-                if info_file['group'] == 'positive':
-                    positive.append(np.array(looking_rate))
-                    positive_button.append(np.array(button_rate))
-
-                elif info_file['group'] == 'negative':
-                    negative.append(np.array(looking_rate))
-                    negative_button.append(np.array(button_rate))
-
-    positive = np.vstack(positive)
-    print('positive', len(positive))
-
-    #negative = np.vstack(negative)
-
-    positive = [np.nanmean(positive[:,i]) for i in range(positive.shape[1])]
-    #negative = [np.nanmean(negative[:,i]) for i in range(negative.shape[1])]
-
-    draw_rates(
-        data=[positive, negative],
-        title='mean looking proportion per trial with distinctive S',
-        save= True,
-        y_label='Mean looking proportion',
-        name='_looking_mean',
-        single=False,
-        first_label='FP group',
-        second_label='FN group',
-        y_limit=True
-        )
-
-    positive_button = np.vstack(positive_button)
-    #negative_button = np.vstack(negative_button)
-    positive_button = [np.nanmean(positive_button[:,i]) for i in range(positive_button.shape[1])]
-    #negative_button = [np.nanmean(negative_button[:,i]) for i in range(negative_button.shape[1])]
-
-    draw_rates(
-        data=[positive_button, negative_button],
-        title='mean button-pressing proportion along trials',
-        save= True,
-        y_label='mean button-pressing proportion',
-        name='_button_mean',
-        single=True,
-        first_label='FP group',
-        second_label='FN group',
-        y_limit=True
-        )
+    # for i in range(len(p)):
+    #     for name in negative:
+    #         if name in PATHS_SOURCE[i]:
+    #             source_files = get_source_files(PATHS_SOURCE[i], gaze_file_filter=p[i]['gaze_file_filter'])
+    #             analyse(i, p[i], source_files, inspect=True)
 
 
-    # analyse_experiment(feature_degree=90)
 
-    # for i in range(len(p)+1):
-    #     source_files = get_source_files(PATHS_SOURCE[i], gaze_file_filter=p[i]['gaze_file_filter'])
-    #     analyse(i, p[i], source_files, inspect=True)
+
+
+
+
+
+    # i = 19
+    # source_files = get_source_files(PATHS_SOURCE[i], gaze_file_filter=p[i]['gaze_file_filter'])
+    # if not p[i]['excluded']:
+    #     analyse(i, p[i], source_files, inspect=True)        

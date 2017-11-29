@@ -117,7 +117,21 @@ def get_data_path(raw=False):
         return os.path.join(os.path.dirname(data_path), 'DATA')
 
 
-DATA_SKIP_HEADER = [26,
+DATA_SKIP_HEADER = [
+                    
+                    31,
+                    26,
+                    30,
+                    28,
+                    22,
+                    24,
+                    28,
+                    37,
+                    26,
+                    38,
+                    30,
+                    22,
+                    26,
                     37,
                     24,
                     27,
@@ -160,6 +174,18 @@ DATA_SKIP_HEADER = [26,
                     12]
 
 PATHS_SOURCE = [
+                '/home/pupil/recordings/2017_11_29_001_FEL/stimulus_control/',
+                '/home/pupil/recordings/2017_11_29_000_DAN/stimulus_control/',
+                '/home/pupil/recordings/2017_11_28_003_GIO/stimulus_control/',
+                '/home/pupil/recordings/2017_11_28_002_FRA/stimulus_control/',
+                '/home/pupil/recordings/2017_11_28_001_ELI/stimulus_control/',
+                '/home/pupil/recordings/2017_11_28_000_SID/stimulus_control/',
+                '/home/pupil/recordings/2017_11_27_005_ANA/stimulus_control/',
+                '/home/pupil/recordings/2017_11_27_004_AUR/stimulus_control/',
+                '/home/pupil/recordings/2017_11_27_003_LUC/stimulus_control/',
+                '/home/pupil/recordings/2017_11_27_002_JOR/stimulus_control/',
+                '/home/pupil/recordings/2017_11_27_001_TUL/stimulus_control/',
+                '/home/pupil/recordings/2017_11_27_000_NAT/stimulus_control/',
                 '/home/pupil/recordings/2017_11_24_006_VER/stimulus_control/',
                 '/home/pupil/recordings/2017_11_24_005_THA/stimulus_control/',
                 '/home/pupil/recordings/2017_11_24_004_EUC/stimulus_control/',
@@ -203,6 +229,18 @@ PATHS_SOURCE = [
                 '/home/pupil/recordings/2017_11_06_000_ROB/stimulus_control/']
 
 PATHS_DESTIN = [
+                 'P53',
+                 'P52',
+                 'P51',
+                 'P50',
+                 'P49',
+                 'P48',
+                 'P47',
+                 'P46',
+                 'P45',
+                 'P44',
+                 'P43',
+                 'P42',
                  'P41',
                  'P40',
                  'P39',
@@ -247,13 +285,110 @@ PATHS_DESTIN = [
 
 
 PARAMETERS = [
+
+    # '2017_11_29_001_FEL'    
+    {'min_block_size':10597,
+     'do_correction': True,
+     'do_remove_outside_screen':True,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_29_000_DAN'
+    {'min_block_size':20643,
+     'do_correction': False,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_28_003_GIO'
+    {'min_block_size':20650,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_28_002_FRA'
+    {'min_block_size':20637,
+     'do_correction': False,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':True},
+
+    # '2017_11_28_001_ELI'
+    {'min_block_size':20654,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_28_000_SID'
+    {'min_block_size':20546,
+     'do_correction': False,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':True},
+
+    # '2017_11_27_005_ANA'
+    {'min_block_size':20609,
+     'do_correction': True,
+     'do_remove_outside_screen':True,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_27_004_AUR'
+    {'min_block_size':20627,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_27_003_LUC'
+    {'min_block_size':20628,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_27_002_JOR'
+    {'min_block_size':20623,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_27_001_TUL'
+    {'min_block_size':20575,
+     'do_correction': False,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
+    # '2017_11_27_000_NAT'
+    {'min_block_size':20526,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*surface_3d*',
+     'excluded':False},
+
     # '2017_11_24_006_VER'
     {'min_block_size':20000,
      'do_correction': False,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
-     'excluded':False},
+     'excluded':True},
 
     # '2017_11_24_005_THA'
     {'min_block_size':20660,
@@ -269,7 +404,7 @@ PARAMETERS = [
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
-     'excluded':False},
+     'excluded':True},
 
     # '2017_11_24_003_FER'
     {'min_block_size':20387,
@@ -376,7 +511,7 @@ PARAMETERS = [
      'excluded':True},
 
     # '2017_11_16_003_ALI'
-    {'min_block_size':10000,
+    {'min_block_size':20643,
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
@@ -384,7 +519,7 @@ PARAMETERS = [
      'excluded':False},
     
     # '2017_11_16_002_LAR'
-    {'min_block_size':10000,
+    {'min_block_size':20597,
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
@@ -397,7 +532,7 @@ PARAMETERS = [
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*surface_3d*',
-     'excluded':False},
+     'excluded':True},
 
     # '2017_11_16_000_VIN'
     {'min_block_size':2000,
@@ -580,5 +715,4 @@ if __name__ == '__main__':
     source_directories = [p for p in PATHS_SOURCE]
     destinat_directory = [os.path.join(data_path, p) for p in PATHS_DESTIN]
     for s, d in zip(source_directories, destinat_directory):
-        if 'P41' in d:
-            organize(s, d)
+        organize(s, d)
