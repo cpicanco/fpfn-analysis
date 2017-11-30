@@ -15,7 +15,7 @@ import shutil
 
 import numpy as np
 
-from methods import load_fpe_timestamps, load_gaze_data, load_ini_data, get_source_files
+from methods import load_fpe_timestamps, load_gaze_data, get_source_files
 
 
 def copy_file(src, dst):
@@ -62,15 +62,6 @@ def convert_beha(src, dst, start_time):
 
             f.write("\t".join((timestamp, bloc, trial, event_converted))+'\n')
 
-def convert_fpfn(src, dst):
-    with open(dst, 'w+') as f:
-        f.write('feature_stimulus_per_trial_in_bloc_2\n')
-        for stimulus in src:
-            if stimulus:
-                f.write(str(stimulus) +'\n')
-            else:
-                f.write('NA' +'\n')
-
 def organize(src_directory, dst_directory):
     """
     organize does not delete nor overrides any source data
@@ -82,7 +73,6 @@ def organize(src_directory, dst_directory):
     # destination
     dst_filenames = ['info.yml',
                      'session_configuration.ini',
-                     'session_features.txt',
                      'session_events.txt',
                      'gaze_coordenates_3d_pr.txt']
     dst_files = [os.path.join(dst_directory, f) for f in dst_filenames]
@@ -95,9 +85,8 @@ def organize(src_directory, dst_directory):
     [print('destination:', dst) for dst in dst_files]
 
     # loading
-    fpfn_file = load_ini_data(src_files[1])
-    beha_file = load_fpe_timestamps(src_files[3])
-    gaze_file = load_gaze_data(src_files[4], delimiter=',')
+    beha_file = load_fpe_timestamps(src_files[3], converted=False)
+    gaze_file = load_gaze_data(src_files[4], converted=False)
     start_time = gaze_file['gaze_timestamp'][0]
 
     # copying
@@ -105,7 +94,6 @@ def organize(src_directory, dst_directory):
     copy_file(src_files[1], dst_files[1])
 
     #conversion
-    convert_fpfn(fpfn_file, dst_files[2])
     convert_beha(beha_file, dst_files[3], start_time=start_time)
     convert_gaze(gaze_file, dst_files[4], start_time=start_time)
 
@@ -172,6 +160,7 @@ DATA_SKIP_HEADER = [
                     38,
                     41,
                     12]
+
 
 PATHS_SOURCE = [
                 '/home/pupil/recordings/2017_11_29_001_FEL/stimulus_control/',
@@ -291,7 +280,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':True,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_29_000_DAN'
@@ -299,7 +288,7 @@ PARAMETERS = [
      'do_correction': False,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_28_003_GIO'
@@ -307,7 +296,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_28_002_FRA'
@@ -315,7 +304,7 @@ PARAMETERS = [
      'do_correction': False,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_28_001_ELI'
@@ -323,7 +312,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_28_000_SID'
@@ -331,7 +320,7 @@ PARAMETERS = [
      'do_correction': False,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_27_005_ANA'
@@ -339,7 +328,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':True,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_27_004_AUR'
@@ -347,7 +336,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_27_003_LUC'
@@ -355,7 +344,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_27_002_JOR'
@@ -363,7 +352,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_27_001_TUL'
@@ -371,7 +360,7 @@ PARAMETERS = [
      'do_correction': False,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_27_000_NAT'
@@ -379,7 +368,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_24_006_VER'
@@ -387,7 +376,7 @@ PARAMETERS = [
      'do_correction': False,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_24_005_THA'
@@ -395,7 +384,7 @@ PARAMETERS = [
      'do_correction': False,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_24_004_EUC'
@@ -403,7 +392,7 @@ PARAMETERS = [
      'do_correction': False,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_24_003_FER'
@@ -411,7 +400,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_24_002_JON'
@@ -419,7 +408,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':True,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_24_001_PED'
@@ -427,7 +416,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_24_000_MAN'
@@ -435,7 +424,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_23_006_MAY'
@@ -443,7 +432,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_23_005_RAU'
@@ -451,7 +440,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_23_004_ROM'
@@ -459,7 +448,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_23_003_YUR'
@@ -467,7 +456,7 @@ PARAMETERS = [
      'do_correction': False,
      'do_remove_outside_screen':True,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_23_002_EIL'
@@ -475,7 +464,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_23_001_JOS'
@@ -483,7 +472,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_23_000_DEN'
@@ -491,7 +480,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_22_001_TIA'
@@ -499,7 +488,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_22_000_EUL'          # <<<<<<<<<<<<<<<<<< complicated eyes
@@ -507,7 +496,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_16_003_ALI'
@@ -515,7 +504,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
     
     # '2017_11_16_002_LAR'
@@ -523,7 +512,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_16_001_MAT'
@@ -531,7 +520,7 @@ PARAMETERS = [
      'do_correction': True,             # <<<<<<<<<<<<<<<<<< complicated eyes
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_16_000_VIN'
@@ -539,7 +528,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_14_006_ALE'
@@ -547,7 +536,7 @@ PARAMETERS = [
      'do_correction': True,             # <<<<<<<<<<<<<<<<<< complicated eyes
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_14_005_JOA'
@@ -555,7 +544,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
     
     # '2017_11_14_004_NEL'
@@ -563,7 +552,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':True,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_14_003_LUC'
@@ -571,7 +560,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_14_002_TAT'
@@ -579,7 +568,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_14_001_MAR'
@@ -587,7 +576,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_14_000_SON'
@@ -595,7 +584,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_13_005_KAR'  #***********
@@ -603,7 +592,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_13_004_ISA'
@@ -611,7 +600,7 @@ PARAMETERS = [
      'do_correction': True,        # <<<<<<<<<<<<<<<<<< complicated eyes
      'do_remove_outside_screen':True,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_13_003_LIZ'
@@ -619,7 +608,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_13_002_MAX'   
@@ -627,7 +616,7 @@ PARAMETERS = [
      'do_correction': True,         # <<<<<<<<<<<<<<<<<< complicated eyes
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_13_001_MAR'
@@ -635,7 +624,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_13_000_GAB'
@@ -643,7 +632,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_09_007_REN'
@@ -651,7 +640,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_09_005_AMA'
@@ -659,7 +648,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_09_004_BEL'
@@ -667,7 +656,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_09_002_EST'       
@@ -675,7 +664,7 @@ PARAMETERS = [
      'do_correction': True,              # <<<<<<<<<<<<<<<<<< complicated eyes
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':True},
 
     # '2017_11_09_001_KAL'
@@ -683,7 +672,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':True,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_09_000_JUL'
@@ -691,7 +680,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_08_003_REU'
@@ -699,7 +688,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False},
 
     # '2017_11_06_000_ROB'
@@ -707,7 +696,7 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*surface_3d*',
+     'gaze_file_filter':'*3d_pr*',
      'excluded':False}
 ]
 if __name__ == '__main__':

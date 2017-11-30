@@ -7,38 +7,34 @@
     You should have received a copy of the GNU General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
-import sys, yaml
+import os, sys, yaml
 sys.path.append('../file_handling')
 
 import numpy as np
 
-from methods import rate, get_source_files
-from methods import load_ini_data, load_fpe_data, load_fpe_timestamps
+from methods import rate, get_source_files, get_data_files, get_events_per_trial
+from methods import load_ini_data, load_fpe_timestamps
 from methods import load_yaml_data, load_gaze_data
 from categorization import gaze_rate
-from data_organizer import PATHS_SOURCE, DATA_SKIP_HEADER
+from data_organizer import PATHS_SOURCE, PATHS_DESTIN, DATA_SKIP_HEADER, get_data_path
 from data_organizer import PARAMETERS as p
 from drawing import draw_rates
-
-version = 'v2'
 
 def analyse(i, parameters, source_files, inspect=False, info_file=None):
     print('Running analysis for session:', PATHS_SOURCE[i])
     if not info_file:
         info_file = load_yaml_data(source_files[0])
-    features = load_ini_data(source_files[1])
-    data_file = load_fpe_data(source_files[2], skip_header=DATA_SKIP_HEADER[i])
-    timestamps = load_fpe_timestamps(source_files[3])
-    all_gaze_data = load_gaze_data(source_files[4], delimiter=',')
+    ini_file = load_ini_data(source_files[1])
+    time_file = load_fpe_timestamps(source_files[2])
+    all_gaze_data = load_gaze_data(source_files[3])
     title = str(i)+' - '+info_file['nickname']+'-'+info_file['group']
-    button_rate = rate(data_file, timestamps, features, version,
+    button_rate = rate(ini_file, time_file,
         title=title,
         save=False,
         inspect=inspect)
 
-    looking_rate = gaze_rate(data_file, timestamps, features, all_gaze_data,
+    looking_rate = gaze_rate(ini_file, time_file, all_gaze_data,
         title=title,
-        version=version,
         factor=1.95,
         min_block_size=parameters['min_block_size'],
         do_correction=parameters['do_correction'],
@@ -56,10 +52,13 @@ def analyse_experiment(feature_degree):
 
     positive_button = []
     negative_button = []
-    for path in PATHS_SOURCE:
-        i = PATHS_SOURCE.index(path)
+
+    data_paths = get_data_path()
+    data_paths = [os.path.join(data_paths, p) for p in PATHS_DESTIN]
+    for path in data_paths:
+        i = data_paths.index(path)
         if not p[i]['excluded']:
-            source_files = get_source_files(PATHS_SOURCE[i], gaze_file_filter=p[i]['gaze_file_filter'])
+            source_files = get_data_files(data_paths[i], gaze_file_filter=p[i]['gaze_file_filter'])
             info_file = load_yaml_data(source_files[0])
             if info_file['feature_degree'] == feature_degree:
                 looking_rate, button_rate = analyse(
@@ -114,7 +113,7 @@ def analyse_experiment(feature_degree):
         )
 
 if __name__ == '__main__':
-    analyse_experiment(feature_degree=90)
+    analyse_experiment(feature_degree=9)
 
     # negative = ['2017_11_16_000_VIN',
     #             '2017_11_14_005_JOA',
@@ -131,13 +130,15 @@ if __name__ == '__main__':
     #             analyse(i, p[i], source_files, inspect=True)
 
 
-
-
-
-
-
-
     # i = 19
     # source_files = get_source_files(PATHS_SOURCE[i], gaze_file_filter=p[i]['gaze_file_filter'])
+    # if not p[i]['excluded']:
+    #     analyse(i, p[i], source_files, inspect=True)        
+
+
+    # data_paths = get_data_path()
+    # data_paths = [os.path.join(data_paths, p) for p in PATHS_DESTIN]
+    # i = 0
+    # source_files = get_data_files(data_paths[i])
     # if not p[i]['excluded']:
     #     analyse(i, p[i], source_files, inspect=True)        

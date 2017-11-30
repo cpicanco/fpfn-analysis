@@ -18,9 +18,8 @@ from correction import unbiased_gaze, ALGORITHM_QUANTILES
 from drawing import plot_xy, plot_xy_donut, draw_rates
 from drawing import draw_relative_rate, draw_rate
 from methods import remove_outside_screen
-from methods import load_fpe_data, load_ini_data, load_fpe_timestamps, load_gaze_data
-from methods import get_events_per_trial_in_bloc, get_trial_intervals
-from methods import get_session_type, get_paths
+from methods import load_ini_data, load_fpe_timestamps, load_gaze_data
+from methods import get_events_per_trial, get_trial_intervals
 from methods import rate_in, get_relative_rate
 from .stimuli import circular_grid
 from .stimuli import donut_grid
@@ -47,7 +46,7 @@ def clean_gaze_data(all_gaze_data, intervals,
         }
 
     if do_remove_outside_session_time:
-        mask = remove_outside_session_time(all_gaze_data['gaze_timestamp'], intervals)
+        mask = remove_outside_session_time(all_gaze_data['time'], intervals)
         all_gaze_data = all_gaze_data[mask]
 
     gaze_data = np.array([all_gaze_data[x_norm], all_gaze_data[y_norm]])
@@ -79,16 +78,18 @@ def get_gaze_mask_donut(shape, gaze_data):
     shape = mp(shape)  
     return shape.contains_points(gaze_data.T)
 
-def gaze_rate(data_file, timestamps, features, all_gaze_data, title,
-    version='v1', factor=1.95,
+def gaze_rate(ini_file, ts_file, all_gaze_data, title,
+    factor=1.95,
     min_block_size=1000,
     do_correction=True,
     do_remove_outside_screen=True,
     do_remove_outside_session_time=True,
     inspect=False,
     save=False):
-    # extract information from raw data
-    trials = get_events_per_trial_in_bloc(data_file, timestamps, features, target_bloc=2, version=version)
+
+    time_data = zip(ts_file['time'], ts_file['bloc'], ts_file['trial'], ts_file['event'])
+    ini_data = zip(ini_file['trial'], ini_file['contingency'], ini_file['feature'])
+    trials = get_events_per_trial(ini_data, time_data)
     trial_intervals = get_trial_intervals(trials, uncategorized=True) 
 
     if inspect:
@@ -116,13 +117,13 @@ def gaze_rate(data_file, timestamps, features, all_gaze_data, title,
             gaze_data = np.array([all_gaze_data[mask]['x_norm'], all_gaze_data[mask]['y_norm']])
             # plot_xy(gaze_data)
             plot_xy_donut(gaze_data)
-        target_timestamps = all_gaze_data[mask]['gaze_timestamp']
+        target_timestamps = all_gaze_data[mask]['time']
         uncategorized_gaze_rates.append(rate_in(trial_intervals, target_timestamps))
 
     gaze_rates_per_trial = np.vstack(uncategorized_gaze_rates).T
     positive_feature_rate = []
     positive_else_rate = []
-    for feature, rates in zip(features, gaze_rates_per_trial):
+    for feature, rates in zip(ini_file['feature'], gaze_rates_per_trial):
         if feature:
             # print(rates[feature-1])
             positive_feature_rate.append(rates[feature-1])
@@ -132,7 +133,7 @@ def gaze_rate(data_file, timestamps, features, all_gaze_data, title,
     relative_rate = get_relative_rate(positive_feature_rate, positive_else_rate)
 
     if inspect:
-        draw_rate(rate_in(trial_intervals, all_gaze_data[:]['gaze_timestamp']), title, save=save)
+        draw_rate(rate_in(trial_intervals, all_gaze_data[:]['time']), title, save=save)
         draw_rates([positive_feature_rate, positive_else_rate], title, save,
             y_label='Looking rate',
             name='_absolute_looking',
