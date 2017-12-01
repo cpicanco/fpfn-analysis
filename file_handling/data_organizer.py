@@ -280,15 +280,15 @@ PATHS_DESTIN = [ 'P55',
 
 PARAMETERS = [
     # '2017_12_01_001_LEX'
-    {'min_block_size':10000,
+    {'min_block_size':20593,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':True,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*2d_pr*',
      'excluded':False},
 
     # '2017_12_01_000_LUI'  
-    {'min_block_size':10000,
+    {'min_block_size':20636,
      'do_correction': True,
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
@@ -549,7 +549,7 @@ PARAMETERS = [
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'excluded':False},
+     'excluded':True},
 
     # '2017_11_14_006_ALE'
     {'min_block_size':2000,

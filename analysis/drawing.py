@@ -106,9 +106,9 @@ def draw_rates(data,title, save=False,
         #axes.plot(data[0],color="k",marker='.', lw=1, label=first_label)
         #axes.plot(data[1],color="k",marker='x',ls='--', lw=1, label=second_label)
         axes.errorbar(range(len(data[0])), data[0], error[0], label=first_label,
-            color="k",marker='.', lw=1, alpha=0.5, capsize=1)
+            color="k",marker='.', lw=1, alpha=0.6)
         axes.errorbar(np.array(range(len(data[1])))+0.18, data[1], error[1], label=second_label,
-            color="k",marker='x', fmt='.k', ls='--', lw=1, alpha=0.3, capsize=1)
+            color="k",marker='x', fmt='.k', ls='--', lw=1, alpha=0.3)
     else:
         axes.plot(data[0],color="k",marker='.', lw=1, label=first_label)
         if not single:
@@ -141,8 +141,12 @@ def draw_rates(data,title, save=False,
     axes.set_xlabel(x_label)
 
     handles, labels = axes.get_legend_handles_labels()
-    axes.legend(handles, labels)
-   
+
+    if error:
+        axes.legend(handles, labels, loc="lower right")
+    else:
+        axes.legend(handles, labels)
+
     if save:
         data_path = os.path.dirname(os.path.abspath(__file__))
         f = os.path.join(os.path.dirname(data_path),title+name+'.png')

@@ -75,21 +75,29 @@ def analyse_experiment(feature_degree):
                     negative_button.append(np.array(button_rate))
 
     positive = np.vstack(positive)
+    np.savetxt(str(feature_degree)+'_looking_positive_relative_rate.txt', positive)
     print('positive', len(positive))
 
     negative = np.vstack(negative)
+    np.savetxt(str(feature_degree)+'_looking_negative_relative_rate.txt', negative)
     print('negative', len(negative))
     
-    positive_min = np.array([np.nanmin(positive[:,i]) for i in range(positive.shape[1])])
-    positive_max = np.array([np.nanmax(positive[:,i]) for i in range(positive.shape[1])])
+
+
+    positive_std = np.array([np.nanstd(positive[:,i]) for i in range(positive.shape[1])])
+    # positive_min = np.array([np.nanmin(positive[:,i]) for i in range(positive.shape[1])])
+    # positive_max = np.array([np.nanmax(positive[:,i]) for i in range(positive.shape[1])])
     positive = np.array([np.nanmean(positive[:,i]) for i in range(positive.shape[1])])
 
-    negative_min = np.array([np.nanmin(negative[:,i]) for i in range(negative.shape[1])])
-    negative_max = np.array([np.nanmax(negative[:,i]) for i in range(negative.shape[1])])
+    negative_std = np.array([np.nanstd(negative[:,i]) for i in range(negative.shape[1])])
+    # negative_min = np.array([np.nanmin(negative[:,i]) for i in range(negative.shape[1])])
+    # negative_max = np.array([np.nanmax(negative[:,i]) for i in range(negative.shape[1])])
     negative = np.array([np.nanmean(negative[:,i]) for i in range(negative.shape[1])])
 
-    positive_error = [positive-positive_min, positive_max-positive]
-    negative_error = [negative-negative_min, negative_max-negative]
+    # positive_error = [positive-positive_min, positive_max-positive]
+    # negative_error = [negative-negative_min, negative_max-negative]
+
+    positive_error, negative_error = positive_std, negative_std
 
     draw_rates(
         data=[positive, negative],
@@ -105,17 +113,24 @@ def analyse_experiment(feature_degree):
         )
 
     positive_button = np.vstack(positive_button)
-    negative_button = np.vstack(negative_button)
+    np.savetxt(str(feature_degree)+'_button_positive_relative_rate.txt', positive_button)
 
-    positive_min = np.array([np.nanmin(positive_button[:,i]) for i in range(positive_button.shape[1])])
-    positive_max = np.array([np.nanmax(positive_button[:,i]) for i in range(positive_button.shape[1])])
+    negative_button = np.vstack(negative_button)
+    np.savetxt(str(feature_degree)+'_button_negative_relative_rate.txt', negative_button)
+
+    positive_std = np.array([np.nanstd(positive_button[:,i]) for i in range(positive_button.shape[1])])
+    # positive_min = np.array([np.nanmin(positive_button[:,i]) for i in range(positive_button.shape[1])])
+    # positive_max = np.array([np.nanmax(positive_button[:,i]) for i in range(positive_button.shape[1])])
     positive = np.array([np.nanmean(positive_button[:,i]) for i in range(positive_button.shape[1])])
 
-    negative_min = np.array([np.nanmin(negative_button[:,i]) for i in range(negative_button.shape[1])])
-    negative_max = np.array([np.nanmax(negative_button[:,i]) for i in range(negative_button.shape[1])])
+    negative_std = np.array([np.nanstd(negative_button[:,i]) for i in range(negative_button.shape[1])])
+    # negative_min = np.array([np.nanmin(negative_button[:,i]) for i in range(negative_button.shape[1])])
+    # negative_max = np.array([np.nanmax(negative_button[:,i]) for i in range(negative_button.shape[1])])
     negative = np.array([np.nanmean(negative_button[:,i]) for i in range(negative_button.shape[1])])
-    positive_error = [positive-positive_min, positive_max-positive]
-    negative_error = [negative-negative_min, negative_max-negative]
+    # positive_error = [positive-positive_min, positive_max-positive]
+    # negative_error = [negative-negative_min, negative_max-negative]
+
+    positive_error, negative_error = positive_std, negative_std
 
     draw_rates(
         data=[positive, negative],
@@ -148,15 +163,9 @@ if __name__ == '__main__':
     #             analyse(i, p[i], source_files, inspect=True)
 
 
-    # i = 19
-    # source_files = get_source_files(PATHS_SOURCE[i], gaze_file_filter=p[i]['gaze_file_filter'])
-    # if not p[i]['excluded']:
-    #     analyse(i, p[i], source_files, inspect=True)        
-
-
     # data_paths = get_data_path()
     # data_paths = [os.path.join(data_paths, p) for p in PATHS_DESTIN]
     # i = 0
-    # source_files = get_data_files(data_paths[i])
+    # source_files = get_data_files(data_paths[i],gaze_file_filter='*2d_pr*')
     # if not p[i]['excluded']:
     #     analyse(i, p[i], source_files, inspect=True)        
