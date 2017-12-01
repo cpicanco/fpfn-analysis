@@ -94,8 +94,8 @@ def organize(src_directory, dst_directory):
     copy_file(src_files[1], dst_files[1])
 
     #conversion
-    convert_beha(beha_file, dst_files[3], start_time=start_time)
-    convert_gaze(gaze_file, dst_files[4], start_time=start_time)
+    convert_beha(beha_file, dst_files[2], start_time=start_time)
+    convert_gaze(gaze_file, dst_files[3], start_time=start_time)
 
 def get_data_path(raw=False):
     data_path = os.path.dirname(os.path.abspath(__file__))
@@ -105,8 +105,10 @@ def get_data_path(raw=False):
         return os.path.join(os.path.dirname(data_path), 'DATA')
 
 
-DATA_SKIP_HEADER = [
-                    
+DATA_SKIP_HEADER = [21,
+                    15,
+                    31,
+                    26,                    
                     31,
                     26,
                     30,
@@ -163,6 +165,8 @@ DATA_SKIP_HEADER = [
 
 
 PATHS_SOURCE = [
+                '/home/pupil/recordings/2017_12_01_001_LEX/stimulus_control/',
+                '/home/pupil/recordings/2017_12_01_000_LUI/stimulus_control/',
                 '/home/pupil/recordings/2017_11_29_001_FEL/stimulus_control/',
                 '/home/pupil/recordings/2017_11_29_000_DAN/stimulus_control/',
                 '/home/pupil/recordings/2017_11_28_003_GIO/stimulus_control/',
@@ -217,7 +221,8 @@ PATHS_SOURCE = [
                 '/home/pupil/recordings/2017_11_08_003_REU/stimulus_control/',
                 '/home/pupil/recordings/2017_11_06_000_ROB/stimulus_control/']
 
-PATHS_DESTIN = [
+PATHS_DESTIN = [ 'P55',
+                 'P54',
                  'P53',
                  'P52',
                  'P51',
@@ -274,6 +279,21 @@ PATHS_DESTIN = [
 
 
 PARAMETERS = [
+    # '2017_12_01_001_LEX'
+    {'min_block_size':10000,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_01_000_LUI'  
+    {'min_block_size':10000,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*3d_pr*',
+     'excluded':False},
 
     # '2017_11_29_001_FEL'    
     {'min_block_size':10597,
