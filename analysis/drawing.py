@@ -95,17 +95,26 @@ def draw_rates(data,title, save=False,
     single=False,
     first_label="positive",
     second_label="negative",
-    y_limit=False):
+    y_limit=False,
+    error=None):
     x_label = 'Trials'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)
     
     # positive
-    axes.plot(data[0],color="k",marker='.', lw=1, label=first_label)
+    if error:
+        #axes.plot(data[0],color="k",marker='.', lw=1, label=first_label)
+        #axes.plot(data[1],color="k",marker='x',ls='--', lw=1, label=second_label)
+        axes.errorbar(range(len(data[0])), data[0], error[0], label=first_label,
+            color="k",marker='.', lw=1, alpha=0.5, capsize=1)
+        axes.errorbar(np.array(range(len(data[1])))+0.18, data[1], error[1], label=second_label,
+            color="k",marker='x', fmt='.k', ls='--', lw=1, alpha=0.3, capsize=1)
+    else:
+        axes.plot(data[0],color="k",marker='.', lw=1, label=first_label)
+        if not single:
+            axes.plot(data[1],color="k",marker='x',ls='--', lw=1, label=second_label)
 
     # negative
-    if not single:
-        axes.plot(data[1],color="k",marker='x',ls='--', lw=1, label=second_label)
 
     # if version == 'v1':
     #     plt.xticks([0,14, 35],[1, 15, 36])
@@ -184,3 +193,9 @@ def plot_xy_donut(data):
         ) 
     plt.show()   
     plt.gcf().clear() 
+
+if __name__ == '__main__':
+    from random import randrange
+    e1 = [randrange(1, 5) for _ in range(20)]
+    e2 = [randrange(1, 5) for _ in range(20)]
+    draw_rates([range(20), range(20)], error=[e1, e2],title='title')

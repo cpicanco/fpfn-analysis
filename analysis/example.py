@@ -80,12 +80,21 @@ def analyse_experiment(feature_degree):
     negative = np.vstack(negative)
     print('negative', len(negative))
     
-    positive = [np.nanmean(positive[:,i]) for i in range(positive.shape[1])]
-    negative = [np.nanmean(negative[:,i]) for i in range(negative.shape[1])]
+    positive_min = np.array([np.nanmin(positive[:,i]) for i in range(positive.shape[1])])
+    positive_max = np.array([np.nanmax(positive[:,i]) for i in range(positive.shape[1])])
+    positive = np.array([np.nanmean(positive[:,i]) for i in range(positive.shape[1])])
+
+    negative_min = np.array([np.nanmin(negative[:,i]) for i in range(negative.shape[1])])
+    negative_max = np.array([np.nanmax(negative[:,i]) for i in range(negative.shape[1])])
+    negative = np.array([np.nanmean(negative[:,i]) for i in range(negative.shape[1])])
+
+    positive_error = [positive-positive_min, positive_max-positive]
+    negative_error = [negative-negative_min, negative_max-negative]
 
     draw_rates(
         data=[positive, negative],
-        title='mean looking proportion per trial with distinctive S',
+        error=[positive_error, negative_error],
+        title='mean looking proportion per trial with distinctive S '+str(feature_degree),
         save= True,
         y_label='Mean looking proportion',
         name='_looking_mean',
@@ -97,12 +106,21 @@ def analyse_experiment(feature_degree):
 
     positive_button = np.vstack(positive_button)
     negative_button = np.vstack(negative_button)
-    positive_button = [np.nanmean(positive_button[:,i]) for i in range(positive_button.shape[1])]
-    negative_button = [np.nanmean(negative_button[:,i]) for i in range(negative_button.shape[1])]
+
+    positive_min = np.array([np.nanmin(positive_button[:,i]) for i in range(positive_button.shape[1])])
+    positive_max = np.array([np.nanmax(positive_button[:,i]) for i in range(positive_button.shape[1])])
+    positive = np.array([np.nanmean(positive_button[:,i]) for i in range(positive_button.shape[1])])
+
+    negative_min = np.array([np.nanmin(negative_button[:,i]) for i in range(negative_button.shape[1])])
+    negative_max = np.array([np.nanmax(negative_button[:,i]) for i in range(negative_button.shape[1])])
+    negative = np.array([np.nanmean(negative_button[:,i]) for i in range(negative_button.shape[1])])
+    positive_error = [positive-positive_min, positive_max-positive]
+    negative_error = [negative-negative_min, negative_max-negative]
 
     draw_rates(
-        data=[positive_button, negative_button],
-        title='mean button-pressing proportion along trials',
+        data=[positive, negative],
+        error=[positive_error, negative_error],
+        title='mean button-pressing proportion along trials '+str(feature_degree),
         save= True,
         y_label='mean button-pressing proportion',
         name='_button_mean',
