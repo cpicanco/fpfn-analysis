@@ -19,7 +19,15 @@ from methods import load_yaml_data, load_gaze_data
 from categorization import gaze_rate
 from data_organizer import PATHS_SOURCE, PATHS_DESTIN, DATA_SKIP_HEADER, get_data_path
 from data_organizer import PARAMETERS as p
-from drawing import draw_rates
+from drawing import draw_rates, draw_points
+
+from scipy.stats import mannwhitneyu
+
+# some alternative approachs:
+
+# Eoin (https://stats.stackexchange.com/users/42952/eoin),
+# How to compare difference between two time series?,
+# URL (version: 2014-07-17): https://stats.stackexchange.com/q/108323
 
 def analyse(i, parameters, source_files, inspect=False, info_file=None):
     print('Running analysis for session:', PATHS_SOURCE[i])
@@ -119,7 +127,7 @@ def analyse_experiment(feature_degree):
     positive, negative, positive_error, negative_error = statistics(
         positive,
         negative
-    #    ['_looking_negative_relative_rate.txt', '_looking_positive_relative_rate.txt']
+        # ['_looking_negative_relative_rate.txt', '_looking_positive_relative_rate.txt']
     )
 
     draw_rates(
@@ -138,7 +146,7 @@ def analyse_experiment(feature_degree):
     positive, negative, positive_error, negative_error = statistics(
         positive_button,
         negative_button
-    #    ['_button_positive_relative_rate.txt', '_button_negative_relative_rate.txt']
+        # ['_button_positive_relative_rate.txt', '_button_negative_relative_rate.txt']
     )
 
  
@@ -157,7 +165,7 @@ def analyse_experiment(feature_degree):
     positive, negative, positive_error, negative_error = statistics(
         positive_latency,
         negative_latency
-    #    ['_latency_positive_relative_rate.txt', '_latency_negative_relative_rate.txt']
+        # ['_latency_positive_relative_rate.txt', '_latency_negative_relative_rate.txt']
     )
 
     draw_rates(
@@ -173,7 +181,16 @@ def analyse_experiment(feature_degree):
         )
 
 if __name__ == '__main__':
-    analyse_experiment(feature_degree=90)
+    positive = np.loadtxt('9_looking_positive_relative_rate.txt')
+    negative = np.loadtxt('9_looking_negative_relative_rate.txt')
+
+    fp = [positive[:,i] for i in range(positive.shape[1])]
+    fn = [negative[:,i] for i in range(negative.shape[1])]
+
+    for p, n in zip(fp, fn):
+        print(mannwhitneyu(p, n, alternative='greater'))
+
+    # analyse_experiment(feature_degree=9)
 
     # negative = ['2017_11_16_000_VIN',
     #             '2017_11_14_005_JOA',

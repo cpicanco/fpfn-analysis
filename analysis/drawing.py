@@ -14,6 +14,40 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+def draw_points(x, y, title='scatter', save=False):
+    x_label = 'FP'
+    y_label = 'FN'
+    axes = plt.gca()
+    plt.suptitle(title, fontsize=12)
+
+    # plt.xticks([0,(len(x)//2)-1, len(x)-1],[1, len(x)//2, len(x)])
+    axes.scatter(x, y, color="k",marker='.', lw=1)
+
+
+    # remove outer frame
+    axes.spines['top'].set_visible(False)
+    axes.spines['bottom'].set_visible(False)
+    axes.spines['left'].set_visible(False)
+    axes.spines['right'].set_visible(False)
+
+    axes.set_ylim(-0.1, 1.1)
+    axes.set_xlim(-0.1, 1.1)
+
+    #remove ticks
+    axes.xaxis.set_ticks_position('none')
+    axes.yaxis.set_ticks_position('none')
+
+    axes.set_ylabel(y_label)
+    axes.set_xlabel(x_label)
+    if save:
+        data_path = os.path.dirname(os.path.abspath(__file__))
+        f = os.path.join(os.path.dirname(data_path),title+'.png')
+        print(f)
+        plt.savefig(f, bbox_inches='tight')
+        plt.close()        
+    else:
+        plt.show()    
+
 def draw_rate(data,title, save=False, y_label = 'FPS by trial'):
     x_label = 'Trials'
     axes = plt.gca()
