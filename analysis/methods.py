@@ -206,26 +206,37 @@ def rate_in(time_interval_pairwise,timestamps):
 def get_relative_rate(data1, data2):
     return [a/(b+a) if b+a > 0 else np.nan for a, b in zip(data1, data2)]
 
-def rate(ini_file, ts_file, title='', save=False, inspect=False):
-    time_data = zip(ts_file['time'], ts_file['bloc'], ts_file['trial'], ts_file['event'])
-    ini_data = zip(ini_file['trial'], ini_file['contingency'], ini_file['feature'])
-    trials = get_events_per_trial(ini_data, time_data)
-    positive_intervals, negative_intervals = get_trial_intervals(trials)  
-
-    responses = get_responses(ts_file)
+def rate(positive_intervals, negative_intervals, responses, title='', save=False, inspect=False):
     positive_data = rate_in(positive_intervals, responses)
     negative_data = rate_in(negative_intervals, responses)
-
     relative_rate = get_relative_rate(positive_data, negative_data)
-
     if inspect:
         draw_rates([positive_data, negative_data], title, save, y_label = 'Button-pressing per seconds')        
         draw_relative_rate(relative_rate,title, save, y_label = 'Button-pressing proportion')
 
     return relative_rate
     
+def latency(trials):
+    def get_time(timestamped_events):
+        d = [] 
+        for time, event in timestamped_events:
+            if event == 'TRIAL_START':
+                d.append(time)
+                continue
+
+            if event == 'RESPONSE':
+                d.append(time)
+                return d[1]-d[0]
+        return np.nan
+    data = []
+    for i, trial in trials.items():
+        if trial['Type'] == 'Positiva':
+            data.append(get_time(zip(trial['Time'], trial['Event'])))
+
+    return data
+
 def get_source_files(src_directory, gaze_file_filter='*surface_3d_pr*'):
-    target_filters = ['*.yml', '*.txt', '*.data', '*.timestamps', gaze_file_filter]
+    target_filters = ['*.yml', '*.txt', '*.timestamps', gaze_file_filter]
     glob_lists = [glob(os.path.join(src_directory, tf)) for tf in target_filters]
     return [sorted(glob_list)[0] for glob_list in glob_lists]
 

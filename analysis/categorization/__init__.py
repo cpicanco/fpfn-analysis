@@ -19,7 +19,6 @@ from drawing import plot_xy, plot_xy_donut, draw_rates
 from drawing import draw_relative_rate, draw_rate
 from methods import remove_outside_screen
 from methods import load_ini_data, load_fpe_timestamps, load_gaze_data
-from methods import get_events_per_trial, get_trial_intervals
 from methods import rate_in, get_relative_rate
 from .stimuli import circular_grid
 from .stimuli import donut_grid
@@ -78,7 +77,7 @@ def get_gaze_mask_donut(shape, gaze_data):
     shape = mp(shape)  
     return shape.contains_points(gaze_data.T)
 
-def gaze_rate(ini_file, ts_file, all_gaze_data, title,
+def gaze_rate(trial_intervals, features, all_gaze_data, title,
     factor=1.95,
     min_block_size=1000,
     do_correction=True,
@@ -86,11 +85,6 @@ def gaze_rate(ini_file, ts_file, all_gaze_data, title,
     do_remove_outside_session_time=True,
     inspect=False,
     save=False):
-
-    time_data = zip(ts_file['time'], ts_file['bloc'], ts_file['trial'], ts_file['event'])
-    ini_data = zip(ini_file['trial'], ini_file['contingency'], ini_file['feature'])
-    trials = get_events_per_trial(ini_data, time_data)
-    trial_intervals = get_trial_intervals(trials, uncategorized=True) 
 
     if inspect:
         # plot_xy(np.array([all_gaze_data['x_norm'], all_gaze_data['y_norm']]),factor)
@@ -123,7 +117,7 @@ def gaze_rate(ini_file, ts_file, all_gaze_data, title,
     gaze_rates_per_trial = np.vstack(uncategorized_gaze_rates).T
     positive_feature_rate = []
     positive_else_rate = []
-    for feature, rates in zip(ini_file['feature'], gaze_rates_per_trial):
+    for feature, rates in zip(features, gaze_rates_per_trial):
         if feature:
             # print(rates[feature-1])
             positive_feature_rate.append(rates[feature-1])
