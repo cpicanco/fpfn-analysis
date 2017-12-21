@@ -1,0 +1,26 @@
+tag: 'P61'
+nickname: '2017_12_14_000_TAT'
+sex: f
+ocupation: 'letras'
+group: 'fp-square/fn-x'
+feature_degree: 9
+age: 32
+report: >
+    Quadrado não produzia som quando os círculos eram completos e produzia
+    quando havia quebras.
+    
+    O X produzia som quando tinha os círculos em volta completos e outras
+    situações também. Em algumas posições de círculos quebrados não havia
+    som.
+    
+    Demorei a compreender o teste porque esperava ver outras formas.
+
+notes: >
+    "Se você pudesse escolher entre X ou quadrado, qual você escolheria?"
+    Respondeu "quadrado, pois foi mais perceptível, mas o X também é, então meio a meio"
+
+    "Você tem algo a dizer sobre o quadrado?"
+    Não respondeu.
+    
+
+after_the_fact_preference: none

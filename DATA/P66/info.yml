@@ -1,0 +1,34 @@
+tag: 'P66'
+nickname: '2017_12_15_002_RUB'
+sex: m
+ocupation: 'meteorologia'
+group: 'fp-square/fn-x'
+feature_degree: 9
+age: 23
+report: >
+    Inicialmente foi posto várias figuras onde eu iria
+    fazer o reconhecimento de quais produziam um som
+    de dinheiro e quais não produziam. As que eu acha-
+    se que produziriam som, eu deveria aperta um
+    botão que dizia que eu estava reconhecendo que ta figu-
+    ra produziria um som, todos os quadrados cujo
+    as circunferências entorno fossem fechadas não emitiam
+    som já os quadrados em que uma circunferência ou círculo
+    estivesse aberto (com um intervalo) esse produzia som.
+    
+    Já as imagens com X, as que produziam som eram
+    apenas a imagens cujo as circunferências entorno do X
+    estivessem totalmente fechadas (sem intervalo).
+    
+
+notes: >
+    Reportou, após a tarefa, não possuir predileção por quadrado 
+    nem por X antes da tarefa.
+    
+    "Se você pudesse escolher entre X ou quadrado, qual você escolheria?"
+    Respondeu "X, pois foi o mais fácil".
+
+    "Você tem algo a dizer sobre o quadrado?"
+    Não respondeu.
+
+after_the_fact_preference: x

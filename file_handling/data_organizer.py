@@ -12,6 +12,7 @@ sys.path.append('../analysis')
 
 import os
 import shutil
+from pathlib import Path
 
 import numpy as np
 
@@ -23,7 +24,7 @@ def copy_file(src, dst):
     if not os.path.exists(base_directory):
         print("Creating directory:", base_directory)
         os.makedirs(base_directory)
-    shutil.copyfile(src,dst)
+    shutil.copyfile(src, dst)
 
 def convert_gaze(src, dst, start_time):
     with open(dst, 'w+') as f:
@@ -62,7 +63,7 @@ def convert_beha(src, dst, start_time):
 
             f.write("\t".join((timestamp, bloc, trial, event_converted))+'\n')
 
-def organize(src_directory, dst_directory):
+def organize(src_directory, dst_directory, gaze_file_filter):
     """
     organize does not delete nor overrides any source data
     it will copy and convert data from source
@@ -74,19 +75,19 @@ def organize(src_directory, dst_directory):
     dst_filenames = ['info.yml',
                      'session_configuration.ini',
                      'session_events.txt',
-                     'gaze_coordenates_3d_pr.txt']
+                     'gaze_coordenates_'+gaze_file_filter.replace('*','')+'.txt']
     dst_files = [os.path.join(dst_directory, f) for f in dst_filenames]
 
     # source
-    src_files = get_source_files(src_directory, gaze_file_filter='*surface_3d_pr*')
-    
+    src_files = get_source_files(src_directory, gaze_file_filter=gaze_file_filter)
+
     # feedback
     [print('source:', src) for src in src_files]   
     [print('destination:', dst) for dst in dst_files]
 
     # loading
-    beha_file = load_fpe_timestamps(src_files[3], converted=False)
-    gaze_file = load_gaze_data(src_files[4], converted=False)
+    beha_file = load_fpe_timestamps(src_files[2], converted=False)
+    gaze_file = load_gaze_data(src_files[3], converted=False)
     start_time = gaze_file['gaze_timestamp'][0]
 
     # copying
@@ -105,7 +106,21 @@ def get_data_path(raw=False):
         return os.path.join(os.path.dirname(data_path), 'DATA')
 
 
-DATA_SKIP_HEADER = [21,
+DATA_SKIP_HEADER = [
+                    36,
+                    24,
+                    38,
+                    38,
+                    27,
+                    32,
+                    24,
+                    19,
+                    22,
+                    27,
+                    31,
+                    31,
+                    23,
+                    21,
                     15,
                     31,
                     26,                    
@@ -165,120 +180,252 @@ DATA_SKIP_HEADER = [21,
 
 
 PATHS_SOURCE = [
-                '/home/pupil/recordings/2017_12_01_001_LEX/stimulus_control/',
-                '/home/pupil/recordings/2017_12_01_000_LUI/stimulus_control/',
-                '/home/pupil/recordings/2017_11_29_001_FEL/stimulus_control/',
-                '/home/pupil/recordings/2017_11_29_000_DAN/stimulus_control/',
-                '/home/pupil/recordings/2017_11_28_003_GIO/stimulus_control/',
-                '/home/pupil/recordings/2017_11_28_002_FRA/stimulus_control/',
-                '/home/pupil/recordings/2017_11_28_001_ELI/stimulus_control/',
-                '/home/pupil/recordings/2017_11_28_000_SID/stimulus_control/',
-                '/home/pupil/recordings/2017_11_27_005_ANA/stimulus_control/',
-                '/home/pupil/recordings/2017_11_27_004_AUR/stimulus_control/',
-                '/home/pupil/recordings/2017_11_27_003_LUC/stimulus_control/',
-                '/home/pupil/recordings/2017_11_27_002_JOR/stimulus_control/',
-                '/home/pupil/recordings/2017_11_27_001_TUL/stimulus_control/',
-                '/home/pupil/recordings/2017_11_27_000_NAT/stimulus_control/',
-                '/home/pupil/recordings/2017_11_24_006_VER/stimulus_control/',
-                '/home/pupil/recordings/2017_11_24_005_THA/stimulus_control/',
-                '/home/pupil/recordings/2017_11_24_004_EUC/stimulus_control/',
-                '/home/pupil/recordings/2017_11_24_003_FER/stimulus_control/',
-                '/home/pupil/recordings/2017_11_24_002_JON/stimulus_control/',
-                '/home/pupil/recordings/2017_11_24_001_PED/stimulus_control/',
-                '/home/pupil/recordings/2017_11_24_000_MAN/stimulus_control/',
-                '/home/pupil/recordings/2017_11_23_006_MAY/stimulus_control/',
-                '/home/pupil/recordings/2017_11_23_005_RAU/stimulus_control/',
-                '/home/pupil/recordings/2017_11_23_004_ROM/stimulus_control/',
-                '/home/pupil/recordings/2017_11_23_003_YUR/stimulus_control/',
-                '/home/pupil/recordings/2017_11_23_002_EIL/stimulus_control/',
-                '/home/pupil/recordings/2017_11_23_001_JOS/stimulus_control/',
-                '/home/pupil/recordings/2017_11_23_000_DEN/stimulus_control/',
-                '/home/pupil/recordings/2017_11_22_001_TIA/stimulus_control/',
-                '/home/pupil/recordings/2017_11_22_000_EUL/stimulus_control/',
-                '/home/pupil/recordings/2017_11_16_003_ALI/stimulus_control/',
-                '/home/pupil/recordings/2017_11_16_002_LAR/stimulus_control/',
-                '/home/pupil/recordings/2017_11_16_001_MAT/stimulus_control/',
-                '/home/pupil/recordings/2017_11_16_000_VIN/stimulus_control/',
-                '/home/pupil/recordings/2017_11_14_006_ALE/stimulus_control/',
-                '/home/pupil/recordings/2017_11_14_005_JOA/stimulus_control/',
-                '/home/pupil/recordings/2017_11_14_004_NEL/stimulus_control/',
-                '/home/pupil/recordings/2017_11_14_003_LUC/stimulus_control/',
-                '/home/pupil/recordings/2017_11_14_002_TAT/stimulus_control/',
-                '/home/pupil/recordings/2017_11_14_001_MAR/stimulus_control/',
-                '/home/pupil/recordings/2017_11_14_000_SON/stimulus_control/',
-                '/home/pupil/recordings/2017_11_13_005_KAR/stimulus_control/',
-                '/home/pupil/recordings/2017_11_13_004_ISA/stimulus_control/',
-                '/home/pupil/recordings/2017_11_13_003_LIZ/stimulus_control/',
-                '/home/pupil/recordings/2017_11_13_002_MAX/stimulus_control/',
-                '/home/pupil/recordings/2017_11_13_001_MAR/stimulus_control/',
-                '/home/pupil/recordings/2017_11_13_000_GAB/stimulus_control/',
-                '/home/pupil/recordings/2017_11_09_007_REN/stimulus_control/',
-                '/home/pupil/recordings/2017_11_09_005_AMA/stimulus_control/',
-                '/home/pupil/recordings/2017_11_09_004_BEL/stimulus_control/',
-                '/home/pupil/recordings/2017_11_09_002_EST/stimulus_control/',
-                '/home/pupil/recordings/2017_11_09_001_KAL/stimulus_control/',
-                '/home/pupil/recordings/2017_11_09_000_JUL/stimulus_control/',
-                '/home/pupil/recordings/2017_11_08_003_REU/stimulus_control/',
-                '/home/pupil/recordings/2017_11_06_000_ROB/stimulus_control/']
+                'recordings/2017_12_18_001_BRE/stimulus_control/',
+                'recordings/2017_12_18_000_MAR/stimulus_control/',
+                'recordings/2017_12_15_002_RUB/stimulus_control/',
+                'recordings/2017_12_15_001_KAR/stimulus_control/',
+                'recordings/2017_12_15_000_RAF/stimulus_control/',
+                'recordings/2017_12_14_002_JOS/stimulus_control/',
+                'recordings/2017_12_14_001_JUL/stimulus_control/',
+                'recordings/2017_12_14_000_TAT/stimulus_control/',
+                'recordings/2017_12_13_004_ANT/stimulus_control/',
+                'recordings/2017_12_13_003_JOE/stimulus_control/',
+                'recordings/2017_12_13_002_FER/stimulus_control/',
+                'recordings/2017_12_13_001_LUK/stimulus_control/',
+                'recordings/2017_12_13_000_WAN/stimulus_control/',
+                'recordings/2017_12_01_001_LEX/stimulus_control/',
+                'recordings/2017_12_01_000_LUI/stimulus_control/',
+                'recordings/2017_11_29_001_FEL/stimulus_control/',
+                'recordings/2017_11_29_000_DAN/stimulus_control/',
+                'recordings/2017_11_28_003_GIO/stimulus_control/',
+                'recordings/2017_11_28_002_FRA/stimulus_control/',
+                'recordings/2017_11_28_001_ELI/stimulus_control/',
+                'recordings/2017_11_28_000_SID/stimulus_control/',
+                'recordings/2017_11_27_005_ANA/stimulus_control/',
+                'recordings/2017_11_27_004_AUR/stimulus_control/',
+                'recordings/2017_11_27_003_LUC/stimulus_control/',
+                'recordings/2017_11_27_002_JOR/stimulus_control/',
+                'recordings/2017_11_27_001_TUL/stimulus_control/',
+                'recordings/2017_11_27_000_NAT/stimulus_control/',
+                'recordings/2017_11_24_006_VER/stimulus_control/',
+                'recordings/2017_11_24_005_THA/stimulus_control/',
+                'recordings/2017_11_24_004_EUC/stimulus_control/',
+                'recordings/2017_11_24_003_FER/stimulus_control/',
+                'recordings/2017_11_24_002_JON/stimulus_control/',
+                'recordings/2017_11_24_001_PED/stimulus_control/',
+                'recordings/2017_11_24_000_MAN/stimulus_control/',
+                'recordings/2017_11_23_006_MAY/stimulus_control/',
+                'recordings/2017_11_23_005_RAU/stimulus_control/',
+                'recordings/2017_11_23_004_ROM/stimulus_control/',
+                'recordings/2017_11_23_003_YUR/stimulus_control/',
+                'recordings/2017_11_23_002_EIL/stimulus_control/',
+                'recordings/2017_11_23_001_JOS/stimulus_control/',
+                'recordings/2017_11_23_000_DEN/stimulus_control/',
+                'recordings/2017_11_22_001_TIA/stimulus_control/',
+                'recordings/2017_11_22_000_EUL/stimulus_control/',
+                'recordings/2017_11_16_003_ALI/stimulus_control/',
+                'recordings/2017_11_16_002_LAR/stimulus_control/',
+                'recordings/2017_11_16_001_MAT/stimulus_control/',
+                'recordings/2017_11_16_000_VIN/stimulus_control/',
+                'recordings/2017_11_14_006_ALE/stimulus_control/',
+                'recordings/2017_11_14_005_JOA/stimulus_control/',
+                'recordings/2017_11_14_004_NEL/stimulus_control/',
+                'recordings/2017_11_14_003_LUC/stimulus_control/',
+                'recordings/2017_11_14_002_TAT/stimulus_control/',
+                'recordings/2017_11_14_001_MAR/stimulus_control/',
+                'recordings/2017_11_14_000_SON/stimulus_control/',
+                'recordings/2017_11_13_005_KAR/stimulus_control/',
+                'recordings/2017_11_13_004_ISA/stimulus_control/',
+                'recordings/2017_11_13_003_LIZ/stimulus_control/',
+                'recordings/2017_11_13_002_MAX/stimulus_control/',
+                'recordings/2017_11_13_001_MAR/stimulus_control/',
+                'recordings/2017_11_13_000_GAB/stimulus_control/',
+                'recordings/2017_11_09_007_REN/stimulus_control/',
+                'recordings/2017_11_09_005_AMA/stimulus_control/',
+                'recordings/2017_11_09_004_BEL/stimulus_control/',
+                'recordings/2017_11_09_002_EST/stimulus_control/',
+                'recordings/2017_11_09_001_KAL/stimulus_control/',
+                'recordings/2017_11_09_000_JUL/stimulus_control/',
+                'recordings/2017_11_08_003_REU/stimulus_control/',
+                'recordings/2017_11_06_000_ROB/stimulus_control/']
 
-PATHS_DESTIN = [ 'P55',
-                 'P54',
-                 'P53',
-                 'P52',
-                 'P51',
-                 'P50',
-                 'P49',
-                 'P48',
-                 'P47',
-                 'P46',
-                 'P45',
-                 'P44',
-                 'P43',
-                 'P42',
-                 'P41',
-                 'P40',
-                 'P39',
-                 'P38',
-                 'P37',
-                 'P36',
-                 'P35',
-                 'P34',
-                 'P33',
-                 'P32',
-                 'P31',
-                 'P30',
-                 'P29',
-                 'P28',
-                 'P27',
-                 'P26',
-                 'P25',
-                 'P24',
-                 'P23',
-                 'P22',
-                 'P21',
-                 'P20',
-                 'P19',
-                 'P18',
-                 'P17',
-                 'P16',
-                 'P15',
-                 'P14',
-                 'P13',
-                 'P12',
-                 'P11',
-                 'P10',
-                 'P09',
-                 'P08',
-                 'P07',
-                 'P06',
-                 'P05',
-                 'P04',
-                 'P03',
-                 'P02',
-                 'P01']
+PATHS_DESTIN = [
+                'P68',
+                'P67',
+                'P66',
+                'P65',
+                'P64',
+                'P63',
+                'P62',
+                'P61',
+                'P60',
+                'P59',
+                'P58',
+                'P57',
+                'P56',
+                'P55',
+                'P54',
+                'P53',
+                'P52',
+                'P51',
+                'P50',
+                'P49',
+                'P48',
+                'P47',
+                'P46',
+                'P45',
+                'P44',
+                'P43',
+                'P42',
+                'P41',
+                'P40',
+                'P39',
+                'P38',
+                'P37',
+                'P36',
+                'P35',
+                'P34',
+                'P33',
+                'P32',
+                'P31',
+                'P30',
+                'P29',
+                'P28',
+                'P27',
+                'P26',
+                'P25',
+                'P24',
+                'P23',
+                'P22',
+                'P21',
+                'P20',
+                'P19',
+                'P18',
+                'P17',
+                'P16',
+                'P15',
+                'P14',
+                'P13',
+                'P12',
+                'P11',
+                'P10',
+                'P09',
+                'P08',
+                'P07',
+                'P06',
+                'P05',
+                'P04',
+                'P03',
+                'P02',
+                'P01']
 
 
 PARAMETERS = [
+    # '2017_12_18_001_BRE'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_18_000_MAR'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+
+    # '2017_12_15_002_RUB'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_15_001_KAR'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_15_000_RAF'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_14_002_JOS'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_14_001_JUL'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_14_000_TAT'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_13_004_ANT'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_13_003_JOE'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_13_002_FER'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_13_001_LUK'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
+    # '2017_12_13_000_WAN'
+    {'min_block_size':20593,
+     'do_correction': True,
+     'do_remove_outside_screen':False,
+     'do_remove_outside_session_time':True,
+     'gaze_file_filter':'*2d_pr*',
+     'excluded':False},
+
     # '2017_12_01_001_LEX'
     {'min_block_size':20593,
      'do_correction': True,
@@ -720,8 +867,8 @@ PARAMETERS = [
      'excluded':False}
 ]
 if __name__ == '__main__':
+    src_directories = [os.path.join(str(Path.home()), p) for p in PATHS_SOURCE]
     data_path = get_data_path()
-    source_directories = [p for p in PATHS_SOURCE]
-    destinat_directory = [os.path.join(data_path, p) for p in PATHS_DESTIN]
-    for s, d in zip(source_directories, destinat_directory):
-        organize(s, d)
+    dst_directories = [os.path.join(data_path, p) for p in PATHS_DESTIN]
+    for s, d, p in zip(src_directories, dst_directories, PARAMETERS):
+        organize(s, d, p['gaze_file_filter'])

@@ -1,0 +1,30 @@
+tag: 'P59'
+nickname: '2017_12_13_003_JOE'
+sex: f
+ocupation: 'geografia'
+group: 'fp-square/fn-x'
+feature_degree: 9
+age: 23
+report: >
+    Inicialmente, verifiquei que as formas não mudavam
+    de X ou quadrado, entretanto, percebi detalhes que
+    anteriormente não havia visto, como falhas nos círculos
+    que circundam as formas X ou quadrado.
+    
+    Produzia som com X e os círculos completamen-
+    te preenchidos do entorno, com o quadrado e os círculos e falha
+    à direita.
+    
+    Não produzia som com o X e os círculos falhados à esquerda.
+
+notes: >
+    Reportou, após a tarefa, não possuir predileção por 
+    quadrado nem por X antes da tarefa.
+    
+    "Se você pudesse escolher entre X ou quadrado, qual você escolheria?"
+    Respondeu "quadrado, por causa do som".
+
+    "Você tem algo a dizer sobre o X?"
+    Não respondeu.
+
+after_the_fact_preference: square

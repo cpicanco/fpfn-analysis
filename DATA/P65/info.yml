@@ -1,0 +1,24 @@
+tag: 'P65'
+nickname: '2017_12_15_001_KAR'
+sex: f
+ocupation: 'enfermagem'
+group: 'fp-square/fn-x'
+feature_degree: 9
+age: 23
+report: >
+    Figuras com "X" no centro com os círculos ao redor
+    completos e com o segundo círculo da esquerda para
+    direita vazado.
+    
+    Figuras com o quadrado no centro e com o quarto círculo
+    da esquerda para a direita vazado, e c/ o sexto círculo
+    vazado.
+
+notes: >
+    "Se você pudesse escolher entre X ou quadrado, qual você escolheria?"
+    Respondeu "X, pois foi mais fácil e aparecia mais".
+
+    "Você tem algo a dizer sobre o quadrado?"
+    Respondeu "fiquei em dúvida, pois foi o que menos apertei".
+
+after_the_fact_preference: x

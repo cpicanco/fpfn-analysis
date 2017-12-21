@@ -1,0 +1,23 @@
+tag: 'P57'
+nickname: '2017_12_13_001_LUK'
+sex: m
+ocupation: 'geografia'
+group: 'fp-square/fn-x'
+feature_degree: 9
+age: 21
+report: >
+    - Eu primeiramente identificava X ou quadrado
+    - Logo em seguida eu olhava todos os cantos para ver alguma falha
+    - o X quando não apresentava nenhuma falha produzia som
+    - o quadrado quando não apresentava nenhuma falha não produzia som
+    - o quadrado com falha produzia som
+    - o X com falha não produzia som
+
+notes: >
+    "Se você pudesse escolher entre X ou quadrado, qual você escolheria?"
+    Respondeu "quadrado, por que nele eu só identificava a falha".
+
+    "Você tem algo a dizer sobre o X?"
+    Respondeu "era mais difícil".
+
+after_the_fact_preference: square

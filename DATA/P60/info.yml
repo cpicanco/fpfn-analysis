@@ -1,0 +1,29 @@
+tag: 'P60'
+nickname: '2017_12_13_004_ANT'
+sex: m
+ocupation: 'professor de física'
+group: 'fp-square/fn-x'
+feature_degree: 9
+age: 23
+report: >
+    Ao início da tarefa, percebi que eram apenas duas úni-
+    cas imagens, a priori, idênticas. A primeira era um X,
+    em cor preta e grande, com círculos ao
+    redor, a segunda era um quadrado, também com
+    cículos ao redor. A diferença entre as imagens mos-
+    tradas é que os círculos nem sempre estavam com-
+    pletos, i. e., em algumas imagens, existia ao menos
+    um incompleto. Identifiquei que as
+    imagens que produziam som eram com
+    o quadrado no centro, cercado com círculos, com-
+    pletos menos um círculo incompleto, nessa ocasião
+    apertei o botão por várias vezes.
+
+notes: >
+    "Se você pudesse escolher entre X ou quadrado, qual você escolheria?"
+    Respondeu "quadrado, por causa do som e foi o mais fácil".
+
+    "Você tem algo a dizer sobre o X?"
+    Não respondeu.
+
+after_the_fact_preference: square

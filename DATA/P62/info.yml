@@ -1,0 +1,27 @@
+tag: 'P62'
+nickname: '2017_12_14_001_JUL'
+sex: f
+ocupation: 'biologia'
+group: 'fp-square/fn-x'
+feature_degree: 9
+age: 21
+report: >
+    As imagens que produziam som eram as que tinham um círculo aberto, principalmente
+    na parte superior da imagem, já as que não produziam tinham os círculos todos fechados ou
+    círculos abertos na parte inferior da imagem. Tanto na imagem com o "X" no centro quanto na ima-
+    com um quadrado no centro produziam som na presença de círculos abertos.
+    
+    No quadrado não produzia som quando os círculos estavam todos fechados ou com círculos abertos
+    na parte inferior da imagem. Na imagem com "X" no centro seguia-se a mesma dinâmica porém,
+    acredito que foi a imagem em que mais pontuei.
+
+notes: >
+    "Se você pudesse escolher entre X ou quadrado, qual você escolheria?"
+    Respondeu "X, pois foi a imagem que fiquei mais familiarizada".
+
+    "Você tem algo a dizer sobre o quadrado?"
+    Não respondeu.
+    
+    A discriminação condicional não ocorreu.
+
+after_the_fact_preference: none
