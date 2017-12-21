@@ -1,3 +1,16 @@
 INSTALL
 
+# install pip3 so you can install other dependencies
+sudo apt install python3-pip python3-setuptools python3-dev
+
+# install numpy and scipy
+sudo apt install python3-numpy python3-scipy
+
+# install matplotlib
+sudo pip3 install matplotlib
+
+# install pyyaml to read our yaml files
 sudo pip3 install pyyaml
+
+# install git so you can clone this and other repositories
+sudo apt install git
