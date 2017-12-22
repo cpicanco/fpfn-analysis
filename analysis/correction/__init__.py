@@ -8,7 +8,6 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 import numpy as np
-import cv2
 
 ALGORITHM_KMEANS = 'kmeans'
 ALGORITHM_QUANTILES = 'quantiles'
@@ -16,6 +15,7 @@ ALGORITHM_QUANTILES = 'quantiles'
 def unbiased_gaze(data, algorithm, min_block_size=1000,**kwargs):
     def bias(gaze_block,**kwargs):
         def kmeans(gaze_block,screen_center, k=2):
+            import cv2
             """
             assumes equally distributed gaze_data and k clusters
             """

@@ -61,6 +61,62 @@ def load_ini_data(path='../data/positive_01.txt'):
 
     return {'trial':range(len(features)), 'contingency':contingencies, 'feature':features}
 
+def load_ini_data_intrasubject(path):
+    def get_feature_number(reference, target, ini_section):
+        if reference == target:
+            for n in range(1, 10):
+                option = 'c'+str(n)+'gap'
+                if Config.get(ini_section, option) == '1':
+                    return n
+        
+    from configparser import ConfigParser
+    Config = ConfigParser()
+    Config.read(path)
+    fp_indexes = []
+    fn_indexes = []
+    fp_features = []
+    fn_features = []
+    fp_contingencies = []
+    fn_contingencies = []
+    for section in Config.sections():
+        if not 'T' in section:
+            continue
+
+        if not 'Blc 2' in section:
+            continue
+            
+        bloc_name = Config.get('Blc 2', 'Name')
+        if bloc_name == 'FPO':
+            fp_center = 'O'
+            fn_center = 'X'
+
+        elif bloc_name == 'FPX':
+            fp_center = 'X'
+            fn_center = 'O'
+
+        fp_target = 'Positiva '+fp_center
+        fp_non_target = 'Negativa '+fp_center
+
+        fn_target = 'Negativa '+fn_center
+        fn_non_target = 'Positiva '+fn_center
+
+        trial_name = Config.get(section, 'Name')
+        if (trial_name == fp_target) or (trial_name == fp_non_target):
+            fp_contingencies.append(Config.get(section, 'Contingency'))
+            fp_features.append(get_feature_number(trial_name, fp_target, section))
+            fp_indexes.append(int(section.replace('Blc 2 - T', ''))-1)
+
+        if (trial_name == fn_target) or (trial_name == fn_non_target):
+            fn_contingencies.append(Config.get(section, 'Contingency'))
+            fn_features.append(get_feature_number(trial_name, fn_target, section))
+            fn_indexes.append(int(section.replace('Blc 2 - T', ''))-1)
+
+    fp = {'trial':fp_indexes, 'contingency':fp_contingencies, 'feature':fp_features}
+    fn = {'trial':fn_indexes, 'contingency':fn_contingencies, 'feature':fn_features}
+
+    return fp, fn
+
+
 def load_gaze_data(path, converted=True):
     if not os.path.isfile(path):
         print(path)
@@ -144,18 +200,20 @@ def get_events_per_trial(ini_data, time_data):
     events_per_trial = {}
     first = True
     for time, bloc_id, trial, ev in time_data:
+        trial_n = trial
         if bloc_id == 2:
             if first:
                 first = False
                 offset = 0
-                if trial > 1:
-                    offset = trial
-            trial = trial - offset
+                if trial_n > 1:
+                    offset = trial_n
+            trial_n = trial_n - offset
 
-            if trial not in events_per_trial:
-                events_per_trial[trial] = {'Type':'','Feature':'','Time':[],'Event':[]}
-            events_per_trial[trial]['Time'].append(time)    
-            events_per_trial[trial]['Event'].append(ev.decode("utf-8"))
+            if trial_n not in events_per_trial:
+                events_per_trial[trial_n] = {'Type':'','Feature':'','Time':[],'Event':[]}
+
+            events_per_trial[trial_n]['Time'].append(time)    
+            events_per_trial[trial_n]['Event'].append(ev.decode("utf-8"))
 
     type1 = 'Positiva'
     type2 = 'Negativa'
@@ -204,7 +262,7 @@ def rate_in(time_interval_pairwise,timestamps):
     return [len(is_inside(timestamps, begin, end))/(end-begin) for begin, end in time_interval_pairwise]
 
 def get_relative_rate(data1, data2):
-    return [a/(b+a) if b+a > 0 else np.nan for a, b in zip(data1, data2)]
+    return [a/(b+a) if b+a > 0 else 0.5 for a, b in zip(data1, data2)]
 
 def rate(positive_intervals, negative_intervals, responses, title='', save=False, inspect=False):
     positive_data = rate_in(positive_intervals, responses)
