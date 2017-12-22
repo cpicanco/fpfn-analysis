@@ -368,7 +368,7 @@ PARAMETERS = [
      'do_remove_outside_screen':False,
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*2d_pr*',
-     'excluded':False},
+     'excluded':True},
 
     # '2017_12_14_001_JUL'
     {'min_block_size':20593,
