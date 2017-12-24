@@ -5,8 +5,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-p_value_plot <- function(means) {
-	pdf('Figure.pdf', width = 4, height = 4)
+norm_plot <- function(data, filen= '') {
+	if (filen == '') {
+		pdf('Figure.pdf', width= 4, height= 4)
+	} else {
+		png(sprintf("images/qqnorm_%s.png", filen), width= 400, height= 400)
+	}
+
+	qqnorm(data);
+	qqline(data, col = 2)	
+}
+
+resid_plot <- function(X, Y, filen= '') {
+	if (filen == '') {
+		pdf('Figure.pdf', width= 4, height= 4)
+	} else {
+		png(sprintf("images/resid_%s.png", filen), width= 800, height= 800)
+	}
+	par(mfrow = c(2, 2))
+	plot(lm(X ~ Y))
+}
+
+p_value_plot <- function(means, filen= -1) {
+	if (filen == -1) {
+		pdf('Figure.pdf', width= 4, height= 4)
+	} else {
+		png(sprintf("images/p_values_%02d.png", filen), width= 400, height= 400)
+	}
 
 	# clean template
 	plot(means, ylim= c(0.0, 1.0), xlim= c(1,27), axes= FALSE, ann= FALSE, type= 'n')
@@ -94,7 +119,7 @@ custom_boxplot <- function(positive_means, negative_means, filen= -1) {
 	)
 }
 
-wilcoxon_rank_sum_test <- function(positive, negative, jittered= FALSE) {
+rank_sum_test <- function(positive, negative, jittered= FALSE, algorithm= 'kruskal') {
 	result <- vector()
 	for (name in names(positive)) {
 		if (jittered) {
@@ -104,15 +129,29 @@ wilcoxon_rank_sum_test <- function(positive, negative, jittered= FALSE) {
 			X <- positive[,name]
 			Y <- negative[,name]
 		}
-		result = c(result, wilcox.test(
-			X,
-			Y,
-			alternative= 'greater',
-			paired= FALSE)$p.value
-		)
-	}
-	frame <- data.frame(t(result))
-	return(frame)
+		# norm_plot(X, name)
+		# norm_plot(Y, name)
+		resid_plot(X, Y, name)
+
+		if (algorithm == 'kruskal') {
+			result = c(result, kruskal.test(list(X, Y))$p.value)
+		}
+
+		if (algorithm == 'wincox') {
+			result = c(result, wincox.test(
+				X, Y,
+				alternative='greater',
+				paired=TRUE)$p.value)			
+		}
+
+		if (algorithm == 'mann-whitney') {
+			result = c(result, wincox.test(
+				X, Y,
+				alternative='greater',
+				paired=FALSE)$p.value)			
+		} 		
+	} 
+	return(data.frame(t(result)))
 }
 
 # load our data
@@ -120,16 +159,16 @@ positive <- read.table('9_intra_button_positive_relative_rate.txt', sep= ' ', na
 negative <- read.table('9_intra_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
 
 # differentiation
-# use_jitter <- FALSE
-# if (use_jitter) {
-# 	frame <- positive[FALSE,]
-# 	for (i in seq(1,1000)) {
-# 		frame <- rbind(frame, wilcoxon_rank_sum_test(positive, negative, use_jitter))
-# 	}
-# } else {
-# 	frame <- wilcoxon_rank_sum_test(positive, negative)
-# }
-# p_value_plot(apply(frame, 2, mean))
+use_jitter <- FALSE
+if (use_jitter) {
+	frame <- positive[FALSE,]
+	for (i in seq(1,1000)) {
+		frame <- rbind(frame, rank_sum_test(positive, negative, use_jitter))
+	}
+} else {
+	frame <- rank_sum_test(positive, negative)
+}
+p_value_plot(apply(frame, 2, mean), 1)
 
 # plot means
 # positive_means <- apply(positive, 2, mean, na.rm= TRUE)
@@ -138,8 +177,8 @@ negative <- read.table('9_intra_button_negative_relative_rate.txt', sep= ' ', na
 
 
 # intra-subject, compare fp and fn trials
-for (i in 1:nrow(positive)) {
-	positive_p <- as.numeric(positive[i, ])
-	negative_p <- as.numeric(negative[i, ])
-	custom_boxplot(positive_p, negative_p, i)
-}
+# for (i in 1:nrow(positive)) {
+# 	positive_p <- as.numeric(positive[i, ])
+# 	negative_p <- as.numeric(negative[i, ])
+# 	custom_boxplot(positive_p, negative_p, i)
+# }
