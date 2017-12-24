@@ -16,17 +16,17 @@ import numpy as np
 import random
 
 EXTERNAL_SCREEN_RECT = [
-    256, # left 
-    0, # top
-    768, # width
-    768  # height
+    240, # left 
+    -16, # top
+    800, # width
+    800  # height
 ]
 
 INTERNAL_SCREEN_RECT = [
-    456, # left 
-    200, # top
-    368, # width
-    368  # height
+    540, # left 
+    284, # top
+    200, # width
+    200  # height
 ]
 
 STIMULI_COORDENATES = [
@@ -45,6 +45,11 @@ STIMULI_HEIGHT_PX = 100
 
 SCREEN_WIDTH_PX = 1280
 SCREEN_HEIGHT_PX = 768
+
+def get_central_rect(width, height):
+    left = (SCREEN_WIDTH_PX // 2) - (width // 2)
+    top = (SCREEN_HEIGHT_PX // 2) - (height // 2)
+    return [left, top]
 
 def normalize(x_px, y_px, inverted_y=False, screen=(SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX)):
     if inverted_y:
@@ -124,19 +129,18 @@ class Circle(object):
 
 def circular_grid(normalized=False):
     return [Circle(x, y, normalized=normalized) for (x, y) in STIMULI_COORDENATES]  
-  
-
-def donut_grid(normalized=False, inverted_y=True):
+ 
+def donut_grid(normalized=False, inverted_y=False):
     grid = []
     step = 40
 
-    grid.append(Circle(
-                left_px=INTERNAL_SCREEN_RECT[0],
-                top_px=INTERNAL_SCREEN_RECT[1],
-                width_px=INTERNAL_SCREEN_RECT[2],
-                height_px=INTERNAL_SCREEN_RECT[3],
-                normalized=normalized,
-                inverted_y=inverted_y).points())
+    # grid.append(Circle(
+    #             left_px=INTERNAL_SCREEN_RECT[0],
+    #             top_px=INTERNAL_SCREEN_RECT[1],
+    #             width_px=INTERNAL_SCREEN_RECT[2],
+    #             height_px=INTERNAL_SCREEN_RECT[3],
+    #             normalized=normalized,
+    #             inverted_y=inverted_y).points())
 
     # loop for the rest
     for i in range(20, 301, step):
@@ -189,7 +193,7 @@ def donut_grid(normalized=False, inverted_y=True):
     internal_arc = np.vstack([a, b])
     grid.append(np.vstack([external_arc, internal_arc]))
 
-    return grid
+    return reversed(grid)
 
 def debug_window():
     from graphics import GraphWin
@@ -198,13 +202,17 @@ def debug_window():
     win.setBackground("black")
 
     for circle in circular_grid():
-        for [x, y] in circle.points():
+        for [x, y] in circle.points(factor=1.):
             win.plotPixel(x, y, "white")
+    
+    # for circle in circular_grid():
+    #     for [x, y] in circle.points(factor=2.):
+    #         win.plotPixel(x, y, "white")
 
     for donut_slice in donut_grid():
         for [x, y] in donut_slice:
             win.plotPixel(x, y, "white")
-            # sleep(0.01)
+            sleep(0.001)
 
     # gaze = RandomPoint.pick()
     # stimulus = random.choice(STIMULI_COORDENATES)
@@ -225,3 +233,4 @@ def debug_window():
 
 if __name__ == '__main__':
     debug_window()
+    # print(get_central_rect(200, 200))
