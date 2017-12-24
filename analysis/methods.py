@@ -18,6 +18,11 @@ from drawing import draw_rates, draw_relative_rate
 fp_strings = ['FP', 'Feature Positive']
 fn_strings = ['FN', 'Feature Negative']
 
+type1 = 'Positiva'
+type2 = 'Negativa'
+center1 = 'O'
+center2 = 'X'
+
 def load_yaml_data(path):
     import yaml
     with open(path, 'r') as stream:
@@ -39,13 +44,13 @@ def load_ini_data(path='../data/positive_01.txt'):
         bloc_name = Config.get('Blc 2', 'Name')
         for fp_string in fp_strings:
             if bloc_name in fp_string:
-                target = 'Positiva'
-                non_target = 'Negativa'
+                target = type1
+                non_target = type2
 
         for fn_string in fn_strings:
             if bloc_name in fn_string:
-                target = 'Negativa'
-                non_target = 'Positiva'
+                target = type2
+                non_target = type1
 
         contingency = Config.get(section, 'Contingency')  
         contingencies.append(contingency) 
@@ -87,18 +92,18 @@ def load_ini_data_intrasubject(path):
             
         bloc_name = Config.get('Blc 2', 'Name')
         if bloc_name == 'FPO':
-            fp_center = 'O'
-            fn_center = 'X'
+            fp_center = center1
+            fn_center = center2
 
         elif bloc_name == 'FPX':
-            fp_center = 'X'
-            fn_center = 'O'
+            fp_center = center2
+            fn_center = center1
 
-        fp_target = 'Positiva '+fp_center
-        fp_non_target = 'Negativa '+fp_center
+        fp_target = type1+' '+fp_center
+        fp_non_target = type2+' '+fp_center
 
-        fn_target = 'Negativa '+fn_center
-        fn_non_target = 'Positiva '+fn_center
+        fn_target = type2+' '+fn_center
+        fn_non_target = type1+' '+fn_center
 
         trial_name = Config.get(section, 'Name')
         if (trial_name == fp_target) or (trial_name == fp_non_target):
@@ -178,24 +183,6 @@ def load_fpe_timestamps(path, converted=True):
     )
     return data
 
-def remove_outside_screen(data, xmax=1, ymax=1, xmin=0, ymin=0, horizontal=True):
-    if horizontal:
-        x = (xmin <= data[0, :]) & (data[0, :] < xmax)
-        y = (ymin <= data[1, :]) & (data[1, :] < ymax)
-        mask = x & y
-        data_clamped = data[:, mask]
-        deleted_count = data.shape[1] - data_clamped.shape[1]
-    else:
-        x = (xmin <= data[:, 0]) & (data[:, 0] < xmax)
-        y = (ymin <= data[:, 1]) & (data[:, 1] < ymax)
-        mask = x & y
-        data_clamped = data[mask, :]
-        deleted_count = data.shape[0] - data_clamped.shape[0]
-
-    if deleted_count > 0:
-        print("\nRemoved", deleted_count, "data point(s) with out-of-screen coordinates!")
-    return data_clamped, mask
-
 def get_events_per_trial(ini_data, time_data):
     events_per_trial = {}
     first = True
@@ -215,8 +202,6 @@ def get_events_per_trial(ini_data, time_data):
             events_per_trial[trial_n]['Time'].append(time)    
             events_per_trial[trial_n]['Event'].append(ev.decode("utf-8"))
 
-    type1 = 'Positiva'
-    type2 = 'Negativa'
     for i, contingency, feature in ini_data:
         events_per_trial[i]['Feature'] = feature
         if type1 in contingency: 
@@ -244,10 +229,10 @@ def get_trial_intervals(trials, uncategorized=False):
     positive_intervals = []
     negative_intervals = []
     for start, end in zip(starts, ends):
-        if start['Type'] == 'Positiva':
+        if start['Type'] == type1:
             positive_intervals.append([start['Time'], end['Time']])
 
-        if start['Type'] == 'Negativa':
+        if start['Type'] == type2:
             negative_intervals.append([start['Time'], end['Time']])
     return positive_intervals, negative_intervals
 
@@ -288,7 +273,7 @@ def latency(trials):
         return np.nan
     data = []
     for i, trial in trials.items():
-        if trial['Type'] == 'Positiva':
+        if trial['Type'] == type1:
             data.append(get_time(zip(trial['Time'], trial['Event'])))
 
     return data

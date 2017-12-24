@@ -186,8 +186,9 @@ def draw_rates(data,title, save=False,
         axes.legend(handles, labels)
 
     if save:
-        data_path = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(os.path.dirname(data_path),title+name+'.png')
+        f = os.path.dirname(os.path.abspath(__file__))
+        f = os.path.join(f,'images')
+        f = os.path.join(f, title+name+'.png')
         print(f)
         plt.savefig(f, bbox_inches='tight')
         plt.close()        
@@ -198,8 +199,8 @@ def plot_xy(data, factor=2.0):
     import matplotlib.patches as patches
     from categorization.stimuli import circular_grid as grid 
     axes = plt.gca()
-    axes.set_ylim(ymax = 2, ymin = -1)
-    axes.set_xlim(xmax = 2, xmin = -1)
+    axes.set_ylim(ymax = 1.5, ymin = -0.5)
+    axes.set_xlim(xmax = 1.5, xmin = -0.5)
     plt.scatter(*data, s=1, c='b')   
     for circle in grid(normalized=True):
         axes.add_patch(

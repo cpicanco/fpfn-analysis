@@ -16,7 +16,7 @@ from methods import latency, get_trial_intervals, get_responses
 from methods import rate, get_source_files, get_data_files, get_events_per_trial
 from methods import load_ini_data_intrasubject, load_ini_data, load_fpe_timestamps
 from methods import load_yaml_data, load_gaze_data
-from categorization import gaze_rate
+from categorization import gaze_rate, get_gaze_rate_per_trial, get_relative_gaze_rate
 from data_organizer import PATHS_SOURCE, PATHS_DESTIN, DATA_SKIP_HEADER, get_data_path
 from data_organizer import PARAMETERS as p
 from drawing import draw_rates, draw_points
@@ -133,7 +133,6 @@ def analyse_experiment(feature_degree):
         negative
         # ['_looking_negative_relative_rate.txt', '_looking_positive_relative_rate.txt']
     )
-
     draw_rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
@@ -152,8 +151,6 @@ def analyse_experiment(feature_degree):
         negative_button
         # ['_button_positive_relative_rate.txt', '_button_negative_relative_rate.txt']
     )
-
- 
     draw_rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
@@ -171,7 +168,6 @@ def analyse_experiment(feature_degree):
         negative_latency
         # ['_latency_positive_relative_rate.txt', '_latency_negative_relative_rate.txt']
     )
-
     draw_rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
@@ -202,7 +198,7 @@ def analyse_intra_subject(i, parameters, source_files, inspect, info_file=None):
     fp_button_rate = rate(fp_positive_intervals, fp_negative_intervals, responses,
         title=title,
         save=False,
-        inspect=inspect)
+        inspect=False)
 
     title = str(i)+' - '+info_file['nickname']+' - '+ 'X (FN)'
     time_data = zip(time_file['time'], time_file['bloc'], time_file['trial'], time_file['event'])
@@ -212,11 +208,44 @@ def analyse_intra_subject(i, parameters, source_files, inspect, info_file=None):
     fn_button_rate = rate(fn_positive_intervals, fn_negative_intervals, responses,
         title=title,
         save=False,
-        inspect=inspect)
+        inspect=False)
 
-    return (fp_button_rate, fn_button_rate), None, None
-    # all_gaze_data = load_gaze_data(source_files[3])
+    factor = 'donut_slice'
+    all_gaze_data = load_gaze_data(source_files[3])
+    all_trial_intervals = get_trial_intervals({**fp_trials, **fn_trials}, uncategorized=True)   
+    gaze_rate_per_trial, gaze_rate_mirror = get_gaze_rate_per_trial(
+        all_trial_intervals,
+        all_gaze_data,
+        factor=factor,
+        inspect=inspect,
+        min_block_size=parameters['min_block_size'],
+        do_correction=parameters['do_correction'],
+        do_remove_outside_screen=parameters['do_remove_outside_screen'],
+        do_remove_outside_session_time=parameters['do_remove_outside_session_time'],
+        do_manual_correction=parameters['do_manual_correction']
+        )
+    fp_gaze_rate = get_relative_gaze_rate(
+        fp_ini_file['feature'],
+        gaze_rate_per_trial[fp_ini_file['trial']],
+        gaze_rate_mirror[fp_ini_file['trial']])
 
+    fn_gaze_rate = get_relative_gaze_rate(
+        fn_ini_file['feature'],
+        gaze_rate_per_trial[fn_ini_file['trial']],
+        gaze_rate_mirror[fn_ini_file['trial']])
+
+    if inspect:
+        title = str(i)+'_'+info_file['nickname']+'_'+ 'square(FP)_X(FN)'+'_factor_'+str(factor)
+        draw_rates([fp_gaze_rate, fn_gaze_rate], title,
+            save=True,
+            y_label='Looking rate',
+            single=False,
+            first_label='feature fp',
+            second_label='feature fn',
+            y_limit=True,
+            )
+
+    return (fp_button_rate, fn_button_rate), (fp_gaze_rate, fn_gaze_rate), None
 
 def analyse_experiment_intrasubject(feature_degree=9):
     positive = []
@@ -278,7 +307,7 @@ if __name__ == '__main__':
     #     print(mannwhitneyu(p, n, alternative='greater'))
 
     # analyse_experiment(feature_degree=9)
-    analyse_experiment_intrasubject(feature_degree=9)
+    # analyse_experiment_intrasubject(feature_degree=9)
 
     # negative = ['2017_11_16_000_VIN',
     #             '2017_11_14_005_JOA',
@@ -295,8 +324,8 @@ if __name__ == '__main__':
 
 
     # single
-    # data_paths = get_data_path()
-    # data_paths = [os.path.join(data_paths, path) for path in PATHS_DESTIN]
-    # i = 12
-    # source_files = get_data_files(data_paths[i],gaze_file_filter=p[i]['gaze_file_filter'])
-    # analyse_intra_subject(i, p[i], source_files, inspect=True)         
+    data_paths = get_data_path()
+    data_paths = [os.path.join(data_paths, path) for path in PATHS_DESTIN]
+    for i in range(13):
+        source_files = get_data_files(data_paths[i],gaze_file_filter=p[i]['gaze_file_filter'])
+        analyse_intra_subject(i, p[i], source_files, inspect=True)         
