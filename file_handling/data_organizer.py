@@ -249,6 +249,8 @@ PATHS_SOURCE = [
                 'recordings/2017_11_08_003_REU/stimulus_control/',
                 'recordings/2017_11_06_000_ROB/stimulus_control/']
 
+PATHS_SOURCE = [os.path.join(str(Path.home()), p) for p in PATHS_SOURCE]
+
 PATHS_DESTIN = [
                 'P68',
                 'P67',
@@ -319,6 +321,8 @@ PATHS_DESTIN = [
                 'P02',
                 'P01']
 
+PATHS_DESTIN = [os.path.join(get_data_path(), p) for p in PATHS_DESTIN]
+
 
 PARAMETERS = [
     # '2017_12_18_001_BRE'
@@ -346,7 +350,7 @@ PARAMETERS = [
      'do_remove_outside_screen':[.80, .20, 1.25, .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[0., 0.02],
      'excluded':False},
 
     # '2017_12_15_001_KAR'
@@ -364,7 +368,7 @@ PARAMETERS = [
      'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[0., 0.05],
      'excluded':False},
 
     # '2017_12_14_002_JOS'
@@ -374,7 +378,7 @@ PARAMETERS = [
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':True}, # no conditional disc.
 
     # '2017_12_14_001_JUL'
     {'min_block_size':40721,
@@ -391,7 +395,7 @@ PARAMETERS = [
      'do_remove_outside_screen':[.83, .26, 1., -.08],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[0.015, 0.03],
+     'do_manual_correction':[0.015, 0.06],
      'excluded':False},
 
     # '2017_12_13_004_ANT'
@@ -442,16 +446,16 @@ PARAMETERS = [
     # '2017_12_01_001_LEX'
     {'min_block_size':20593,
      'do_correction': True,
-     'do_remove_outside_screen':True,
+     'do_remove_outside_screen':[.85, .23, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[0., 0.06],
      'excluded':False},
 
     # '2017_12_01_000_LUI'  
     {'min_block_size':20636,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
@@ -460,7 +464,7 @@ PARAMETERS = [
     # '2017_11_29_001_FEL'    
     {'min_block_size':10597,
      'do_correction': True,
-     'do_remove_outside_screen':True,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
@@ -469,34 +473,34 @@ PARAMETERS = [
     # '2017_11_29_000_DAN'
     {'min_block_size':20643,
      'do_correction': False,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[-0.03, 0.],
      'excluded':False},
 
     # '2017_11_28_003_GIO'
     {'min_block_size':20650,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[0.01, 0.01],
      'excluded':False},
 
     # '2017_11_28_002_FRA'
     {'min_block_size':20637,
      'do_correction': False,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':True}, # no conditional disc.
 
     # '2017_11_28_001_ELI'
     {'min_block_size':20654,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
@@ -505,34 +509,34 @@ PARAMETERS = [
     # '2017_11_28_000_SID'
     {'min_block_size':20546,
      'do_correction': False,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':True}, # no button differetiation
 
     # '2017_11_27_005_ANA'
     {'min_block_size':20609,
      'do_correction': True,
-     'do_remove_outside_screen':True,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[0., 0.03],
      'excluded':False},
 
     # '2017_11_27_004_AUR'
     {'min_block_size':20627,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[0.005, 0.03],
      'excluded':False},
 
     # '2017_11_27_003_LUC'
     {'min_block_size':20628,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
@@ -540,44 +544,44 @@ PARAMETERS = [
 
     # '2017_11_27_002_JOR'
     {'min_block_size':20623,
-     'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_correction': False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[-0.02, 0.],
      'excluded':False},
 
     # '2017_11_27_001_TUL'
     {'min_block_size':20575,
      'do_correction': False,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_27_000_NAT'
-    {'min_block_size':20526,
+    {'min_block_size':20359//3,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[0.03, 0.],
      'excluded':False},
 
     # '2017_11_24_006_VER'
     {'min_block_size':20000,
      'do_correction': False,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':True}, # bad eyes, looking to a fixed point
 
     # '2017_11_24_005_THA'
     {'min_block_size':20660,
      'do_correction': False,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
@@ -586,61 +590,61 @@ PARAMETERS = [
     # '2017_11_24_004_EUC'
     {'min_block_size': 20644,
      'do_correction': False,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
-     'excluded':True},
+     'do_manual_correction':[-0.05, 0.02],
+     'excluded':True}, # no button differatiation
 
     # '2017_11_24_003_FER'
     {'min_block_size':20387,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[0., 0.02],
      'excluded':False},
 
     # '2017_11_24_002_JON'
     {'min_block_size':20545,
      'do_correction': True,
-     'do_remove_outside_screen':True,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[0., 0.03],
      'excluded':False},
 
     # '2017_11_24_001_PED'
-    {'min_block_size':20664,
+    {'min_block_size':20499,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_24_000_MAN'
-    {'min_block_size':20582,
+    {'min_block_size':20440,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_23_006_MAY'
-    {'min_block_size':20645,
+    {'min_block_size':20628,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_23_005_RAU'
-    {'min_block_size':20656,
+    {'min_block_size':20407,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[.80, .20, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
@@ -649,7 +653,7 @@ PARAMETERS = [
     # '2017_11_23_004_ROM'
     {'min_block_size':20656,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
@@ -658,286 +662,283 @@ PARAMETERS = [
     # '2017_11_23_003_YUR'
     {'min_block_size':20571,
      'do_correction': False,
-     'do_remove_outside_screen':True,
+     'do_remove_outside_screen':[.80, .20, 1.03, .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':True}, # no button differentiation
 
     # '2017_11_23_002_EIL'
-    {'min_block_size':20619,
+    {'min_block_size':20468,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[.80, .20, 1.03, .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[-0.01, 0.01],
      'excluded':False},
 
     # '2017_11_23_001_JOS'
     {'min_block_size':20604,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':True}, # no button differentiation
 
     # '2017_11_23_000_DEN'
-    {'min_block_size':20567,
+    {'min_block_size':20500,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1.06, .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[0.0, 0.03],
      'excluded':False},
 
     # '2017_11_22_001_TIA'
-    {'min_block_size':20656,
+    {'min_block_size':20249,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[.80, .20, 1., .0],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
-    # '2017_11_22_000_EUL'          # <<<<<<<<<<<<<<<<<< complicated eyes
-    {'min_block_size':10000,
+    # '2017_11_22_000_EUL'          
+    {'min_block_size':20349,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1.30, .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
-     'excluded':True},
+     'gaze_file_filter':'*3d_ba*',
+     'do_manual_correction':[0.03, 0.03],
+     'excluded':True}, # differentiation at the very end
 
     # '2017_11_16_003_ALI'
     {'min_block_size':20643,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
      'do_manual_correction':[],
      'excluded':False},
     
     # '2017_11_16_002_LAR'
-    {'min_block_size':20597,
-     'do_correction': True,
-     'do_remove_outside_screen':False,
+    {'min_block_size':19489,
+     'do_correction': False,
+     'do_remove_outside_screen':[],
      'do_remove_outside_session_time':True,
      'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_manual_correction':[-0.04, 0.0],
      'excluded':False},
 
     # '2017_11_16_001_MAT'
-    {'min_block_size':5000,
-     'do_correction': True,             # <<<<<<<<<<<<<<<<<< complicated eyes
-     'do_remove_outside_screen':False,
+    {'min_block_size':19253,
+     'do_correction': True,           
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*3d_ba*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':True}, # complicated eyes
 
     # '2017_11_16_000_VIN'
     {'min_block_size':2000,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1.30, .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*3d_ba*',
      'do_manual_correction':[],
-     'excluded':True},
-
+     'excluded':True}, # differentiation at the very end
+ 
     # '2017_11_14_006_ALE'
-    {'min_block_size':2000,
-     'do_correction': True,             # <<<<<<<<<<<<<<<<<< complicated eyes
-     'do_remove_outside_screen':False,
+    {'min_block_size':18698,
+     'do_correction': False,  
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':True}, # using too much peripheral vision
 
     # '2017_11_14_005_JOA'
-    {'min_block_size':10000,
-     'do_correction': True,
-     'do_remove_outside_screen':False,
+    {'min_block_size':20000,
+     'do_correction': False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'gaze_file_filter':'*2d_pr*',
+     'do_manual_correction':[-0.04, 0.06],
      'excluded':False},
     
     # '2017_11_14_004_NEL'
-    {'min_block_size':10000,
-     'do_correction': True,
-     'do_remove_outside_screen':True,
+    {'min_block_size':20000,
+     'do_correction': False,
+     'do_remove_outside_screen':[.80, .20, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'gaze_file_filter':'*2d_pr*',
+     'do_manual_correction':[-0.01, 0.065],
      'excluded':False},
 
     # '2017_11_14_003_LUC'
-    {'min_block_size':10000,
+    {'min_block_size':20000,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_14_002_TAT'
-    {'min_block_size':10000,
+    {'min_block_size':20000,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_14_001_MAR'
-    {'min_block_size':10000,
+    {'min_block_size':20342,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_14_000_SON'
-    {'min_block_size':10000,
+    {'min_block_size':20000,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_13_005_KAR'  #***********
     {'min_block_size':20000,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_13_004_ISA'
     {'min_block_size':20000,
      'do_correction': True,        # <<<<<<<<<<<<<<<<<< complicated eyes
-     'do_remove_outside_screen':True,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':True},
 
     # '2017_11_13_003_LIZ'
     {'min_block_size':10000,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_13_002_MAX'   
-    {'min_block_size':1000,
-     'do_correction': True,         # <<<<<<<<<<<<<<<<<< complicated eyes
-     'do_remove_outside_screen':False,
+    {'min_block_size':20577,
+     'do_correction': False,       
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':True}, # do not followed instructions
 
     # '2017_11_13_001_MAR'
-    {'min_block_size':10000,
+    {'min_block_size':20087,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_13_000_GAB'
-    {'min_block_size':10000,
+    {'min_block_size':26933,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':True},
 
     # '2017_11_09_007_REN'
-    {'min_block_size':20000,
-     'do_correction': True,
-     'do_remove_outside_screen':False,
+    {'min_block_size':20404,
+     'do_correction': False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_09_005_AMA'
-    {'min_block_size':20000,
+    {'min_block_size':20439,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_09_004_BEL'
     {'min_block_size':10000,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':True}, # no button differentiation
 
     # '2017_11_09_002_EST'       
-    {'min_block_size':1000,
-     'do_correction': True,              # <<<<<<<<<<<<<<<<<< complicated eyes
-     'do_remove_outside_screen':False,
+    {'min_block_size':20299,
+     'do_correction': True,              
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
-     'excluded':True},
+     'excluded':False},
 
     # '2017_11_09_001_KAL'
-    {'min_block_size':5000,
+    {'min_block_size':19096,
      'do_correction': True,
-     'do_remove_outside_screen':True,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_09_000_JUL'
-    {'min_block_size':5000,
-     'do_correction': True,
-     'do_remove_outside_screen':False,
+    {'min_block_size':20573,
+     'do_correction': False, # looking a lot at the top
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_08_003_REU'
-    {'min_block_size':5000,
+    {'min_block_size':20657, 
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False},
 
     # '2017_11_06_000_ROB'
-    {'min_block_size':5000,
+    {'min_block_size':20657,
      'do_correction': True,
-     'do_remove_outside_screen':False,
+     'do_remove_outside_screen':[1., .0, 1., .0],
      'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
+     'gaze_file_filter':'*2d_pr*',
      'do_manual_correction':[],
      'excluded':False}
 ]
 if __name__ == '__main__':
-    pass
-    # src_directories = [os.path.join(str(Path.home()), p) for p in PATHS_SOURCE]
-    # data_path = get_data_path()
-    # dst_directories = [os.path.join(data_path, p) for p in PATHS_DESTIN]
-    # for s, d, p in zip(src_directories, dst_directories, PARAMETERS):
-    #     organize(s, d, p['gaze_file_filter'])
+    for s, d, p in zip(PATHS_SOURCE, PATHS_DESTIN, PARAMETERS):
+        if '2017_11_27_000_NAT' in s:
+            organize(s, d, p['gaze_file_filter'])
