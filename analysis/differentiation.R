@@ -119,6 +119,11 @@ custom_boxplot <- function(positive_means, negative_means, filen= -1) {
 	)
 }
 
+# some alternative approachs:
+
+# Eoin (https://stats.stackexchange.com/users/42952/eoin),
+# How to compare difference between two time series?,
+# URL (version: 2014-07-17): https://stats.stackexchange.com/q/108323
 rank_sum_test <- function(positive, negative, jittered= FALSE, algorithm= 'kruskal') {
 	result <- vector()
 	for (name in names(positive)) {
@@ -131,7 +136,7 @@ rank_sum_test <- function(positive, negative, jittered= FALSE, algorithm= 'krusk
 		}
 		# norm_plot(X, name)
 		# norm_plot(Y, name)
-		resid_plot(X, Y, name)
+		# resid_plot(X, Y, name)
 
 		if (algorithm == 'kruskal') {
 			result = c(result, kruskal.test(list(X, Y))$p.value)
@@ -173,7 +178,7 @@ p_value_plot(apply(frame, 2, mean), 1)
 # plot means
 # positive_means <- apply(positive, 2, mean, na.rm= TRUE)
 # negative_means <- apply(negative, 2, mean, na.rm= TRUE)
-# standard_plot(positive_means, negative_means)
+# standard_plot(positive_means, negative_means,1)
 
 
 # intra-subject, compare fp and fn trials
