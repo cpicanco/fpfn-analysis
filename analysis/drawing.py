@@ -40,8 +40,9 @@ def draw_points(x, y, title='scatter', save=False):
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
     if save:
-        data_path = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(os.path.dirname(data_path),title+'.png')
+        f = os.path.dirname(os.path.abspath(__file__))
+        f = os.path.join(f,'images')
+        f = os.path.join(f, title+'.png')
         print(f)
         plt.savefig(f, bbox_inches='tight')
         plt.close()        
@@ -73,8 +74,9 @@ def draw_rate(data,title, save=False, y_label = 'FPS by trial'):
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
     if save:
-        data_path = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(os.path.dirname(data_path),title+'_fps.png')
+        f = os.path.dirname(os.path.abspath(__file__))
+        f = os.path.join(f,'images')
+        f = os.path.join(f, title+'_fps'+'.png')
         print(f)
         plt.savefig(f, bbox_inches='tight')
         plt.close()        
@@ -115,8 +117,9 @@ def draw_relative_rate(data,title, save=False, y_label = 'Button-pressing propor
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
     if save:
-        data_path = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(os.path.dirname(data_path),title+'_relative'+name+'.png')
+        f = os.path.dirname(os.path.abspath(__file__))
+        f = os.path.join(f,'images')
+        f = os.path.join(f, title+name+'.png')
         print(f)
         plt.savefig(f, bbox_inches='tight')
         plt.close()        
@@ -195,9 +198,9 @@ def draw_rates(data,title, save=False,
     else:
         plt.show()
 
-def plot_xy(data, factor=2.0):
+def plot_xy(data, factor=1.0):
     import matplotlib.patches as patches
-    from categorization.stimuli import circular_grid as grid 
+    from categorization.stimuli import circle_grid as grid 
     axes = plt.gca()
     axes.set_ylim(ymax = 1.5, ymin = -0.5)
     axes.set_xlim(xmax = 1.5, xmin = -0.5)
