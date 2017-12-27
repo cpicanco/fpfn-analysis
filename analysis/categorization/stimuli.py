@@ -127,8 +127,8 @@ class Circle(object):
     def points(self, factor=1., low=0, high=360, step=1):
         return ellipse(self.center, self.radius[0]*factor, self.radius[1]*factor, low, high, step)
 
-def circular_grid(normalized=False):
-    return [Circle(x, y, normalized=normalized) for (x, y) in STIMULI_COORDENATES]  
+def circle_grid(normalized=False, inverted_y=True):
+    return [Circle(x, y, normalized=normalized, inverted_y=inverted_y) for (x, y) in STIMULI_COORDENATES]  
  
 def donut_grid(normalized=False, inverted_y=False):
     grid = []
@@ -201,11 +201,11 @@ def debug_window():
     win = GraphWin('Floor', SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX)
     win.setBackground("black")
 
-    for circle in circular_grid():
+    for circle in circle_grid():
         for [x, y] in circle.points(factor=1.):
             win.plotPixel(x, y, "white")
     
-    # for circle in circular_grid():
+    # for circle in circle_grid():
     #     for [x, y] in circle.points(factor=2.):
     #         win.plotPixel(x, y, "white")
 
