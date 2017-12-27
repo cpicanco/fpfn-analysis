@@ -65,10 +65,10 @@ def unbiased_gaze(data, algorithm, min_block_size=1000,**kwargs):
 
     data_count = data.shape[0]    
     if data_count < min_block_size:
-        print("\nToo few data to proceed. \nUsing min_block_size = %d"%data_count)
+        print("\tToo few data to proceed. \n\tUsing min_block_size = %d"%data_count)
         min_block_size = data_count
     else:
-        print("\nUsing min_block_size=%d for a total gaze count of %d"%(min_block_size, data_count))
+        print("\tUsing min_block_size=%d for a total gaze count of %d"%(min_block_size, data_count))
 
     bias_along_blocks = {'bias':[], 'block':[]}
     unbiased = []
