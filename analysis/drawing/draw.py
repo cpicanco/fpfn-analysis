@@ -14,7 +14,16 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-def draw_points(x, y, title='scatter', save=False):
+def save_figure(filename):
+    f = os.path.dirname(os.path.abspath(__file__))
+    f = os.path.dirname(f)
+    f = os.path.join(f,'images')
+    f = os.path.join(f, filename+'.png')
+    print(f)
+    plt.savefig(f, bbox_inches='tight')
+    plt.close() 
+
+def points(x, y, title='scatter', save=False):
     x_label = 'FP'
     y_label = 'FN'
     axes = plt.gca()
@@ -40,16 +49,11 @@ def draw_points(x, y, title='scatter', save=False):
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
     if save:
-        f = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(f,'images')
-        f = os.path.join(f, title+'.png')
-        print(f)
-        plt.savefig(f, bbox_inches='tight')
-        plt.close()        
+        save_figure(title)       
     else:
         plt.show()    
 
-def draw_rate(data,title, save=False, y_label = 'FPS by trial'):
+def rate(data,title, save=False, y_label = 'FPS by trial'):
     x_label = 'Trials'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)
@@ -74,17 +78,12 @@ def draw_rate(data,title, save=False, y_label = 'FPS by trial'):
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
     if save:
-        f = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(f,'images')
-        f = os.path.join(f, title+'_fps'+'.png')
-        print(f)
-        plt.savefig(f, bbox_inches='tight')
-        plt.close()        
+        save_figure(title+'_fps')      
     else:
         plt.show()
 
 
-def draw_relative_rate(data,title, save=False, y_label = 'Button-pressing proportion', name=''):
+def relative_rate(data,title, save=False, y_label = 'Button-pressing proportion', name=''):
     x_label = 'Trials'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)
@@ -117,16 +116,11 @@ def draw_relative_rate(data,title, save=False, y_label = 'Button-pressing propor
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
     if save:
-        f = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(f,'images')
-        f = os.path.join(f, title+name+'.png')
-        print(f)
-        plt.savefig(f, bbox_inches='tight')
-        plt.close()        
+        save_figure(title+name)       
     else:
         plt.show()
 
-def draw_rates(data,title, save=False,
+def rates(data,title, save=False,
     y_label='Button-pressing rate',
     name='',
     single=False,
@@ -189,16 +183,11 @@ def draw_rates(data,title, save=False,
         axes.legend(handles, labels)
 
     if save:
-        f = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(f,'images')
-        f = os.path.join(f, title+name+'.png')
-        print(f)
-        plt.savefig(f, bbox_inches='tight')
-        plt.close()        
+        save_figure(title+name)        
     else:
         plt.show()
 
-def plot_xy(data, factor=1.0):
+def xy_plot(data, factor=1.0):
     import matplotlib.patches as patches
     from categorization.stimuli import circle_grid as grid 
     axes = plt.gca()
@@ -220,7 +209,7 @@ def plot_xy(data, factor=1.0):
     plt.show()   
     plt.gcf().clear() 
 
-def plot_xy_donut(data):
+def xy_donut_plot(data):
     import matplotlib.patches as patches
     from matplotlib.path import Path as mp
     from categorization.stimuli import donut_grid as grid 
@@ -239,6 +228,28 @@ def plot_xy_donut(data):
         ) 
     plt.show()   
     plt.gcf().clear() 
+
+def image(img=None, filename=None):
+    import matplotlib.patches as patches
+    from categorization.stimuli import circle_grid as grid
+    fig, axes = plt.subplots()
+    for circle in grid(normalized=False):
+        axes.add_patch(
+            patches.Ellipse(
+                circle.center,   
+                width=circle.width*1.,          
+                height=circle.height*1.,
+                angle=360,
+                facecolor="none",
+                edgecolor="black",
+                alpha=0.5       
+            )
+        ) 
+
+    # img = plt.imread(filename)
+    plt.imshow(img)
+    plt.show()
+    # print(matplotlib.__version__)
 
 if __name__ == '__main__':
     from random import randrange
