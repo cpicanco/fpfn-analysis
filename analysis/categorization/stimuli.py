@@ -9,10 +9,9 @@
 '''
 import sys
 sys.path.append('../../analysis')
+
 from time import sleep
 import random
-
-from methods import load_ini_data
 
 import numpy as np
 

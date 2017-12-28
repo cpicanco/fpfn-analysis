@@ -18,7 +18,6 @@ from gaze_animation import animate_gaze
 from correction.utils import clean_gaze_data
 from drawing import draw
 
-from methods import load_ini_data, load_fpe_timestamps, load_gaze_data
 from methods import rate_in, get_relative_rate
 from .stimuli import circle_grid
 from .stimuli import donut_grid

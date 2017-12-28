@@ -14,6 +14,10 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+import matplotlib.patches as patches
+from categorization.stimuli import circle_grid
+from categorization.stimuli import donut_grid
+
 def save_figure(filename):
     f = os.path.dirname(os.path.abspath(__file__))
     f = os.path.dirname(f)
@@ -188,13 +192,11 @@ def rates(data,title, save=False,
         plt.show()
 
 def xy_plot(data, factor=1.0):
-    import matplotlib.patches as patches
-    from categorization.stimuli import circle_grid as grid 
     axes = plt.gca()
     axes.set_ylim(ymax = 1.5, ymin = -0.5)
     axes.set_xlim(xmax = 1.5, xmin = -0.5)
     plt.scatter(*data, s=1, c='b')   
-    for circle in grid(normalized=True):
+    for circle in circle_grid(normalized=True):
         axes.add_patch(
             patches.Ellipse(
                 circle.center,   
@@ -210,14 +212,11 @@ def xy_plot(data, factor=1.0):
     plt.gcf().clear() 
 
 def xy_donut_plot(data):
-    import matplotlib.patches as patches
-    from matplotlib.path import Path as mp
-    from categorization.stimuli import donut_grid as grid 
     axes = plt.gca()
     axes.set_ylim(ymax = 2, ymin = -1)
     axes.set_xlim(xmax = 2, xmin = -1)
     plt.scatter(*data, s=1, c='b')   
-    for donut in grid(normalized=True):
+    for donut in donut_grid(normalized=True):
         axes.add_patch(
             patches.PathPatch(
                 mp(donut),
@@ -229,27 +228,34 @@ def xy_donut_plot(data):
     plt.show()   
     plt.gcf().clear() 
 
-def image(img=None, filename=None):
-    import matplotlib.patches as patches
-    from categorization.stimuli import circle_grid as grid
-    fig, axes = plt.subplots()
-    for circle in grid(normalized=False):
-        axes.add_patch(
-            patches.Ellipse(
-                circle.center,   
-                width=circle.width*1.,          
-                height=circle.height*1.,
-                angle=360,
-                facecolor="none",
-                edgecolor="black",
-                alpha=0.5       
-            )
-        ) 
+def images(img1, img2, screen):
+    (w, h) = screen
+    def add_grid(ax):
+        for circle in circle_grid(normalized=False):
+            ax.add_patch(
+                patches.Ellipse(
+                    circle.center,   
+                    width=circle.width*1.,          
+                    height=circle.height*1.,
+                    angle=360,
+                    facecolor="none",
+                    edgecolor="black",
+                    alpha=0.25      
+                )
+            ) 
+        ax.xaxis.set_ticks_position('none')
+        ax.yaxis.set_ticks_position('none')
+        # ax.set_ylim(0, h)
+        # ax.set_xlim(0, w)        
 
-    # img = plt.imread(filename)
-    plt.imshow(img)
+    f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True)
+    add_grid(ax1)
+    add_grid(ax2)
+    ax1.imshow(img1)
+    ax2.imshow(img2)
+    f.tight_layout(pad= 0)
+    f.subplots_adjust(wspace=0)
     plt.show()
-    # print(matplotlib.__version__)
 
 if __name__ == '__main__':
     from random import randrange

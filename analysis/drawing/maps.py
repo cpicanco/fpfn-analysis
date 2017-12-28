@@ -28,17 +28,20 @@ import cv2
 def invert_y(gaze_points):
     return gaze_points['x_norm'], 1-gaze_points['y_norm']   
 
-def custom_heatmap(data, heatmap_detail=0.05, colormap=colormaps.viridis):
+def custom_heatmap(data, heatmap_detail=0.09, colormap=colormaps.viridis):
+    """
+    adapted from:
+    """
     grid = [sh, sw]
     xvals, yvals = invert_y(data)
     hist, *edges = np.histogram2d(
         yvals, xvals,
         bins= grid,
-        range= [[0, 1.], [0, 1.]],
+        range= [[0., 1.], [0., 1.]],
         normed= False)
     filter_h = int(heatmap_detail * grid[0]) // 2 * 2 + 1
     filter_w = int(heatmap_detail * grid[1]) // 2 * 2 + 1
-    hist = cv2.GaussianBlur(hist, (filter_h, filter_w), 15)
+    hist = cv2.GaussianBlur(hist, (filter_h, filter_w), 0)
 
     hist_max = hist.max()
     hist *= (255. / hist_max) if hist_max else 0.
@@ -54,9 +57,7 @@ def custom_heatmap(data, heatmap_detail=0.05, colormap=colormaps.viridis):
     heatmap[:,:,0] = cv2.LUT(hist, v[:,0]) # B matplotlib, 2 R opencv
     hist[hist>0] = 150
     heatmap[:,:,3] = hist # alpha
-
-    # cv2.imwrite('temp.png', heatmap)
-    draw.image(heatmap)
+    return heatmap
 
 def analyse(i):
     parameters = PARAMETERS[i]
@@ -97,8 +98,9 @@ def analyse(i):
         min_block_size=parameters['min_block_size'],
         inspect=False)
 
-    custom_heatmap(positive_gaze_data)
-    custom_heatmap(negative_gaze_data)
+    positive_heatmap = custom_heatmap(positive_gaze_data)
+    negative_heatmap = custom_heatmap(negative_gaze_data)
+    draw.images(positive_heatmap, negative_heatmap, (sw, sh))
 
 if __name__ == '__main__':
-    analyse(-2)
+    analyse(-1)

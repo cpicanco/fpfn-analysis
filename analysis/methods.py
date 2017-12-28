@@ -8,10 +8,9 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 import sys, os
+
 from glob import glob
 from itertools import islice
-
-from drawing import draw
 
 import numpy as np
 
@@ -266,9 +265,9 @@ def rate(positive_intervals, negative_intervals, responses, title='', save=False
     positive_data = rate_in(positive_intervals, responses)
     negative_data = rate_in(negative_intervals, responses)
     relative_rate = get_relative_rate(positive_data, negative_data)
-    if inspect:
-        draw.rates([positive_data, negative_data], title, save, y_label = 'Button-pressing per seconds')        
-        draw.relative_rate(relative_rate,title, save, y_label = 'Button-pressing proportion')
+    # if inspect:
+    #     draw.rates([positive_data, negative_data], title, save, y_label = 'Button-pressing per seconds')        
+    #     draw.relative_rate(relative_rate,title, save, y_label = 'Button-pressing proportion')
 
     return relative_rate
     
