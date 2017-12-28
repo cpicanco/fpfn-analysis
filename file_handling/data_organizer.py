@@ -18,7 +18,6 @@ import numpy as np
 
 from methods import load_fpe_timestamps, load_gaze_data, get_source_files
 
-
 def copy_file(src, dst):
     base_directory = os.path.dirname(dst)
     if not os.path.exists(base_directory):
@@ -28,13 +27,13 @@ def copy_file(src, dst):
 
 def convert_gaze(src, dst, start_time):
     with open(dst, 'w+') as f:
-        f.write("\t".join(('time','x_norm','y_norm'))+'\n')
-        for timestamp, X, Y in zip(src['gaze_timestamp'], src['x_norm'], src['y_norm']):
+        f.write("\t".join(('time','x_norm','y_norm','confidence'))+'\n')
+        for timestamp, X, Y, confidence in zip(src['gaze_timestamp'], src['x_norm'], src['y_norm'], src['confidence']):
             timestamp -= start_time
             timestamp = '%.6f'%timestamp
             X = '%.3f'%round(X, 3)
             Y = '%.3f'%round(Y, 3)
-            f.write("\t".join((timestamp, X, Y))+'\n')
+            f.write("\t".join((timestamp, X, Y, repr(confidence)))+'\n')
 
 def convert_beha(src, dst, start_time):
     with open(dst, 'w+') as f:
@@ -71,6 +70,7 @@ def organize(src_directory, dst_directory, gaze_file_filter):
     it DOES overrides any previous copies in destination 
     it must be run after pupil surface data have been exported     
     """
+    print('doing:', src_directory)
     # destination
     dst_filenames = ['info.yml',
                      'session_configuration.ini',
@@ -80,10 +80,6 @@ def organize(src_directory, dst_directory, gaze_file_filter):
 
     # source
     src_files = get_source_files(src_directory, gaze_file_filter=gaze_file_filter)
-
-    # feedback
-    [print('source:', src) for src in src_files]   
-    [print('destination:', dst) for dst in dst_files]
 
     # loading
     beha_file = load_fpe_timestamps(src_files[2], converted=False)
@@ -97,6 +93,11 @@ def organize(src_directory, dst_directory, gaze_file_filter):
     #conversion
     convert_beha(beha_file, dst_files[2], start_time=start_time)
     convert_gaze(gaze_file, dst_files[3], start_time=start_time)
+
+    # feedback
+    print('done:', src_directory)
+    # [print('source:', src) for src in src_files]   
+    # [print('destination:', dst) for dst in dst_files]
 
 def get_data_path(raw=False):
     data_path = os.path.dirname(os.path.abspath(__file__))
@@ -326,619 +327,711 @@ PATHS_DESTIN = [os.path.join(get_data_path(), p) for p in PATHS_DESTIN]
 
 PARAMETERS = [
     # '2017_12_18_001_BRE'
-    {'min_block_size': 42806, # 42806
+    {'min_block_size': 42806,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[-0.015, 0.03],     
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [-0.015, 0.03],     
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_18_000_MAR'
-    {'min_block_size':10000,
+    {'min_block_size': 10000,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
 
     # '2017_12_15_002_RUB'
-    {'min_block_size':10000,
+    {'min_block_size': 10000,
      'do_correction': True,
-     'do_remove_outside_screen':[.80, .20, 1.25, .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[0., 0.02],
+     'do_remove_outside_screen': [.80, .20, 1.25, .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [0., 0.02],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_15_001_KAR'
-    {'min_block_size':42392,
+    {'min_block_size': 42392,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[0., 0.01],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [0., 0.01],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_15_000_RAF'
-    {'min_block_size':42298,
+    {'min_block_size': 42298,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[0., 0.05],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [0., 0.03],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_14_002_JOS'
-    {'min_block_size':10000,
+    {'min_block_size': 10000,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # no conditional disc.
 
     # '2017_12_14_001_JUL'
-    {'min_block_size':40721,
+    {'min_block_size': 40721,
      'do_correction': True,
-     'do_remove_outside_screen':[0.80, .27, 1.10, .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[0.01, 0.03],
+     'do_remove_outside_screen': [0.80, .27, 1.10, .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [0.01, 0.03],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_14_000_TAT'
-    {'min_block_size':10000,
+    {'min_block_size': 10000,
      'do_correction': True,
-     'do_remove_outside_screen':[.83, .26, 1., -.08],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[0.015, 0.06],
+     'do_remove_outside_screen': [.83, .26, 1., -.08],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [0.015, 0.06],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_13_004_ANT'
-    {'min_block_size':20000,
+    {'min_block_size': 20000,
      'do_correction': False,
-     'do_remove_outside_screen':[.77, .20, 1., .08],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [.77, .20, 1., .08],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_13_003_JOE'
-    {'min_block_size':42897,
+    {'min_block_size': 42897,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_13_002_FER'
-    {'min_block_size':42895,
+    {'min_block_size': 42895,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_13_001_LUK'
-    {'min_block_size':42800,
+    {'min_block_size': 42800,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_13_000_WAN'
-    {'min_block_size':20000,
+    {'min_block_size': 20000,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1.20, .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1.20, .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_01_001_LEX'
-    {'min_block_size':20593,
+    {'min_block_size': 20593,
      'do_correction': True,
-     'do_remove_outside_screen':[.85, .23, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[0., 0.06],
+     'do_remove_outside_screen': [.85, .23, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [0., 0.06],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_01_000_LUI'  
-    {'min_block_size':20636,
+    {'min_block_size': 20636,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_29_001_FEL'    
-    {'min_block_size':10597,
+    {'min_block_size': 10597,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_29_000_DAN'
-    {'min_block_size':20643,
+    {'min_block_size': 20643,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[-0.03, 0.],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [-0.03, 0.],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_28_003_GIO'
-    {'min_block_size':20650,
+    {'min_block_size': 20650,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[0.01, 0.01],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [0.01, 0.01],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_28_002_FRA'
-    {'min_block_size':20637,
+    {'min_block_size': 20637,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # no conditional disc.
 
     # '2017_11_28_001_ELI'
-    {'min_block_size':20654,
+    {'min_block_size': 20654,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_28_000_SID'
-    {'min_block_size':20546,
+    {'min_block_size': 20546,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # no button differetiation
 
     # '2017_11_27_005_ANA'
-    {'min_block_size':20609,
+    {'min_block_size': 20609,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[0., 0.03],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [0., 0.03],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_27_004_AUR'
-    {'min_block_size':20627,
+    {'min_block_size': 20627,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[0.005, 0.03],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [0.005, 0.03],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_27_003_LUC'
-    {'min_block_size':20628,
+    {'min_block_size': 20628,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_27_002_JOR'
-    {'min_block_size':20623,
+    {'min_block_size': 20623,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[-0.02, 0.],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [-0.02, 0.],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_27_001_TUL'
-    {'min_block_size':20575,
+    {'min_block_size': 20575,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_27_000_NAT'
-    {'min_block_size':20359//3,
+    {'min_block_size': 20359//3,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[0.03, 0.],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [0.03, 0.],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_24_006_VER'
-    {'min_block_size':20000,
+    {'min_block_size': 20000,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # bad eyes, looking to a fixed point
 
     # '2017_11_24_005_THA'
-    {'min_block_size':20660,
+    {'min_block_size': 20660,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_24_004_EUC'
-    {'min_block_size': 20644,
+    {'min_block_size':  20644,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[-0.05, 0.02],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [-0.05, 0.02],
+     'confidence_threshold' :.65,
      'excluded':True}, # no button differatiation
 
     # '2017_11_24_003_FER'
-    {'min_block_size':20387,
+    {'min_block_size': 20387,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[0., 0.02],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [0., 0.02],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_24_002_JON'
-    {'min_block_size':20545,
+    {'min_block_size': 20545,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[0., 0.03],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [0., 0.03],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_24_001_PED'
-    {'min_block_size':20499,
+    {'min_block_size': 20499,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_24_000_MAN'
-    {'min_block_size':20440,
+    {'min_block_size': 20440,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_23_006_MAY'
-    {'min_block_size':20628,
+    {'min_block_size': 20628,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_23_005_RAU'
-    {'min_block_size':20407,
+    {'min_block_size': 20407,
      'do_correction': True,
-     'do_remove_outside_screen':[.80, .20, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_23_004_ROM'
-    {'min_block_size':20656,
+    {'min_block_size': 20656,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_23_003_YUR'
-    {'min_block_size':20571,
+    {'min_block_size': 20571,
      'do_correction': False,
-     'do_remove_outside_screen':[.80, .20, 1.03, .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [.80, .20, 1.03, .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # no button differentiation
 
     # '2017_11_23_002_EIL'
-    {'min_block_size':20468,
+    {'min_block_size': 20468,
      'do_correction': True,
-     'do_remove_outside_screen':[.80, .20, 1.03, .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[-0.01, 0.01],
+     'do_remove_outside_screen': [.80, .20, 1.03, .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [-0.01, 0.01],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_23_001_JOS'
-    {'min_block_size':20604,
+    {'min_block_size': 20604,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # no button differentiation
 
     # '2017_11_23_000_DEN'
-    {'min_block_size':20500,
+    {'min_block_size': 20500,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1.06, .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[0.0, 0.03],
+     'do_remove_outside_screen': [1., .0, 1.06, .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [0.0, 0.03],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_22_001_TIA'
-    {'min_block_size':20249,
+    {'min_block_size': 20249,
      'do_correction': True,
-     'do_remove_outside_screen':[.80, .20, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_22_000_EUL'          
-    {'min_block_size':20349,
+    {'min_block_size': 20349,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1.30, .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_ba*',
-     'do_manual_correction':[0.03, 0.03],
+     'do_remove_outside_screen': [1., .0, 1.30, .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_ba*',
+     'do_manual_correction': [0.03, 0.03],
+     'confidence_threshold' :.65,
      'excluded':True}, # differentiation at the very end
 
     # '2017_11_16_003_ALI'
-    {'min_block_size':20643,
+    {'min_block_size': 20643,
      'do_correction': True,
-     'do_remove_outside_screen':[],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
     
     # '2017_11_16_002_LAR'
-    {'min_block_size':19489,
+    {'min_block_size': 19489,
      'do_correction': False,
-     'do_remove_outside_screen':[],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_pr*',
-     'do_manual_correction':[-0.04, 0.0],
+     'do_remove_outside_screen': [],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_pr*',
+     'do_manual_correction': [-0.04, 0.0],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_16_001_MAT'
-    {'min_block_size':19253,
+    {'min_block_size': 19253,
      'do_correction': True,           
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_ba*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_ba*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # complicated eyes
 
     # '2017_11_16_000_VIN'
-    {'min_block_size':2000,
+    {'min_block_size': 2000,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1.30, .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*3d_ba*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1.30, .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*3d_ba*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # differentiation at the very end
  
     # '2017_11_14_006_ALE'
-    {'min_block_size':18698,
+    {'min_block_size': 18698,
      'do_correction': False,  
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # using too much peripheral vision
 
     # '2017_11_14_005_JOA'
-    {'min_block_size':20000,
+    {'min_block_size': 20000,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[-0.04, 0.06],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [-0.04, 0.06],
+     'confidence_threshold': .65,
      'excluded':False},
     
     # '2017_11_14_004_NEL'
-    {'min_block_size':20000,
+    {'min_block_size': 20000,
      'do_correction': False,
-     'do_remove_outside_screen':[.80, .20, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[-0.01, 0.065],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [-0.01, 0.065],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_14_003_LUC'
-    {'min_block_size':20000,
+    {'min_block_size': 20000,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_14_002_TAT'
-    {'min_block_size':20000,
+    {'min_block_size': 20000,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_14_001_MAR'
-    {'min_block_size':20342,
+    {'min_block_size': 20342,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_14_000_SON'
-    {'min_block_size':20000,
+    {'min_block_size': 20000,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_13_005_KAR'  #***********
-    {'min_block_size':20000,
+    {'min_block_size': 20000,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_13_004_ISA'
-    {'min_block_size':20000,
+    {'min_block_size': 20000,
      'do_correction': True,        # <<<<<<<<<<<<<<<<<< complicated eyes
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True},
 
     # '2017_11_13_003_LIZ'
-    {'min_block_size':10000,
+    {'min_block_size': 10000,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_13_002_MAX'   
-    {'min_block_size':20577,
+    {'min_block_size': 20577,
      'do_correction': False,       
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # do not followed instructions
 
     # '2017_11_13_001_MAR'
-    {'min_block_size':20087,
+    {'min_block_size': 20087,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_13_000_GAB'
-    {'min_block_size':26933,
+    {'min_block_size': 26933,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
-     'excluded':True},
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
+     'excluded':True}, # wrong size, 108 instead 54
 
     # '2017_11_09_007_REN'
-    {'min_block_size':20404,
+    {'min_block_size': 20404,
      'do_correction': False,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_09_005_AMA'
-    {'min_block_size':20439,
+    {'min_block_size': 20439,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_09_004_BEL'
-    {'min_block_size':10000,
+    {'min_block_size': 10000,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold' :.65,
      'excluded':True}, # no button differentiation
 
     # '2017_11_09_002_EST'       
-    {'min_block_size':20299,
+    {'min_block_size': 20299,
      'do_correction': True,              
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_09_001_KAL'
-    {'min_block_size':19096,
+    {'min_block_size': 19096,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_09_000_JUL'
-    {'min_block_size':20573,
+    {'min_block_size': 20573,
      'do_correction': False, # looking a lot at the top
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_08_003_REU'
-    {'min_block_size':20657, 
+    {'min_block_size': 20657, 
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_06_000_ROB'
-    {'min_block_size':20657,
+    {'min_block_size': 20657,
      'do_correction': True,
-     'do_remove_outside_screen':[1., .0, 1., .0],
-     'do_remove_outside_session_time':True,
-     'gaze_file_filter':'*2d_pr*',
-     'do_manual_correction':[],
+     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_session_time': True,
+     'gaze_file_filter': '*2d_pr*',
+     'do_manual_correction': [],
+     'confidence_threshold': .65,
      'excluded':False}
 ]
 if __name__ == '__main__':
+    filenames = [
+    '2017_12_18_001_BRE','2017_12_18_000_MAR','2017_12_15_002_RUB','2017_12_15_001_KAR',
+    '2017_12_15_000_RAF','2017_12_14_002_JOS','2017_12_14_001_JUL','2017_12_14_000_TAT',
+    '2017_12_13_004_ANT','2017_12_13_003_JOE','2017_12_13_002_FER','2017_12_13_001_LUK',
+    '2017_12_13_000_WAN','2017_12_01_001_LEX','2017_12_01_000_LUI','2017_11_29_001_FEL',
+    '2017_11_29_000_DAN','2017_11_28_003_GIO','2017_11_28_002_FRA','2017_11_28_001_ELI',
+    '2017_11_28_000_SID','2017_11_27_005_ANA','2017_11_27_004_AUR','2017_11_27_003_LUC',
+    '2017_11_27_002_JOR','2017_11_27_001_TUL','2017_11_27_000_NAT','2017_11_24_006_VER',
+    '2017_11_24_005_THA','2017_11_24_004_EUC','2017_11_24_003_FER','2017_11_24_002_JON',
+    '2017_11_24_001_PED','2017_11_24_000_MAN','2017_11_23_006_MAY','2017_11_23_005_RAU',
+    '2017_11_23_004_ROM','2017_11_23_003_YUR','2017_11_23_002_EIL','2017_11_22_001_TIA',
+    '2017_11_23_001_JOS','2017_11_23_000_DEN','2017_11_22_000_EUL','2017_11_16_003_ALI',
+    '2017_11_16_002_LAR','2017_11_16_001_MAT','2017_11_16_000_VIN','2017_11_14_006_ALE',
+    '2017_11_14_005_JOA','2017_11_14_004_NEL','2017_11_14_003_LUC','2017_11_14_002_TAT',
+    '2017_11_14_001_MAR','2017_11_14_000_SON','2017_11_13_005_KAR','2017_11_13_004_ISA',
+    '2017_11_13_003_LIZ','2017_11_13_002_MAX','2017_11_13_001_MAR','2017_11_13_000_GAB',
+    '2017_11_09_007_REN','2017_11_09_005_AMA','2017_11_09_004_BEL','2017_11_09_002_EST',
+    '2017_11_09_001_KAL','2017_11_09_000_JUL','2017_11_08_003_REU','2017_11_06_000_ROB']
+
+    def organized(source_path):
+        for filename in filenames:
+            if filename in source_path:
+                return True
+
     for s, d, p in zip(PATHS_SOURCE, PATHS_DESTIN, PARAMETERS):
-        if '2017_11_27_000_NAT' in s:
+        if not organized(s):
             organize(s, d, p['gaze_file_filter'])
