@@ -12,17 +12,21 @@ sys.path.append('../file_handling')
 
 import numpy as np
 
+from methods import trial_mask, variance
 from methods import latency, get_trial_intervals, get_responses
 from methods import rate, get_source_files, get_data_files, get_events_per_trial
 from methods import load_ini_data_intrasubject, load_ini_data, load_fpe_timestamps
 from methods import load_yaml_data, load_gaze_data
 from categorization import get_gaze_rate_per_trial, get_relative_gaze_rate
+from correction.utils import confidence_threshold
 from data_organizer import PATHS_SOURCE, PATHS_DESTIN, DATA_SKIP_HEADER, get_data_path
 from data_organizer import PARAMETERS as p
-from drawing import draw_rates, draw_points
+from drawing import draw
 
 def analyse(i, parameters, source_files, inspect=False, info_file=None):
-    print('\nRunning analysis for session:', PATHS_SOURCE[i])
+    print('\nRunning analysis for session:')
+    print('\t', PATHS_DESTIN[i])
+    print('\t', PATHS_SOURCE[i])
     if not info_file:
         info_file = load_yaml_data(source_files[0])
     ini_file = load_ini_data(source_files[1])
@@ -39,10 +43,36 @@ def analyse(i, parameters, source_files, inspect=False, info_file=None):
     button_rate = rate(positive_intervals, negative_intervals, responses,
         title=title,
         save=False,
-        inspect=False)
+        inspect=inspect)
 
     features = ini_file['feature']
     trial_intervals = get_trial_intervals(trials, uncategorized=True)  
+
+    # sig2_per_trial_x = []  
+    # sig2_per_trial_y = []
+    
+    # data_count = all_gaze_data.shape[0]
+    # mask = confidence_threshold(all_gaze_data, .10)
+    # gaze_data = all_gaze_data[mask]
+    # deleted_count = data_count - gaze_data.shape[0]   
+    # if deleted_count > 0:
+    #     print("Removed %i from %i (%.2f%%) data point(s) below confidence threshold!"%(deleted_count, data_count, (deleted_count/data_count)*100))
+
+    # gaze_data = all_gaze_data[mask]
+    # for begin, end in trial_intervals:
+    #     mask = trial_mask(gaze_data['time'], begin, end)
+    #     x, y = gaze_data['x_norm'][mask], gaze_data['y_norm'][mask] 
+    #     x, y = variance(x, y, True)
+    #     sig2_per_trial_x.append(x)
+    #     sig2_per_trial_y.append(y)
+    # draw.rates([sig2_per_trial_x,sig2_per_trial_y], title+'_variance',
+    #     save=False,
+    #     y_label='looking variance',
+    #     single=False,
+    #     first_label='x',
+    #     second_label='y',
+    #     y_limit=False,        
+    # )
 
     factor = 'donut_slice'
     gaze_rate_per_trial, gaze_rate_mirror = get_gaze_rate_per_trial(
@@ -54,15 +84,16 @@ def analyse(i, parameters, source_files, inspect=False, info_file=None):
         do_correction=parameters['do_correction'],
         do_remove_outside_screen=parameters['do_remove_outside_screen'],
         do_remove_outside_session_time=parameters['do_remove_outside_session_time'],
-        do_manual_correction=parameters['do_manual_correction']
+        do_manual_correction=parameters['do_manual_correction'],
+        do_confidence_threshold=parameters['confidence_threshold']
         )
     gaze_rate = get_relative_gaze_rate(
         ini_file['feature'],
         gaze_rate_per_trial,
         gaze_rate_mirror)
 
-    if False:
-        draw_rates([gaze_rate, []], title,
+    if inspect:
+        draw.rates([gaze_rate, []], title,
             save=False,
             y_label='Looking rate',
             single=True,
@@ -70,8 +101,7 @@ def analyse(i, parameters, source_files, inspect=False, info_file=None):
             y_limit=True,
             )
 
-    latencies = latency(trials)
-    return gaze_rate, button_rate, latencies
+    return gaze_rate, button_rate, latency(trials)
 
 def statistics(positive, negative, export=None):
     positive = np.vstack(positive)
@@ -138,15 +168,16 @@ def analyse_experiment(feature_degree):
 
     positive, negative, positive_error, negative_error = statistics(
         positive,
-        negative
-        # ['_looking_negative_relative_rate.txt', '_looking_positive_relative_rate.txt']
+        negative,
+        [str(feature_degree)+'_looking_negative_relative_rate.txt',
+         str(feature_degree)+'_looking_positive_relative_rate.txt']
     )
-    draw_rates(
+    draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='mean looking proportion per trial with distinctive S '+str(feature_degree),
+        title='average looking proportion along trials - fp %i°'%feature_degree,
         save= True,
-        y_label='Mean looking proportion',
+        y_label='average looking proportion',
         single=False,
         first_label='FP group',
         second_label='FN group',
@@ -156,15 +187,16 @@ def analyse_experiment(feature_degree):
 
     positive, negative, positive_error, negative_error = statistics(
         positive_button,
-        negative_button
-        # ['_button_positive_relative_rate.txt', '_button_negative_relative_rate.txt']
+        negative_button,
+        [str(feature_degree)+'_button_positive_relative_rate.txt',
+         str(feature_degree)+'_button_negative_relative_rate.txt']
     )
-    draw_rates(
+    draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='mean button-pressing proportion along trials '+str(feature_degree),
+        title='average button-pressing proportion along trials - fp %i°'%feature_degree,
         save= True,
-        y_label='mean button-pressing proportion',
+        y_label='average button-pressing proportion',
         single=False,
         first_label='FP group',
         second_label='FN group',
@@ -173,13 +205,14 @@ def analyse_experiment(feature_degree):
 
     positive, negative, positive_error, negative_error = statistics(
         positive_latency,
-        negative_latency
-        # ['_latency_positive_relative_rate.txt', '_latency_negative_relative_rate.txt']
+        negative_latency,
+        [str(feature_degree)+'_latency_positive_relative_rate.txt',
+         str(feature_degree)+'_latency_negative_relative_rate.txt']
     )
-    draw_rates(
+    draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='mean latency along trials '+str(feature_degree),
+        title='average latency along trials - fp %i°'%feature_degree,
         save= True,
         y_label='latency (s)',
         single=False,
@@ -189,7 +222,9 @@ def analyse_experiment(feature_degree):
         )
 
 def analyse_intra_subject(i, parameters, source_files, inspect, info_file=None):
-    print('\nRunning analysis for session:', PATHS_SOURCE[i])
+    print('\nRunning analysis for session:')
+    print('\t', PATHS_DESTIN[i])
+    print('\t', PATHS_SOURCE[i])
     if not info_file:
         info_file = load_yaml_data(source_files[0]) 
         
@@ -206,7 +241,7 @@ def analyse_intra_subject(i, parameters, source_files, inspect, info_file=None):
     fp_button_rate = rate(fp_positive_intervals, fp_negative_intervals, responses,
         title=title,
         save=False,
-        inspect=False)
+        inspect=inspect)
 
     title = str(i)+' - '+info_file['nickname']+' - '+ 'X (FN)'
     time_data = zip(time_file['time'], time_file['bloc'], time_file['trial'], time_file['event'])
@@ -216,7 +251,7 @@ def analyse_intra_subject(i, parameters, source_files, inspect, info_file=None):
     fn_button_rate = rate(fn_positive_intervals, fn_negative_intervals, responses,
         title=title,
         save=False,
-        inspect=False)
+        inspect=inspect)
 
     factor = 'donut_slice'
     all_gaze_data = load_gaze_data(source_files[3])
@@ -230,7 +265,8 @@ def analyse_intra_subject(i, parameters, source_files, inspect, info_file=None):
         do_correction=parameters['do_correction'],
         do_remove_outside_screen=parameters['do_remove_outside_screen'],
         do_remove_outside_session_time=parameters['do_remove_outside_session_time'],
-        do_manual_correction=parameters['do_manual_correction']
+        do_manual_correction=parameters['do_manual_correction'],
+        do_confidence_threshold=parameters['confidence_threshold']
         )
     fp_gaze_rate = get_relative_gaze_rate(
         fp_ini_file['feature'],
@@ -244,7 +280,7 @@ def analyse_intra_subject(i, parameters, source_files, inspect, info_file=None):
 
     if inspect:
         title = str(i)+'_'+info_file['nickname']+'_'+ 'square(FP)_X(FN)'+'_factor_'+str(factor)
-        draw_rates([fp_gaze_rate, fn_gaze_rate], title,
+        draw.rates([fp_gaze_rate, fn_gaze_rate], title,
             save=True,
             y_label='Looking rate',
             single=False,
@@ -252,8 +288,8 @@ def analyse_intra_subject(i, parameters, source_files, inspect, info_file=None):
             second_label='feature fn',
             y_limit=True,
             )
-
-    return (fp_button_rate, fn_button_rate), (fp_gaze_rate, fn_gaze_rate), (None, None)
+    latencies = (latency(fp_trials), latency(fn_trials))
+    return (fp_button_rate, fn_button_rate), (fp_gaze_rate, fn_gaze_rate), latencies
 
 def analyse_experiment_intrasubject(feature_degree=9):
     positive_gaze = []
@@ -301,10 +337,10 @@ def analyse_experiment_intrasubject(feature_degree=9):
         [str(feature_degree)+'_intra_button_positive_relative_rate.txt',
          str(feature_degree)+'_intra_button_negative_relative_rate.txt']
     )
-    draw_rates(
+    draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='button-pressing proportion along trials - intra-subject - '+str(feature_degree),
+        title='average button-pressing proportion - intra-subject - fp %i°'%feature_degree,
         save= True,
         y_label='average button-pressing proportion',
         single=False,
@@ -313,16 +349,17 @@ def analyse_experiment_intrasubject(feature_degree=9):
         y_limit=True
         )
 
+
     positive, negative, positive_error, negative_error = statistics(
         positive_gaze,
         negative_gaze,
         [str(feature_degree)+'_intra_gaze_positive_relative_rate.txt',
          str(feature_degree)+'_intra_gaze_negative_relative_rate.txt']
     )
-    draw_rates(
+    draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='feature (%i degrees) looking proportion - intra-subject'%feature_degree,
+        title='average looking proportion - intra-subject - fp %i°'%feature_degree,
         save= True,
         y_label='average looking proportion',
         single=False,
@@ -331,28 +368,28 @@ def analyse_experiment_intrasubject(feature_degree=9):
         y_limit=True
         )
 
-    # positive, negative, positive_error, negative_error = statistics(
-    #     positive_latency,
-    #     negative_latency,
-    #     [str(feature_degree)+'_intra_latency_positive_relative_rate.txt',
-    #      str(feature_degree)+'_intra_latency_negative_relative_rate.txt']
-    # )
-    # draw_rates(
-    #     data=[positive, negative],
-    #     error=[positive_error, negative_error],
-    #     title='average feature latency along trials - intra-subject',
-    #     save= True,
-    #     y_label='average latency',
-    #     single=False,
-    #     first_label='FP group',
-    #     second_label='FN group',
-    #     y_limit=True
-    #     )
+    positive, negative, positive_error, negative_error = statistics(
+        positive_latency,
+        negative_latency,
+        [str(feature_degree)+'_intra_latency_positive_relative_rate.txt',
+         str(feature_degree)+'_intra_latency_negative_relative_rate.txt']
+    )
+    draw.rates(
+        data=[positive, negative],
+        error=[positive_error, negative_error],
+        title='average latency along trials - fp %i°- intra-subject'%feature_degree,
+        save= True,
+        y_label='average latency',
+        single=False,
+        first_label='FP group',
+        second_label='FN group',
+        y_limit=True
+        )
 
 if __name__ == '__main__':
     # analyse_experiment(feature_degree=9)
     # analyse_experiment(feature_degree=90)
-    analyse_experiment_intrasubject(feature_degree=9)
+    # analyse_experiment_intrasubject(feature_degree=9)
 
     # negative = ['2017_11_16_000_VIN',
     #             '2017_11_14_005_JOA',
@@ -372,8 +409,15 @@ if __name__ == '__main__':
     #     source_files = get_data_files(PATHS_DESTIN[i],gaze_file_filter=p[i]['gaze_file_filter'])
     #     analyse_intra_subject(i, p[i], source_files, inspect=True)         
 
-    # i = -29
-    
-    # i = -69
-    # source_files = get_data_files(PATHS_DESTIN[i], gaze_file_filter=p[i]['gaze_file_filter'])
-    # analyse(i, p[i], source_files, inspect=True)
+
+    # for i in range(68):   
+    #     source_files = get_data_files(PATHS_DESTIN[i], gaze_file_filter=p[i]['gaze_file_filter'])
+    #     try:
+    #         analyse(i, p[i], source_files, inspect=False)
+    #     except Exception as e:
+    #         print(e)
+    #         continue
+
+    i = 0
+    source_files = get_data_files(PATHS_DESTIN[i], gaze_file_filter=p[i]['gaze_file_filter'])
+    analyse_intra_subject(i, p[i], source_files, inspect=True)    

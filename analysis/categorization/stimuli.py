@@ -8,12 +8,14 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 import sys
-from time import sleep
 sys.path.append('../../analysis')
+from time import sleep
+import random
+
 from methods import load_ini_data
 
 import numpy as np
-import random
+
 
 EXTERNAL_SCREEN_RECT = [
     240, # left 

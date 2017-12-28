@@ -11,10 +11,10 @@ import sys, os
 from glob import glob
 from itertools import islice
 
+from drawing import draw
+
 import numpy as np
 
-from drawing import draw_rates, draw_relative_rate
-    
 fp_strings = ['FP', 'Feature Positive']
 fn_strings = ['FN', 'Feature Negative']
 
@@ -183,6 +183,16 @@ def load_fpe_timestamps(path, converted=True):
     )
     return data
 
+def variance(x, y, dependent=False):
+    if dependent:
+        return np.var(x, ddof=1), np.var(y, ddof=1)
+    
+    vx = np.var(x, ddof=1)
+    vy = np.var(y, ddof=1)
+    mux = np.mean(x)*np.mean(x)
+    muy = np.mean(y)*np.mean(y)
+    return (vx*vy)+(vx*muy)+(vy*mux)
+
 def get_events_per_trial(ini_data, time_data):
     events_per_trial = {}
     first = True
@@ -246,6 +256,9 @@ def is_inside(timestamps,rangein, rangeout):
 def rate_in(time_interval_pairwise,timestamps):
     return [len(is_inside(timestamps, begin, end))/(end-begin) for begin, end in time_interval_pairwise]
 
+def trial_mask(target_timestamps, begin, end):
+    return (target_timestamps >= begin) & (target_timestamps <= end)
+
 def get_relative_rate(data1, data2):
     return [a/(b+a) if b+a > 0 else 0.5 for a, b in zip(data1, data2)]
 
@@ -254,8 +267,8 @@ def rate(positive_intervals, negative_intervals, responses, title='', save=False
     negative_data = rate_in(negative_intervals, responses)
     relative_rate = get_relative_rate(positive_data, negative_data)
     if inspect:
-        draw_rates([positive_data, negative_data], title, save, y_label = 'Button-pressing per seconds')        
-        draw_relative_rate(relative_rate,title, save, y_label = 'Button-pressing proportion')
+        draw.rates([positive_data, negative_data], title, save, y_label = 'Button-pressing per seconds')        
+        draw.relative_rate(relative_rate,title, save, y_label = 'Button-pressing proportion')
 
     return relative_rate
     
