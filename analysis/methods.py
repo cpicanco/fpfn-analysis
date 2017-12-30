@@ -191,6 +191,31 @@ def variance(x, y, dependent=False):
     mux = np.mean(x)*np.mean(x)
     muy = np.mean(y)*np.mean(y)
     return (vx*vy)+(vx*muy)+(vy*mux)
+    
+def statistics(positive, negative, export=None):
+    positive = np.vstack(positive)
+    negative = np.vstack(negative)
+    
+    print('positive', len(positive))
+    print('negative', len(negative))
+    
+    if export:
+        np.savetxt(export[0], positive)
+        np.savetxt(export[1], negative)
+    
+    positive_std = np.array([np.nanstd(positive[:,i]) for i in range(positive.shape[1])])
+    # positive_min = np.array([np.nanmin(positive[:,i]) for i in range(positive.shape[1])])
+    # positive_max = np.array([np.nanmax(positive[:,i]) for i in range(positive.shape[1])])
+    positive = np.array([np.nanmean(positive[:,i]) for i in range(positive.shape[1])])
+
+    negative_std = np.array([np.nanstd(negative[:,i]) for i in range(negative.shape[1])])
+    # negative_min = np.array([np.nanmin(negative[:,i]) for i in range(negative.shape[1])])
+    # negative_max = np.array([np.nanmax(negative[:,i]) for i in range(negative.shape[1])])
+    negative = np.array([np.nanmean(negative[:,i]) for i in range(negative.shape[1])])
+
+    # positive_error = [positive-positive_min, positive_max-positive]
+    # negative_error = [negative-negative_min, negative_max-negative]
+    return positive, negative, positive_std, negative_std
 
 def get_events_per_trial(ini_data, time_data):
     events_per_trial = {}
@@ -252,24 +277,14 @@ def get_responses(ts):
 def is_inside(timestamps,rangein, rangeout):
     return [t for t in timestamps if (t >= rangein) and (t <= rangeout)]
 
-def rate_in(time_interval_pairwise,timestamps):
+def rate_in(time_interval_pairwise, timestamps):
     return [len(is_inside(timestamps, begin, end))/(end-begin) for begin, end in time_interval_pairwise]
 
 def trial_mask(target_timestamps, begin, end):
     return (target_timestamps >= begin) & (target_timestamps <= end)
 
-def get_relative_rate(data1, data2):
+def relative_rate_from(data1, data2):
     return [a/(b+a) if b+a > 0 else 0.5 for a, b in zip(data1, data2)]
-
-def rate(positive_intervals, negative_intervals, responses, title='', save=False, inspect=False):
-    positive_data = rate_in(positive_intervals, responses)
-    negative_data = rate_in(negative_intervals, responses)
-    relative_rate = get_relative_rate(positive_data, negative_data)
-    # if inspect:
-    #     draw.rates([positive_data, negative_data], title, save, y_label = 'Button-pressing per seconds')        
-    #     draw.relative_rate(relative_rate,title, save, y_label = 'Button-pressing proportion')
-
-    return relative_rate
     
 def latency(trials):
     def get_time(timestamped_events):
