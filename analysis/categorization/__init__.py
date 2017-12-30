@@ -18,7 +18,7 @@ from gaze_animation import animate_gaze
 from correction.utils import clean_gaze_data
 from drawing import draw
 
-from methods import rate_in, get_relative_rate
+from methods import rate_in, relative_rate_from
 from .stimuli import circle_grid
 from .stimuli import donut_grid
 
@@ -99,7 +99,7 @@ def get_relative_gaze_rate(features, gaze_rates_per_trial, gaze_rate_mirror, abs
     
     if absolute:
         return positive_feature_rate, positive_feature_mirror
-    return get_relative_rate(positive_feature_rate, positive_feature_mirror)
+    return relative_rate_from(positive_feature_rate, positive_feature_mirror)
 
 if __name__ == '__main__':
     pass

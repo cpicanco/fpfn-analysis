@@ -47,6 +47,9 @@ STIMULI_HEIGHT_PX = 100
 SCREEN_WIDTH_PX = 1280
 SCREEN_HEIGHT_PX = 768
 
+SCREEN_DISTANCE_CM = 240.
+SCREEN_WIDTH_CM = 70.
+
 def get_central_rect(width, height):
     left = (SCREEN_WIDTH_PX // 2) - (width // 2)
     top = (SCREEN_HEIGHT_PX // 2) - (height // 2)
