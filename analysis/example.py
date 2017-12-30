@@ -12,9 +12,10 @@ sys.path.append('../file_handling')
 
 import numpy as np
 
-from methods import trial_mask, variance
+from methods import trial_mask, variance, statistics
 from methods import latency, get_trial_intervals, get_responses
-from methods import rate, get_source_files, get_data_files, get_events_per_trial
+from methods import relative_rate_from, rate_in
+from methods import get_data_files, get_events_per_trial
 from methods import load_ini_data_intrasubject, load_ini_data, load_fpe_timestamps
 from methods import load_yaml_data, load_gaze_data
 from categorization import get_gaze_rate_per_trial, get_relative_gaze_rate
@@ -23,27 +24,51 @@ from data_organizer import PATHS_SOURCE, PATHS_DESTIN, DATA_SKIP_HEADER, get_dat
 from data_organizer import PARAMETERS as p
 from drawing import draw
 
-def analyse(i, parameters, source_files, inspect=False, info_file=None):
+def analyse_button(trials, responses, title, inspect=False):
+    positive_intervals, negative_intervals = get_trial_intervals(trials)
+    button_rate_positive = rate_in(positive_intervals, responses)
+    button_rate_negative = rate_in(negative_intervals, responses)
+    button_relative_rate = relative_rate_from(
+        button_rate_positive, button_rate_negative)
+    
+    draw.rates([button_rate_positive, button_rate_negative],
+        title= title+'_absolute',
+        save= not inspect,
+        first_label='S+',
+        second_label='S-',
+        y_label= 'Button-pressing per seconds'
+    ) 
+
+    draw.rates([button_relative_rate, []],
+        title= title+'_relative',
+        save= not inspect,
+        y_label='Button-pressing proportion',
+        single= True,
+        y_limit= [-0.1, 1.1],
+        ) 
+    return button_relative_rate
+
+def analyse(i, inspect=False, data_files=None):
     print('\nRunning analysis for session:')
     print('\t', PATHS_DESTIN[i])
     print('\t', PATHS_SOURCE[i])
-    if not info_file:
-        info_file = load_yaml_data(source_files[0])
-    ini_file = load_ini_data(source_files[1])
-    time_file = load_fpe_timestamps(source_files[2])
-    all_gaze_data = load_gaze_data(source_files[3])
+    parameters = p[i]
+    if not data_files:
+        data_files = get_data_files(
+            data_paths[i],
+            gaze_file_filter=parameters['gaze_file_filter'])
+          
+    info_file = load_yaml_data(data_files[0])
+    ini_file = load_ini_data(data_files[1])
+    time_file = load_fpe_timestamps(data_files[2])
+    all_gaze_data = load_gaze_data(data_files[3])
     title = str(i)+' - '+info_file['nickname']+'-'+info_file['group']
 
     time_data = zip(time_file['time'], time_file['bloc'], time_file['trial'], time_file['event'])
     ini_data = zip(ini_file['trial'], ini_file['contingency'], ini_file['feature'])
     trials = get_events_per_trial(ini_data, time_data)
-
-    positive_intervals, negative_intervals = get_trial_intervals(trials)
     responses = get_responses(time_file)    
-    button_rate = rate(positive_intervals, negative_intervals, responses,
-        title=title,
-        save=False,
-        inspect=inspect)
+    button_proportion = analyse_button(trials, responses, title, inspect)
 
     features = ini_file['feature']
     trial_intervals = get_trial_intervals(trials, uncategorized=True)  
@@ -92,41 +117,16 @@ def analyse(i, parameters, source_files, inspect=False, info_file=None):
         gaze_rate_per_trial,
         gaze_rate_mirror)
 
-    if inspect:
-        draw.rates([gaze_rate, []], title,
-            save=False,
-            y_label='Looking rate',
-            single=True,
-            first_label='feature fp',
-            y_limit=True,
-            )
+    draw.rates([gaze_rate, []],
+        title= title,
+        save= not inspect,
+        y_label='Looking proportion',
+        single= True,
+        first_label= 'feature fp',
+        y_limit= [-0.1, 1.1],
+        )   
 
-    return gaze_rate, button_rate, latency(trials)
-
-def statistics(positive, negative, export=None):
-    positive = np.vstack(positive)
-    negative = np.vstack(negative)
-    
-    print('positive', len(positive))
-    print('negative', len(negative))
-    
-    if export:
-        np.savetxt(export[0], positive)
-        np.savetxt(export[1], negative)
-    
-    positive_std = np.array([np.nanstd(positive[:,i]) for i in range(positive.shape[1])])
-    # positive_min = np.array([np.nanmin(positive[:,i]) for i in range(positive.shape[1])])
-    # positive_max = np.array([np.nanmax(positive[:,i]) for i in range(positive.shape[1])])
-    positive = np.array([np.nanmean(positive[:,i]) for i in range(positive.shape[1])])
-
-    negative_std = np.array([np.nanstd(negative[:,i]) for i in range(negative.shape[1])])
-    # negative_min = np.array([np.nanmin(negative[:,i]) for i in range(negative.shape[1])])
-    # negative_max = np.array([np.nanmax(negative[:,i]) for i in range(negative.shape[1])])
-    negative = np.array([np.nanmean(negative[:,i]) for i in range(negative.shape[1])])
-
-    # positive_error = [positive-positive_min, positive_max-positive]
-    # negative_error = [negative-negative_min, negative_max-negative]
-    return positive, negative, positive_std, negative_std
+    return gaze_rate, button_proportion, latency(trials)
 
 def analyse_experiment(feature_degree):
     positive = []
@@ -138,23 +138,21 @@ def analyse_experiment(feature_degree):
     positive_latency = []
     negative_latency = []
 
-    data_paths = get_data_path()
-    data_paths = [os.path.join(data_paths, p) for p in PATHS_DESTIN]
-    for path in data_paths:
+    for path in PATHS_DESTIN:
         i = data_paths.index(path)
         if p[i]['excluded']:
             continue
 
-        source_files = get_data_files(data_paths[i], gaze_file_filter=p[i]['gaze_file_filter'])
-        info_file = load_yaml_data(source_files[0])
+        data_files = get_data_files(path, gaze_file_filter=p[i]['gaze_file_filter'])
+        info_file = load_yaml_data(data_files[0])
         if not ((info_file['group'] == 'positive') or (info_file['group'] == 'negative')):
             continue
 
         if info_file['feature_degree'] == feature_degree:
             looking_rate, button_rate, latencies = analyse(
-                i, p[i], source_files,
+                i,
                 inspect=False,
-                info_file=info_file)
+                data_files=data_files)
 
             if info_file['group'] == 'positive':
                 positive.append(np.array(looking_rate))
@@ -181,7 +179,7 @@ def analyse_experiment(feature_degree):
         single=False,
         first_label='FP group',
         second_label='FN group',
-        y_limit=True
+        y_limit=[-0.1, 1.1]
         )
 
 
@@ -200,7 +198,7 @@ def analyse_experiment(feature_degree):
         single=False,
         first_label='FP group',
         second_label='FN group',
-        y_limit=True
+        y_limit=[-0.1, 1.1]
         )
 
     positive, negative, positive_error, negative_error = statistics(
@@ -217,50 +215,43 @@ def analyse_experiment(feature_degree):
         y_label='latency (s)',
         single=False,
         first_label='FP group',
-        second_label='FN group',
-        y_limit=False
+        second_label='FN group'
         )
 
-def analyse_intra_subject(i, parameters, source_files, inspect, info_file=None):
+def analyse_intra_subject(i, inspect=False, data_files=None):
     print('\nRunning analysis for session:')
     print('\t', PATHS_DESTIN[i])
     print('\t', PATHS_SOURCE[i])
-    if not info_file:
-        info_file = load_yaml_data(source_files[0]) 
-        
-    fp_ini_file, fn_ini_file = load_ini_data_intrasubject(source_files[1])
-    time_file = load_fpe_timestamps(source_files[2])
-    time_data = zip(time_file['time'], time_file['bloc'], time_file['trial'], time_file['event'])
-
+    parameters = p[i]
+    if not data_files:
+        data_files = get_data_files(PATHS_DESTIN[i], gaze_file_filter=p[i]['gaze_file_filter'])
+    
+    info_file = load_yaml_data(data_files[0])     
+    fp_ini_file, fn_ini_file = load_ini_data_intrasubject(data_files[1])
+    time_file = load_fpe_timestamps(data_files[2])
+    
     responses = get_responses(time_file) 
-    title = str(i)+' - '+info_file['nickname']+' - '+ 'square (FP)'
 
+    title = str(i)+' - '+info_file['nickname']+' - '+ 'square (FP)'
+    time_data = zip(time_file['time'], time_file['bloc'], time_file['trial'], time_file['event'])
     fp_ini_data = zip(fp_ini_file['trial'], fp_ini_file['contingency'], fp_ini_file['feature'])
     fp_trials = get_events_per_trial(fp_ini_data, time_data)
-    fp_positive_intervals, fp_negative_intervals = get_trial_intervals(fp_trials)
-    fp_button_rate = rate(fp_positive_intervals, fp_negative_intervals, responses,
-        title=title,
-        save=False,
-        inspect=inspect)
+    fp_button_proportion = analyse_button(fp_trials, responses, title)  
 
     title = str(i)+' - '+info_file['nickname']+' - '+ 'X (FN)'
     time_data = zip(time_file['time'], time_file['bloc'], time_file['trial'], time_file['event'])
     fn_ini_data = zip(fn_ini_file['trial'], fn_ini_file['contingency'], fn_ini_file['feature'])
     fn_trials = get_events_per_trial(fn_ini_data, time_data)
-    fn_positive_intervals, fn_negative_intervals = get_trial_intervals(fn_trials)
-    fn_button_rate = rate(fn_positive_intervals, fn_negative_intervals, responses,
-        title=title,
-        save=False,
-        inspect=inspect)
+    fn_button_proportion = analyse_button(fn_trials, responses, title)  
 
     factor = 'donut_slice'
-    all_gaze_data = load_gaze_data(source_files[3])
+    all_gaze_data = load_gaze_data(data_files[3])
     all_trial_intervals = get_trial_intervals({**fp_trials, **fn_trials}, uncategorized=True)   
     gaze_rate_per_trial, gaze_rate_mirror = get_gaze_rate_per_trial(
         all_trial_intervals,
         all_gaze_data,
         factor=factor,
-        inspect=inspect,
+        inspect=False,
         min_block_size=parameters['min_block_size'],
         do_correction=parameters['do_correction'],
         do_remove_outside_screen=parameters['do_remove_outside_screen'],
@@ -278,18 +269,19 @@ def analyse_intra_subject(i, parameters, source_files, inspect, info_file=None):
         gaze_rate_per_trial[fn_ini_file['trial']],
         gaze_rate_mirror[fn_ini_file['trial']])
 
-    if inspect:
-        title = str(i)+'_'+info_file['nickname']+'_'+ 'square(FP)_X(FN)'+'_factor_'+str(factor)
-        draw.rates([fp_gaze_rate, fn_gaze_rate], title,
-            save=True,
-            y_label='Looking rate',
-            single=False,
-            first_label='feature fp',
-            second_label='feature fn',
-            y_limit=True,
-            )
+    title = str(i)+'_'+info_file['nickname']+'_'+ 'square(FP)_X(FN)'+'_factor_'+str(factor)
+    draw.rates([fp_gaze_rate, fn_gaze_rate], title,
+        save=not inspect,
+        y_label='Looking proportion at the feature',
+        single=False,
+        first_label='FP group',
+        second_label='FN group',
+        y_limit=[-0.1, 1.1],
+        )
     latencies = (latency(fp_trials), latency(fn_trials))
-    return (fp_button_rate, fn_button_rate), (fp_gaze_rate, fn_gaze_rate), latencies
+    button = (fp_button_proportion, fn_button_proportion)
+    gaze = (fp_gaze_rate, fn_gaze_rate)
+    return button, gaze, latencies
 
 def analyse_experiment_intrasubject(feature_degree=9):
     positive_gaze = []
@@ -301,23 +293,21 @@ def analyse_experiment_intrasubject(feature_degree=9):
     positive_latency = []
     negative_latency = []
 
-    data_paths = get_data_path()
-    data_paths = [os.path.join(data_paths, p) for p in PATHS_DESTIN]
-    for path in data_paths:
-        i = data_paths.index(path)
+    for path in PATHS_DESTIN:
+        i = PATHS_DESTIN.index(path)
         if p[i]['excluded']:
             continue
 
-        source_files = get_data_files(data_paths[i], gaze_file_filter=p[i]['gaze_file_filter'])
-        info_file = load_yaml_data(source_files[0])
+        data_files = get_data_files(path, gaze_file_filter=p[i]['gaze_file_filter'])
+        info_file = load_yaml_data(data_files[0])
         if not info_file['group'] == 'fp-square/fn-x':
             continue
             
         if info_file['feature_degree'] == feature_degree:
             button_rate, looking_rate, latencies = analyse_intra_subject(
-                i, p[i], source_files,
+                i,
                 inspect=False,
-                info_file=info_file)
+                data_files=data_files)
 
             (fp_button, fn_button) = button_rate
             (fp_gaze, fn_gaze) = looking_rate
@@ -346,7 +336,7 @@ def analyse_experiment_intrasubject(feature_degree=9):
         single=False,
         first_label='FP group',
         second_label='FN group',
-        y_limit=True
+        y_limit=[-0.1, 1.1]
         )
 
 
@@ -365,7 +355,7 @@ def analyse_experiment_intrasubject(feature_degree=9):
         single=False,
         first_label='FP group',
         second_label='FN group',
-        y_limit=True
+        y_limit=[-0.1, 1.1]
         )
 
     positive, negative, positive_error, negative_error = statistics(
@@ -382,14 +372,13 @@ def analyse_experiment_intrasubject(feature_degree=9):
         y_label='average latency',
         single=False,
         first_label='FP group',
-        second_label='FN group',
-        y_limit=True
+        second_label='FN group'
         )
 
 if __name__ == '__main__':
     # analyse_experiment(feature_degree=9)
     # analyse_experiment(feature_degree=90)
-    # analyse_experiment_intrasubject(feature_degree=9)
+    analyse_experiment_intrasubject(feature_degree=9)
 
     # negative = ['2017_11_16_000_VIN',
     #             '2017_11_14_005_JOA',
@@ -401,23 +390,17 @@ if __name__ == '__main__':
     # for i in range(len(p)):
     #     for name in negative:
     #         if name in PATHS_SOURCE[i]:
-    #             source_files = get_source_files(PATHS_SOURCE[i], gaze_file_filter=p[i]['gaze_file_filter'])
-    #             analyse(i, p[i], source_files, inspect=True)
+    #             analyse(i, inspect=True)
 
-    # single
     # for i in range(13):
-    #     source_files = get_data_files(PATHS_DESTIN[i],gaze_file_filter=p[i]['gaze_file_filter'])
-    #     analyse_intra_subject(i, p[i], source_files, inspect=True)         
-
+    #     analyse_intra_subject(i, inspect=True)         
 
     # for i in range(68):   
-    #     source_files = get_data_files(PATHS_DESTIN[i], gaze_file_filter=p[i]['gaze_file_filter'])
     #     try:
-    #         analyse(i, p[i], source_files, inspect=False)
+    #         analyse(i, inspect=False)
     #     except Exception as e:
     #         print(e)
     #         continue
 
-    i = 0
-    source_files = get_data_files(PATHS_DESTIN[i], gaze_file_filter=p[i]['gaze_file_filter'])
-    analyse_intra_subject(i, p[i], source_files, inspect=True)    
+    # i = 0
+    # analyse_intra_subject(i)    
