@@ -11,7 +11,7 @@ norm_plot <- function(data, filen= '') {
 	} else {
 		png(sprintf("images/qqnorm_%s.png", filen), width= 400, height= 400)
 	}
-
+	print(shapiro.test(data))
 	qqnorm(data);
 	qqline(data, col = 2)	
 }
@@ -35,9 +35,11 @@ p_value_plot <- function(data, filen= -1, p_value=0.001, intra_subject=FALSE) {
 
 	# clean template
 	if (intra_subject) {
+		xtitle <- 'friedman'
         xlabel <- 'Subjects'
         xat <- seq(1, 12)
 	} else {
+		xtitle <- 'rank test'
 		xlabel <- 'Trials'
 		xat <- c(1, 13, 27)
 	}
@@ -55,7 +57,6 @@ p_value_plot <- function(data, filen= -1, p_value=0.001, intra_subject=FALSE) {
 		}
 	}
 	
-
 	# y
 	axis(2, at= c(0.0, 0.5, 1.0), tick= TRUE, las= 2, cex.axis= 0.8)
 
@@ -63,14 +64,17 @@ p_value_plot <- function(data, filen= -1, p_value=0.001, intra_subject=FALSE) {
 	axis(1, at= xat, tick= TRUE, las= 0, cex.axis= 0.8)
 
 	title(
-		#main= c("Mean Discriminative index"), 
+		main= xtitle, 
 		xlab= xlabel,
 		ylab= 'p-value',
 		cex.main= 1.2, cex.lab= 1.0, font.main= 1, font.lab= 1
 	)
+
+	legend(0.8, 1., legend=c("p < 0.05", "p >= 0.05"),
+       col=c("black", "gray"), pch=c(16, 16))
 }
 
-standard_plot <- function(positive_means, negative_means, filen= -1) {
+standard_plot <- function(pdata, ndata, filen= -1, ylim= c(0.0, 1.0)) {
 	if (filen == -1) {
 		pdf('Figure.pdf', width= 4, height= 4)
 	} else {
@@ -78,13 +82,23 @@ standard_plot <- function(positive_means, negative_means, filen= -1) {
 	}
 
 	# clean template
-	plot(positive_means, ylim= c(0.0, 1.0), xlim= c(1,27), axes= FALSE, ann= FALSE, type= 'n')
+	plot(pdata, ylim= ylim, xlim= c(1,27), axes= FALSE, ann= FALSE, type= 'n')
 
 	# connected white-black dots
-	lines(negative_means, lty= 2, lwd= 1, type= 'l')
-	lines(positive_means, lty= 1, lwd= 1, type= 'l')
-	points(negative_means, pch= 21, bg= 'white', cex= 0.8)
-	points(positive_means, pch= 21, bg= 'black', cex= 0.8)
+	lines(ndata, lty= 2, lwd= 1, type= 'l')
+	lines(pdata, lty= 1, lwd= 1, type= 'l')
+	points(ndata, pch= 21, bg= 'white', cex= 0.8)
+	points(pdata, pch= 21, bg= 'black', cex= 0.8)
+
+	# # fit
+	# x <- seq(1,27)
+	# pmodel <- lm(pdata~poly(x,6,raw=TRUE))
+	# nmodel <- lm(ndata~poly(x,5,raw=TRUE))
+	# nmodel2 <- lm(ndata~poly(x,2,raw=TRUE))
+	# print(anova(nmodel, nmodel2))
+
+	# lines(x, predict(pmodel, data.frame(x= x)), col= 'black')
+	# lines(x, predict(nmodel, data.frame(x= x)), col= 'gray')
 
 	# y
 	axis(2, at= c(0.0, 0.5, 1.0), tick= TRUE, las= 2, cex.axis= 0.8)
@@ -100,7 +114,7 @@ standard_plot <- function(positive_means, negative_means, filen= -1) {
 	)
 }
 
-custom_boxplot <- function(positive_means, negative_means, filen= -1) {
+custom_boxplot <- function(pdata, ndata, filen= -1) {
 	if (filen == -1) {
 		pdf('Figure.pdf', width= 4, height= 4)
 	} else {
@@ -108,7 +122,7 @@ custom_boxplot <- function(positive_means, negative_means, filen= -1) {
 	}
 
 	# template
-	boxplot(positive_means, negative_means,
+	boxplot(pdata, ndata,
 		names= c("fp", "fn"), range = 0,
 		ylim= c(0.0, 1.0), axes= FALSE, ann= FALSE, frame.plot= FALSE)
 
@@ -126,75 +140,65 @@ custom_boxplot <- function(positive_means, negative_means, filen= -1) {
 	)
 }
 
-## https://www.r-bloggers.com/side-by-side-box-plots
-## -with-patterns-from-data-sets-stacked-by-reshape2-and-melt-in-r/
-boxplot_comparison <- function(positive, negative) {
-	# compare one by one
-	# for (i in 1:nrow(positive)) { 
-	# 	positive_p <- as.numeric(positive[i, ])
-	# 	negative_p <- as.numeric(negative[i, ])
-	# 	custom_boxplot(positive_p, negative_p, i)
-	# }
-
-	# install.packages('reshape2')
-	library(reshape2)
-
+boxplot_comparison <- function(pdata, ndata) {
 	# format data
-	data <- positive[FALSE,]
-	for (row in 1:nrow(positive)) {	
-		p <- positive[row,]
-		n <- negative[row,]
-		data <- rbind(data, n, p)
+	for (row in 1:nrow(pdata)) {	
+		p <- pdata[row,]
+		n <- ndata[row,]
+		custom_boxplot(as.numeric(p), as.numeric(n), row)
 	}
-	rownames(data) <- NULL
 
-	pnames <- c(
-		'P1','P1',
-		'P2','P2',
-		'P3','P3',
-		'P4','P4',
-		'P5','P5',
-		'P6','P6',
-		'P7','P7',
-		'P8','P8',
-		'P9','P9',
-		'P10','P10',
-		'P11','P11',
-		'P12','P12')
-
-	pgroup <- c(replicate(12, c('FP', 'FN')))
-
-	data$pnames <- pnames
-	data$pgroup <- pgroup
-	data <- melt(data, id = c('pnames', 'pgroup'))
-	data <- data[, -3]
-	data
+	pp1 <- as.numeric(pdata[1,])
+	np1 <- as.numeric(ndata[1,])
+	pp2 <- as.numeric(pdata[2,])
+	np2 <- as.numeric(ndata[2,])
+	pp3 <- as.numeric(pdata[3,])
+	np3 <- as.numeric(ndata[3,])
+	pp4 <- as.numeric(pdata[4,])
+	np4 <- as.numeric(ndata[4,])
+	pp5 <- as.numeric(pdata[5,])
+	np5 <- as.numeric(ndata[5,])
+	pp6 <- as.numeric(pdata[6,])
+	np6 <- as.numeric(ndata[6,])
+	pp7 <- as.numeric(pdata[7,])
+	np7 <- as.numeric(ndata[7,])
+	pp8 <- as.numeric(pdata[8,])
+	np8 <- as.numeric(ndata[8,])
+	pp9 <- as.numeric(pdata[9,])
+	np9 <- as.numeric(ndata[9,])
+	pp10 <- as.numeric(pdata[10,])
+	np10 <- as.numeric(ndata[10,])
+	pp11 <- as.numeric(pdata[11,])
+	np11 <- as.numeric(ndata[11,])
+	pp12 <- as.numeric(pdata[12,])
+	np12 <- as.numeric(ndata[12,])
 
 	# plot data
 	png('box_plots.png', width= 595, height= 400)
 	par(mar=c(3.5, 2.3, 3.5, 0.0)) 
 	ticks <- seq(1, 24, by= 1)
-	
-	is.even <- function(x) x %% 2 == 0
-	a <- vector()
-	for (i in ticks) {
-		if (is.even(i)) {
-			a <- c(a, i-0.9)
-		} else {
-			a <- c(a, i)
-		}
-	}
 
 	boxplots <- boxplot(
-		value~pgroup + pnames,
-		 data= data,
-		 at= ticks,
-		 xaxt= 'n',
-		 axes= FALSE,
-		 ylim= c(.0, 1.),
-		 boxwex=.5,
-		 col= c('white', 'gray')
-		 )
+		pp1,np1,
+		pp2,np2,
+		pp3,np3,
+		pp4,np4,
+		pp5,np5,
+		pp6,np6,
+		pp7,np7,
+		pp8,np8,
+		pp9,np9,
+		pp10,np10,
+		pp11,np11,
+		pp12,np12,		
+		range= 0,
+		xaxt= 'n',
+		axes= FALSE,
+		ylim= c(.0, 1.),
+		boxwex=.5,
+		col= c('white', 'gray'),
+		frame.plot= FALSE
+	)
 
 	# y
 	axis(side= 2, at= c(0.0, 0.5, 1.0), tick= TRUE, las= 2)
@@ -224,42 +228,6 @@ boxplot_comparison <- function(positive, negative) {
 		cex.axis= 0.9
 		)
 	title('Comparing button-pressing proportion across participants')
-
-	# fp, fn between groups
-	# pnames <- c('P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11', 'P12')
-	# pnames <- c(pnames, pnames)
-	# pgroup <- c(replicate(12, 'FP'), replicate(12, 'FN'))
-	# data <- data.frame(rbind(as.matrix(negative), as.matrix(positive)))
-	# data$pnames <- pnames
-	# data$pgroup <- pgroup
-	# data <- melt(data, id = c('pnames', 'pgroup'))
-	# data <- data[, -3]
-
-	# # plot
-
-	# ticks_a = seq(1, 6.5, by= .5)
-	# ticks_b = ticks_a+7
-
-	# png('box_plots.png')
-	# boxplots <- boxplot(
-	# 	value~pnames + pgroup,
-	# 	 data= data,
-	# 	 at= c(ticks_a, ticks_b),
-	# 	 xaxt= 'n',
-	# 	 ylim= c(.0, 1.),
-	# 	 xlim= range(0, max(ticks_b+1)),
-	# 	 boxwex=.25
-	# 	 # col= c(replicate(12, 'gray'), replicate(12, 'gray'))
-	# 	 )
-
-	# axis(
-	# 	side= 1,
-	# 	at= c(ticks_a[6], ticks_b[6]),
-	# 	labels = c('X (FN)', 'Square (FP)'),
-	# 	line= 0.5,
-	# 	lwd= 0
-	# 	)
-	# title('Comparing button-pressing proportion across participants')
 	dev.off()
 }
 
@@ -309,7 +277,8 @@ rank_test_per_col <- function(positive, negative, jittered= FALSE, algorithm= 'k
 	return(data.frame(t(result)))
 }
 
-rank_test_per_row <- function (positive, negative, jittered=FALSE, algorithm= 'friedman') {
+rank_test_per_row <- function (positive, negative,
+  jittered=FALSE, algorithm= 'friedman', output='pvalue') {
 	result <- vector()
 	for (row in 1:nrow(positive)) {
 		if (jittered) {
@@ -321,8 +290,15 @@ rank_test_per_row <- function (positive, negative, jittered=FALSE, algorithm= 'f
 		}
 
 		if (algorithm == 'friedman') {
-			result = c(result, friedman.test(matrix(c(X, Y), ncol=2))$p.value)
-			result
+			test <- friedman.test(matrix(c(X, Y), ncol=2))
+			print(test)
+			if (output == 'pvalue') {
+				result = c(result, test$p.value)
+			}
+			
+			if (output == 'stats') {
+				result = c(result, test$statistic)
+			}	
 		} 
 	} 
 	return(data.frame(t(result)))
@@ -331,6 +307,7 @@ rank_test_per_row <- function (positive, negative, jittered=FALSE, algorithm= 'f
 # load data
 positive <- read.table('9_intra_button_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
 negative <- read.table('9_intra_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+
 
 # differentiation
 # use_jitter <- FALSE
@@ -344,13 +321,14 @@ negative <- read.table('9_intra_button_negative_relative_rate.txt', sep= ' ', na
 # }
 # p_value_plot(apply(frame, 2, mean), 1, p_value=0.005)
 
-# plot means
-# positive_means <- apply(positive, 2, mean, na.rm= TRUE)
-# negative_means <- apply(negative, 2, mean, na.rm= TRUE)
-# standard_plot(positive_means, negative_means,1)
+# # plot means
+# positive_measure <- apply(positive, 2, sd, na.rm= TRUE)
+# negative_measure <- apply(negative, 2, sd, na.rm= TRUE)
+# norm_plot(positive_means, 1)
+# norm_plot(negative_means, 2)
+# standard_plot(positive_measure, negative_measure, 1)
 
+# differentiation intra-subject
 boxplot_comparison(positive, negative)
-
-# # differentiation intra-subject
-# frame = rank_test_per_row(positive, negative)
-# p_value_plot(as.numeric(frame[1,]), 1, p_value=0.001, intra_subject= TRUE)
+frame = rank_test_per_row(positive, negative)
+p_value_plot(as.numeric(frame[1,]), 1, p_value=0.005, intra_subject= TRUE)
