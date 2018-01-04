@@ -282,41 +282,9 @@ def xy_donut_plot(data):
     plt.show()   
     plt.gcf().clear() 
 
-def images(img1, img2, screen, save, title):
+def images(imgs, screen, save, title):
+    (img1, img2) = imgs
     (w, h) = screen
-    def add_grid(ax):
-        for circle in circle_grid(normalized=False):
-            ax.add_patch(
-                patches.Ellipse(
-                    circle.center,   
-                    width=circle.width*1.,          
-                    height=circle.height*1.,
-                    angle=360,
-                    facecolor="none",
-                    edgecolor="black",
-                    alpha=0.25      
-                )
-            ) 
-        ax.xaxis.set_ticks_position('none')
-        ax.yaxis.set_ticks_position('none')
-        # ax.set_ylim(0, h)
-        # ax.set_xlim(0, w)        
-
-    f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True)
-    # add_grid(ax1)
-    # add_grid(ax2)
-    ax1.imshow(img1)
-    ax2.imshow(img2)
-    f.tight_layout(pad= 0)
-    f.subplots_adjust(wspace=0)
-    if save:
-        save_figure(title)       
-    else:
-        plt.show()
-
-def images_four(imgs, screen, save, title):
-    (w, h) = screen
-    (im1, im2, im3, im4) = imgs
     def fax(ax):
         # for circle in circle_grid(normalized=False):
         #     ax.add_patch(
@@ -330,6 +298,32 @@ def images_four(imgs, screen, save, title):
         #             alpha=0.25      
         #         )
         #     ) 
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.xaxis.set_ticks_position('none')
+        ax.yaxis.set_ticks_position('none')
+        ax.axis('off')
+        # ax.set_ylim(0, h)
+        # ax.set_xlim(0, w)        
+
+    f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True)
+    ax1.imshow(img1)
+    fax(ax1)
+    ax2.imshow(img2)
+    fax(ax2)
+    f.tight_layout(pad= 0)
+    f.subplots_adjust(wspace=0)
+    if save:
+        save_figure(title)       
+    else:
+        plt.show()
+
+def images_four(imgs, screen, save, title):
+    (w, h) = screen
+    (im1, im2, im3, im4) = imgs
+    def fax(ax):
         ax.spines['top'].set_visible(False)
         ax.spines['bottom'].set_visible(False)
         ax.spines['left'].set_visible(False)

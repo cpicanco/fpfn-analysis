@@ -29,39 +29,85 @@ import numpy as np
 import cv2
 
 def invert_y(gaze_points):
-    return gaze_points['x_norm'], 1-gaze_points['y_norm']   
+    return gaze_points['x_norm'], 1-gaze_points['y_norm']  
 
-def custom_heatmap(data, heatmap_detail=0.06, colormap=colormaps.viridis):
-    """
-    adapted from pupil-labs
-    """
-    grid = [sh, sw]
+def histogram(data, detail):
     # grid = [1075, 1792]
     xvals, yvals = invert_y(data)
     hist, *edges = np.histogram2d(
         yvals, xvals,
-        bins= grid,
+        bins= [sh, sw],
         range= [[-0.2, 1.20], [-0.2, 1.20]],
         normed= False)
-    filter_h = int(heatmap_detail * grid[0]) // 2 * 2 + 1
-    filter_w = int(heatmap_detail * grid[1]) // 2 * 2 + 1
-    hist = cv2.GaussianBlur(hist, (filter_h, filter_w), 10)
+    kernel = detail // 2 * 2 + 1
+    return cv2.GaussianBlur(hist,(kernel, kernel), 0)
 
-    hist_max = hist.max()
+def heatmap_scale(max_n=1., colormap=colormaps.viridis, width=20, height=256, opencv=True):
+    scale = np.zeros((height, width), np.uint8)
+    s = 255
+    for i in range(0, height):
+        for j in range(0, width):
+            scale[i, j] = s
+        s -= 1
+
+    lut = np.asarray(colormap)
+    lut *= 255
+    lut = lut.astype(np.uint8)
+
+    if opencv:
+        B, G, R = 0, 1, 2
+    else:
+        B, G, R = 2, 1, 1
+
+    image = np.zeros((height, width, 4), np.uint8)
+    image[:,:,B] = cv2.LUT(scale, lut[:,2])
+    image[:,:,G] = cv2.LUT(scale, lut[:,1]) 
+    image[:,:,R] = cv2.LUT(scale, lut[:,0]) 
+    scale[scale>0] = 255
+    image[:,:,3] = scale # alpha
+    cv2.imwrite('scale.png',image)
+
+def apply_colormap(hist, hist_max, colormap):
     hist *= (255. / hist_max) if hist_max else 0.
     hist = hist.astype(np.uint8)
 
-    v = np.asarray(colormap)
-    v *= 255
-    v = v.astype(np.uint8)
+    lut = np.asarray(colormap)
+    lut *= 255
+    lut = lut.astype(np.uint8)
 
-    heatmap = np.zeros((grid[0], grid[1],4), np.uint8)
-    heatmap[:,:,2] = cv2.LUT(hist, v[:,2]) # R matplotlib, 0 B opencv
-    heatmap[:,:,1] = cv2.LUT(hist, v[:,1]) # G matplotlib, 1 G opencv
-    heatmap[:,:,0] = cv2.LUT(hist, v[:,0]) # B matplotlib, 2 R opencv
-    hist[hist>0] = 150
-    heatmap[:,:,3] = hist # alpha
-    return heatmap
+    heatmap = np.zeros((sh, sw, 4), np.uint8)
+    heatmap[:,:,2] = cv2.LUT(hist, lut[:,2]) # R matplotlib, 0 B opencv
+    heatmap[:,:,1] = cv2.LUT(hist, lut[:,1]) # G matplotlib, 1 G opencv
+    heatmap[:,:,0] = cv2.LUT(hist, lut[:,0]) # B matplotlib, 2 R opencv
+    # hist[hist>0] = 255
+    # heatmap[:,:,3] = hist # alpha
+
+    heatmap[:,:,3] = np.ones((sh, sw), np.uint8)*255
+
+    #  crop horizontally
+    return heatmap[:,256:1024,:]
+
+def custom_heatmap(data, heatmap_detail=60, colormap=colormaps.viridis):
+    """
+    adapted from pupil-labs
+    colormaps from: https://bids.github.io/colormap/
+    """
+    global_max = []
+    histograms = []
+    for gaze_data in data:
+        hist = histogram(gaze_data, heatmap_detail)
+        global_max.append(hist.max())
+        histograms.append(hist)
+
+    heatmaps = []
+    hist_max = np.max(global_max)
+    for hist in histograms:
+        heatmaps.append(apply_colormap(hist, hist_max, colormap))
+        
+    if len(heatmaps) > 1:
+        return tuple(heatmaps) 
+    else:
+        return heatmaps[0]
 
 def denormalize(gaze_points):
     gaze_points['x_norm'] *= sw
@@ -121,7 +167,7 @@ def analyse(i, inspect=False, data_files=None):
     time_file = load_fpe_timestamps(data_files[2])
     all_gaze_data = load_gaze_data(data_files[3])
 
-    title = ' - '.join((str(i), str(info_file['feature_degree']), info_file['nickname'], info_file['group']))
+    title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], info_file['group']))
 
     time_data = zip(time_file['time'], time_file['bloc'], time_file['trial'], time_file['event'])
     ini_data = zip(ini_file['trial'], ini_file['contingency'], ini_file['feature'])
@@ -162,11 +208,13 @@ def analyse(i, inspect=False, data_files=None):
         second_label='S-',
         y_limit= [1., 10.]       
     )
-
-    # if inspect:
-    #     draw.images(
-    #         custom_heatmap(positive_gaze_data),
-    #         custom_heatmap(negative_gaze_data), (sw, sh))
+    title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['group'], info_file['nickname'], 'S+ S-')) 
+    draw.images(
+        custom_heatmap([positive_gaze_data, negative_gaze_data]),
+        (sw, sh),
+        save=not inspect,
+        title=title
+         )
 
     return (positive_gaze_data, negative_gaze_data), (pdispersion, ndispersion)
 
@@ -196,11 +244,11 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
     fn_positive_intervals, fn_negative_intervals = get_trial_intervals(fn_trials)
 
 
-    title = ' - '.join((str(i), str(info_file['feature_degree']), info_file['nickname'], 'FP'))
+    title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'FP'))
     titlea = title + '_fp_positive'
     titleb = title + '_fp_negative'
 
-    title = ' - '.join((str(i), str(info_file['feature_degree']), info_file['nickname'], 'FN'))
+    title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'FN'))
     titlec = title + '_fn_positive'
     titled = title + '_fn_negative'
 
@@ -245,7 +293,7 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
         inspect=False)
     fn_ndispersion = dispersion(fn_negative_gaze_data, fn_negative_intervals, titled)
 
-    title = ' - '.join((str(i), str(info_file['feature_degree']), info_file['nickname'], 'distinctive'))
+    title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'distinctive'))
     draw.rates(
         [fp_pdispersion, fn_pdispersion],
         title= title+'_pdispersion',
@@ -257,7 +305,7 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
         y_limit= [1., 10.]       
     )
 
-    title = ' - '.join((str(i), str(info_file['feature_degree']), info_file['nickname'], 'common'))   
+    title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'common'))   
     draw.rates(
         [fp_ndispersion, fn_ndispersion],
         title= title+'_ndispersion',
@@ -269,16 +317,9 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
         y_limit= [1., 10.]       
     )
 
-    title = ' - '.join(('heat', str(i), str(info_file['feature_degree']), info_file['nickname'], 'distinctive-common'))   
-    hm = custom_heatmap(fp_positive_gaze_data)
-
-    # [:,256:1024,:] <- crop horizontally
-    imgs = (
-        custom_heatmap(fp_positive_gaze_data)[:,256:1024,:],
-        custom_heatmap(fn_negative_gaze_data)[:,256:1024,:],
-        custom_heatmap(fp_negative_gaze_data)[:,256:1024,:],
-        custom_heatmap(fn_positive_gaze_data)[:,256:1024,:]
-    ) 
+    title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'distinctive-common'))   
+    imgs = custom_heatmap([fp_positive_gaze_data,fn_negative_gaze_data,
+                           fp_negative_gaze_data,fn_positive_gaze_data])
     draw.images_four(
         imgs,
         (sw, sh),
@@ -383,9 +424,13 @@ def analyse_experiment(feature_degree):
         title= 'comparing FP and FN looking dispersion - '+str(feature_degree),
         labels= labels
     )
-    # draw.images(
-    #     custom_heatmap(positive),
-    #     custom_heatmap(negative), (sw, sh))        
+    imgs = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
+    draw.images_four(
+        imgs,
+        (sw, sh),
+        title=' - '.join(['heat', str(feature_degree)]),
+        save= True)
+       
 
 def analyse_experiment_intrasubject(feature_degree):
     fp_positivex, fp_positivey = [], []
@@ -480,38 +525,19 @@ def analyse_experiment_intrasubject(feature_degree):
         labels= labels
     )
 
-    draw.images(
-        custom_heatmap(fp_positive),
-        custom_heatmap(fn_negative), (sw, sh),
-        title='comparing FP and FN looking dispersion - '+str(feature_degree)+'_intra_distinctive_heatmaps',
-        save=True
-    )
-
-    draw.images(
-        custom_heatmap(fp_negative),
-        custom_heatmap(fn_positive), (sw, sh),
-        title='comparing FP and FN looking dispersion - '+str(feature_degree)+'_intra_common_heatmaps',
-        save=True
-        )
+    imgs = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
+    draw.images_four(
+        imgs,
+        (sw, sh),
+        title=' - '.join(['heat', str(feature_degree),'intra']),
+        save= True)
 
 
 if __name__ == '__main__':
-    analyse_experiment_intrasubject(9)
+    # analyse_experiment_intrasubject(9)
     # analyse_experiment(9)
-
-    # positive = np.genfromtxt('positive90.txt',
-    #     delimiter=' ',
-    #     filling_values=None,
-    #     names=True,
-    #     dtype=None
-    # )
-    # negative = np.genfromtxt('negative90.txt',
-    #     delimiter=' ',
-    #     filling_values=None,
-    #     names=True,
-    #     dtype=None
-    # )
-
-    # draw.images(
-    #     custom_heatmap(positive),
-    #     custom_heatmap(negative), (sw, sh))        
+    # analyse_experiment(90)
+   
+    # analyse(67)
+    analyse_intrasubject(0)
+    # heatmap_scale()
