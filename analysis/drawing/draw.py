@@ -320,41 +320,30 @@ def images(imgs, screen, save, title):
     else:
         plt.show()
 
-def images_four(imgs, screen, save, title):
-    (w, h) = screen
-    (im1, im2, im3, im4) = imgs
-    def fax(ax):
+def images_four(imgs, save, title):
+    from mpl_toolkits.axes_grid1 import Grid
+    
+    f = plt.figure(figsize=(4,4))
+    grid = Grid(f, rect=111, nrows_ncols=(2,2),
+            axes_pad=0.01, label_mode='none',)
+
+    for ax, im in zip(grid, imgs):
+        ax.imshow(im)
         ax.spines['top'].set_visible(False)
         ax.spines['bottom'].set_visible(False)
         ax.spines['left'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        ax.xaxis.set_ticks_position('none')
-        ax.yaxis.set_ticks_position('none')
         ax.axis('off')
-        # ax.set_ylim(0, h)
-        # ax.set_xlim(0, w)        
+         
+    f.text(.08, .52, 'FP', ha='left', va='center')
+    f.text(.95, .52, 'FN', ha='right', va='center')
+    f.text(.52, .95, 'distinctive', ha='center', va='top',)
+    f.text(.52, .08, 'common', ha='center', va='bottom',)   
 
-    f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharey=True, sharex=True)
-    ax1.imshow(im1)
-    fax(ax1)
-    ax2.imshow(im2)
-    fax(ax2)
-    ax3.imshow(im3)
-    fax(ax3)
-    ax4.imshow(im4)
-    fax(ax4)
-    
-    f.text(.1, .5, 'FP', ha='left', va='center')
-    f.text(.9, .5, 'FN', ha='right', va='center')
-    f.text(.5, .9, 'distinctive', ha='center', va='top',)
-    f.text(.5, .1, 'common', ha='center', va='bottom',)   
-    f.tight_layout(pad= 0)
-    f.subplots_adjust(wspace=0, hspace=0)
     if save:
         save_figure(title)       
     else:
         plt.show()
-
 
 if __name__ == '__main__':
     from random import randrange

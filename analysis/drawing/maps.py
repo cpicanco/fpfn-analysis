@@ -79,15 +79,15 @@ def apply_colormap(hist, hist_max, colormap):
     heatmap[:,:,2] = cv2.LUT(hist, lut[:,2]) # R matplotlib, 0 B opencv
     heatmap[:,:,1] = cv2.LUT(hist, lut[:,1]) # G matplotlib, 1 G opencv
     heatmap[:,:,0] = cv2.LUT(hist, lut[:,0]) # B matplotlib, 2 R opencv
-    # hist[hist>0] = 255
-    # heatmap[:,:,3] = hist # alpha
+    hist[hist>0] = 255
+    heatmap[:,:,3] = hist # alpha
 
-    heatmap[:,:,3] = np.ones((sh, sw), np.uint8)*255
+    # heatmap[:,:,3] = np.ones((sh, sw), np.uint8)*255
 
     #  crop horizontally
     return heatmap[:,256:1024,:]
 
-def custom_heatmap(data, heatmap_detail=60, colormap=colormaps.viridis):
+def custom_heatmap(data, heatmap_detail=50, colormap=colormaps.viridis):
     """
     adapted from pupil-labs
     colormaps from: https://bids.github.io/colormap/
@@ -322,7 +322,6 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
                            fp_negative_gaze_data,fn_positive_gaze_data])
     draw.images_four(
         imgs,
-        (sw, sh),
         title=title,
         save= not inspect)
 
@@ -427,7 +426,6 @@ def analyse_experiment(feature_degree):
     imgs = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
     draw.images_four(
         imgs,
-        (sw, sh),
         title=' - '.join(['heat', str(feature_degree)]),
         save= True)
        
@@ -528,16 +526,15 @@ def analyse_experiment_intrasubject(feature_degree):
     imgs = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
     draw.images_four(
         imgs,
-        (sw, sh),
         title=' - '.join(['heat', str(feature_degree),'intra']),
         save= True)
 
 
 if __name__ == '__main__':
-    # analyse_experiment_intrasubject(9)
-    # analyse_experiment(9)
-    # analyse_experiment(90)
+    analyse_experiment_intrasubject(9)
+    analyse_experiment(9)
+    analyse_experiment(90)
    
-    # analyse(67)
-    analyse_intrasubject(0)
+    # analyse(44)
+    # analyse_intrasubject(0)
     # heatmap_scale()
