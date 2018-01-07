@@ -101,6 +101,8 @@ ENV/
 .mypy_cache/
 
 # other
-*.txt
+/analysis/**/*.txt
+/analysis/*.txt
 *.png
 *.pdf
+*.zip
