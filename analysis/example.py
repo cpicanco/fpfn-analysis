@@ -139,6 +139,13 @@ def analyse_experiment(feature_degree):
                 data_files=data_files)
 
             if info_file['group'] == 'positive':
+                # wrong size
+                if '2017_11_13_000_GAB' in info_file['nickname']:
+                    positive.append(np.array(looking_rate)[:27])
+                    positive_button.append(np.array(button_rate)[:27])
+                    positive_latency.append(np.array(latencies)[:27])
+                    continue
+
                 positive.append(np.array(looking_rate))
                 positive_button.append(np.array(button_rate))
                 positive_latency.append(np.array(latencies))
@@ -359,10 +366,49 @@ def analyse_experiment_intrasubject(feature_degree=9):
         second_label='FN group'
         )
 
-if __name__ == '__main__':
-    analyse_experiment(feature_degree=9)
-    analyse_experiment(feature_degree=90)
-    analyse_experiment_intrasubject(feature_degree=9)
 
-    # analyse(53)
+def analyse_excluded(feature_degree):
+    positive = []
+    negative = []
+
+    positive_button = []
+    negative_button = []
+
+    positive_latency = []
+    negative_latency = []
+
+    for path in PATHS_DESTIN:
+        i = PATHS_DESTIN.index(path)
+        if not p[i]['excluded']:
+            continue
+
+        data_files = get_data_files(path, gaze_file_filter=p[i]['gaze_file_filter'])
+        info_file = load_yaml_data(data_files[0])
+        if not ((info_file['group'] == 'positive') or (info_file['group'] == 'negative')):
+            continue
+
+        if info_file['feature_degree'] == feature_degree:
+            looking_rate, button_rate, latencies = analyse(
+                i,
+                inspect=False,
+                data_files=data_files)
+
+            if info_file['group'] == 'positive':
+                positive.append(np.array(looking_rate))
+                positive_button.append(np.array(button_rate))
+                positive_latency.append(np.array(latencies))
+
+            elif info_file['group'] == 'negative':
+                negative.append(np.array(looking_rate))
+                negative_button.append(np.array(button_rate))
+                negative_latency.append(np.array(latencies))
+
+if __name__ == '__main__':
+    # analyse_experiment(feature_degree=9)
+    # analyse_experiment(feature_degree=90)
+    # analyse_experiment_intrasubject(feature_degree=9)
+
+    analyse_excluded(9)
+
+    # analyse(47)
     # analyse_intra_subject(i)    

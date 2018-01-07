@@ -365,8 +365,9 @@ def analyse_experiment(feature_degree):
                 fp_negativex.append(negative_gaze['x_norm'])
                 fp_negativey.append(negative_gaze['y_norm'])
                 
-                fp_pdispersion.append(pdispersion)
-                fp_ndispersion.append(ndispersion)
+                fp_pdispersion.append(pdispersion[:27])
+                fp_ndispersion.append(ndispersion[:27])
+
 
             elif info_file['group'] == 'negative':
                 fn_positivex.append(positive_gaze['x_norm'])
@@ -375,8 +376,8 @@ def analyse_experiment(feature_degree):
                 fn_negativex.append(negative_gaze['x_norm'])
                 fn_negativey.append(negative_gaze['y_norm'])
 
-                fn_pdispersion.append(pdispersion)
-                fn_ndispersion.append(ndispersion)
+                fn_pdispersion.append(pdispersion[:27])
+                fn_ndispersion.append(ndispersion[:27])
 
     fp_positivex = np.hstack(fp_positivex)
     fp_positivey = np.hstack(fp_positivey)
@@ -529,12 +530,51 @@ def analyse_experiment_intrasubject(feature_degree):
         title=' - '.join(['heat', str(feature_degree),'intra']),
         save= True)
 
+def analyse_excluded(feature_degree):
+    fp_positivex, fp_positivey = [], []
+    fp_negativex, fp_negativey = [], []
+
+    fn_positivex, fn_positivey = [], []
+    fn_negativex, fn_negativey = [], []
+
+    fp_pdispersion, fp_ndispersion = [], []
+    fn_pdispersion, fn_ndispersion = [], []
+    a, b = 0, 0
+    for path in PATHS_DESTIN:
+        i = PATHS_DESTIN.index(path)
+        parameters = PARAMETERS[i]
+        if not parameters['excluded']:
+            continue
+
+        data_files = get_data_files(path,
+            gaze_file_filter=parameters['gaze_file_filter'])
+        info_file = load_yaml_data(data_files[0])
+        if not ((info_file['group'] == 'positive') or (info_file['group'] == 'negative')):
+            continue
+
+        if info_file['feature_degree'] == feature_degree:
+            gaze, gaze_dispersion = analyse(i, 
+                inspect= False,
+                data_files= data_files)
+
+            (positive_gaze, negative_gaze) = gaze
+            (pdispersion, ndispersion) = gaze_dispersion
+            if info_file['group'] == 'positive': 
+                a += 1   
+
+            if info_file['group'] == 'negative':
+                b += 1
+
+    print('positive:', a)
+    print('negative:', b)
 
 if __name__ == '__main__':
-    analyse_experiment_intrasubject(9)
-    analyse_experiment(9)
-    analyse_experiment(90)
+    # analyse_experiment_intrasubject(9)
+    # analyse_experiment(9)
+    # analyse_experiment(90)
    
-    # analyse(44)
+    # analyse_excluded(9)
+
+    analyse(47)
     # analyse_intrasubject(0)
     # heatmap_scale()
