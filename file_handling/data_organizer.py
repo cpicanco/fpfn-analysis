@@ -755,7 +755,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_ba*',
      'do_manual_correction': [0.03, 0.03],
      'confidence_threshold' :.65,
-     'excluded':True}, # differentiation at the very end
+     'excluded':False}, # differentiation at the very end
 
     # '2017_11_16_003_ALI'
     {'min_block_size': 20643,
@@ -785,27 +785,27 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_ba*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # complicated eyes
+     'excluded':True}, # does not follow instructions
 
     # '2017_11_16_000_VIN'
-    {'min_block_size': 2000,
+    {'min_block_size': 20000,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1.30, .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_ba*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # differentiation at the very end
+     'excluded':False}, # differentiation at the very end
  
     # '2017_11_14_006_ALE'
     {'min_block_size': 18698,
      'do_correction': False,  
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
-     'gaze_file_filter': '*2d_pr*',
+     'gaze_file_filter': '*3d_ba*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # using too much peripheral vision
+     'excluded':False}, # using too much peripheral vision
 
     # '2017_11_14_005_JOA'
     {'min_block_size': 20000,
@@ -902,10 +902,10 @@ PARAMETERS = [
      'do_correction': False,       
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
-     'gaze_file_filter': '*2d_pr*',
+     'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # do not followed instructions
+     'excluded':False}, # looking first, then button
 
     # '2017_11_13_001_MAR'
     {'min_block_size': 20087,
@@ -925,7 +925,7 @@ PARAMETERS = [
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # wrong size, 108 instead 54
+     'excluded':False}, # wrong size, 108 instead 54
 
     # '2017_11_09_007_REN'
     {'min_block_size': 20404,
@@ -1020,7 +1020,7 @@ if __name__ == '__main__':
     '2017_11_24_001_PED','2017_11_24_000_MAN','2017_11_23_006_MAY','2017_11_23_005_RAU',
     '2017_11_23_004_ROM','2017_11_23_003_YUR','2017_11_23_002_EIL','2017_11_22_001_TIA',
     '2017_11_23_001_JOS','2017_11_23_000_DEN','2017_11_22_000_EUL','2017_11_16_003_ALI',
-    '2017_11_16_002_LAR','2017_11_16_001_MAT','2017_11_16_000_VIN','2017_11_14_006_ALE',
+    '2017_11_16_002_LAR','2017_11_16_001_MAT','2017_11_16_000_VIN',
     '2017_11_14_005_JOA','2017_11_14_004_NEL','2017_11_14_003_LUC','2017_11_14_002_TAT',
     '2017_11_14_001_MAR','2017_11_14_000_SON','2017_11_13_005_KAR','2017_11_13_004_ISA',
     '2017_11_13_003_LIZ','2017_11_13_002_MAX','2017_11_13_001_MAR','2017_11_13_000_GAB',
