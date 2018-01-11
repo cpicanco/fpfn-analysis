@@ -16,7 +16,7 @@ from methods import load_yaml_data, load_ini_data, trial_mask
 from methods import load_fpe_timestamps, load_gaze_data, load_ini_data_intrasubject
 from methods import get_data_files, statistics
 from methods import get_events_per_trial, get_trial_intervals
-from correction.utils import clean_gaze_data
+from correction.utils import clean_gaze_data, remove_outside_session_time
 
 from categorization.stimuli import SCREEN_WIDTH_PX as sw
 from categorization.stimuli import SCREEN_HEIGHT_PX as sh
@@ -42,7 +42,7 @@ def histogram(data, detail):
     kernel = detail // 2 * 2 + 1
     return cv2.GaussianBlur(hist,(kernel, kernel), 0)
 
-def heatmap_scale(max_n=1., colormap=colormaps.viridis, width=20, height=256, opencv=True):
+def heatmap_scale(title, size, y_max=1., colormap=colormaps.viridis, width=20, height=256, opencv=False):
     scale = np.zeros((height, width), np.uint8)
     s = 255
     for i in range(0, height):
@@ -57,7 +57,7 @@ def heatmap_scale(max_n=1., colormap=colormaps.viridis, width=20, height=256, op
     if opencv:
         B, G, R = 0, 1, 2
     else:
-        B, G, R = 2, 1, 1
+        B, G, R = 2, 1, 0
 
     image = np.zeros((height, width, 4), np.uint8)
     image[:,:,B] = cv2.LUT(scale, lut[:,2])
@@ -65,7 +65,8 @@ def heatmap_scale(max_n=1., colormap=colormaps.viridis, width=20, height=256, op
     image[:,:,R] = cv2.LUT(scale, lut[:,0]) 
     scale[scale>0] = 255
     image[:,:,3] = scale # alpha
-    cv2.imwrite('scale.png',image)
+    # cv2.imwrite('scale.png',image)
+    return draw.scale(title=title, save=True, y_maximum=y_max, image=image, size= size)
 
 def apply_colormap(hist, hist_max, colormap):
     hist *= (255. / hist_max) if hist_max else 0.
@@ -105,9 +106,9 @@ def custom_heatmap(data, heatmap_detail=50, colormap=colormaps.viridis):
         heatmaps.append(apply_colormap(hist, hist_max, colormap))
         
     if len(heatmaps) > 1:
-        return tuple(heatmaps) 
+        return tuple(heatmaps), hist_max
     else:
-        return heatmaps[0]
+        return heatmaps[0], hist_max
 
 def denormalize(gaze_points):
     gaze_points['x_norm'] *= sw
@@ -209,12 +210,15 @@ def analyse(i, inspect=False, data_files=None):
         y_limit= [1., 10.]       
     )
     title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['group'], info_file['nickname'], 'S+ S-')) 
-    draw.images(
-        custom_heatmap([positive_gaze_data, negative_gaze_data]),
+    imgs, y_max = custom_heatmap([positive_gaze_data, negative_gaze_data])
+    scale_path = heatmap_scale(size=371., title= title, y_max= y_max)
+    plot_path = draw.images(
+        imgs,
         (sw, sh),
         save=not inspect,
-        title=title
-         )
+        title=title)
+
+    draw.join_images(plot_path, scale_path)
 
     return (positive_gaze_data, negative_gaze_data), (pdispersion, ndispersion)
 
@@ -252,45 +256,31 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
     titlec = title + '_fn_positive'
     titled = title + '_fn_negative'
 
-    fp_positive_gaze_data = clean_gaze_data(all_gaze_data, 
-        do_remove_outside_session_time=fp_positive_intervals,        
+    all_gaze_data = load_gaze_data(data_files[3])
+    all_trial_intervals = get_trial_intervals({**fp_trials, **fn_trials}, uncategorized=True)   
+    all_gaze_data = clean_gaze_data(all_gaze_data, 
+        do_remove_outside_session_time=all_trial_intervals,        
         do_correction=parameters['do_correction'],
         do_remove_outside_screen=parameters['do_remove_outside_screen'],
         do_manual_correction=parameters['do_manual_correction'],
         do_confidence_threshold=parameters['confidence_threshold'],
         min_block_size=parameters['min_block_size'],
-        inspect=False)
+        inspect=True)
 
+    mask = remove_outside_session_time(all_gaze_data['time'], fp_positive_intervals)
+    fp_positive_gaze_data = all_gaze_data[mask]      
     fp_pdispersion = dispersion(fp_positive_gaze_data, fp_positive_intervals, titlea)
 
-    fp_negative_gaze_data = clean_gaze_data(all_gaze_data, 
-        do_remove_outside_session_time=fp_negative_intervals,        
-        do_correction=parameters['do_correction'],
-        do_remove_outside_screen=parameters['do_remove_outside_screen'],
-        do_manual_correction=parameters['do_manual_correction'],
-        do_confidence_threshold=parameters['confidence_threshold'],
-        min_block_size=parameters['min_block_size'],
-        inspect=False)
+    mask = remove_outside_session_time(all_gaze_data['time'], fp_negative_intervals)
+    fp_negative_gaze_data = all_gaze_data[mask]        
     fp_ndispersion = dispersion(fp_negative_gaze_data, fp_negative_intervals, titleb)
 
-    fn_positive_gaze_data = clean_gaze_data(all_gaze_data, 
-        do_remove_outside_session_time=fn_positive_intervals,        
-        do_correction=parameters['do_correction'],
-        do_remove_outside_screen=parameters['do_remove_outside_screen'],
-        do_manual_correction=parameters['do_manual_correction'],
-        do_confidence_threshold=parameters['confidence_threshold'],
-        min_block_size=parameters['min_block_size'],
-        inspect=False)
+    mask = remove_outside_session_time(all_gaze_data['time'], fn_positive_intervals)
+    fn_positive_gaze_data = all_gaze_data[mask]
     fn_pdispersion = dispersion(fn_positive_gaze_data, fn_positive_intervals, titlec)
 
-    fn_negative_gaze_data = clean_gaze_data(all_gaze_data, 
-        do_remove_outside_session_time=fn_negative_intervals,        
-        do_correction=parameters['do_correction'],
-        do_remove_outside_screen=parameters['do_remove_outside_screen'],
-        do_manual_correction=parameters['do_manual_correction'],
-        do_confidence_threshold=parameters['confidence_threshold'],
-        min_block_size=parameters['min_block_size'],
-        inspect=False)
+    mask = remove_outside_session_time(all_gaze_data['time'], fn_negative_intervals)
+    fn_negative_gaze_data = all_gaze_data[mask]
     fn_ndispersion = dispersion(fn_negative_gaze_data, fn_negative_intervals, titled)
 
     title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'distinctive'))
@@ -318,12 +308,15 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
     )
 
     title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'distinctive-common'))   
-    imgs = custom_heatmap([fp_positive_gaze_data,fn_negative_gaze_data,
+    imgs, y_max = custom_heatmap([fp_positive_gaze_data,fn_negative_gaze_data,
                            fp_negative_gaze_data,fn_positive_gaze_data])
-    draw.images_four(
+    scale_path = heatmap_scale(size=368., title= title, y_max= y_max)
+    plot_path = draw.images_four(
         imgs,
         title=title,
         save= not inspect)
+    
+    draw.join_images(plot_path, scale_path)
 
     gaze = (fp_positive_gaze_data, fp_negative_gaze_data, fn_positive_gaze_data, fn_negative_gaze_data)
     disp = (fp_pdispersion, fp_ndispersion, fn_pdispersion, fn_ndispersion)
@@ -424,13 +417,15 @@ def analyse_experiment(feature_degree):
         title= 'comparing FP and FN looking dispersion - '+str(feature_degree),
         labels= labels
     )
-    imgs = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
-    draw.images_four(
+    title = ' - '.join(['heat', str(feature_degree)])
+    imgs, y_max = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
+    scale_path = heatmap_scale(size=368., title= title, y_max= y_max)
+    plot_path = draw.images_four(
         imgs,
-        title=' - '.join(['heat', str(feature_degree)]),
+        title= title,
         save= True)
        
-
+    draw.join_images(plot_path, scale_path)
 def analyse_experiment_intrasubject(feature_degree):
     fp_positivex, fp_positivey = [], []
     fp_negativex, fp_negativey = [], []
@@ -524,11 +519,14 @@ def analyse_experiment_intrasubject(feature_degree):
         labels= labels
     )
 
-    imgs = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
-    draw.images_four(
+    title = ' - '.join(['heat', str(feature_degree),'intra'])
+    imgs, y_max = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
+    scale_path = heatmap_scale(size=368., title= title, y_max= y_max)
+    plot_path = draw.images_four(
         imgs,
-        title=' - '.join(['heat', str(feature_degree),'intra']),
+        title=title,
         save= True)
+    draw.join_images(plot_path, scale_path)
 
 def analyse_excluded(feature_degree):
     fp_positivex, fp_positivey = [], []
@@ -575,6 +573,5 @@ if __name__ == '__main__':
    
     # analyse_excluded(9)
 
-    analyse(47)
-    # analyse_intrasubject(0)
-    # heatmap_scale()
+    # analyse(17) 
+    analyse_intrasubject(8)

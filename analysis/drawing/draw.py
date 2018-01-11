@@ -18,6 +18,16 @@ import matplotlib.patches as patches
 from categorization.stimuli import circle_grid
 from categorization.stimuli import donut_grid
 
+def join_images(path1, path2):
+    import cv2
+    im1 = cv2.imread(path1, cv2.IMREAD_UNCHANGED)
+    im2 = cv2.imread(path2, cv2.IMREAD_UNCHANGED)
+    print(im1.shape)
+    print(im2.shape)
+    os.remove(path1)
+    os.remove(path2)
+    cv2.imwrite(path1, np.concatenate((im1, im2), axis=1))
+
 def save_figure(filename):
     f = os.path.dirname(os.path.abspath(__file__))
     f = os.path.dirname(f)
@@ -26,6 +36,7 @@ def save_figure(filename):
     print(f)
     plt.savefig(f, bbox_inches='tight')
     plt.close() 
+    return f
 
 def points(x, y, title='scatter', save=False):
     x_label = 'FP'
@@ -53,7 +64,7 @@ def points(x, y, title='scatter', save=False):
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
     if save:
-        save_figure(title)       
+        return save_figure(title)       
     else:
         plt.show()    
 
@@ -82,7 +93,7 @@ def rate(data,title, save=False, y_label = 'FPS by trial'):
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
     if save:
-        save_figure(title+'_fps')      
+        return save_figure(title+'_fps')      
     else:
         plt.show()
 
@@ -120,7 +131,7 @@ def relative_rate(data,title, save=False, y_label = 'Button-pressing proportion'
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
     if save:
-        save_figure(title+name)       
+        return save_figure(title+name)       
     else:
         plt.show()
 
@@ -187,7 +198,7 @@ def rates(data,title, save=False,
         axes.legend(handles, labels)
 
     if save:
-        save_figure(title+name)        
+        return save_figure(title+name)        
     else:
         plt.show()
 
@@ -240,7 +251,7 @@ def rates_double(data, error, title, labels, y_limit=[], save=True):
     f.text(0.5, 0.04, labels[1], ha='center')
 
     if save:
-        save_figure(title)        
+        return save_figure(title)        
     else:
         plt.show()
 
@@ -302,13 +313,16 @@ def images(imgs, screen, save, title):
         ax.spines['bottom'].set_visible(False)
         ax.spines['left'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        ax.xaxis.set_ticks_position('none')
         ax.yaxis.set_ticks_position('none')
+        ax.yaxis.set_ticklabels([])
+        ax.xaxis.set_ticks_position('none')
+        ax.xaxis.set_ticklabels([])
         ax.axis('off')
         # ax.set_ylim(0, h)
         # ax.set_xlim(0, w)        
 
-    f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True)
+    dpi = 100
+    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(3.5,3.5), sharey=True, sharex=True)
     ax1.imshow(img1)
     fax(ax1)
     ax2.imshow(img2)
@@ -316,7 +330,7 @@ def images(imgs, screen, save, title):
     f.tight_layout(pad= 0)
     f.subplots_adjust(wspace=0)
     if save:
-        save_figure(title)       
+        return save_figure(title)       
     else:
         plt.show()
 
@@ -324,8 +338,9 @@ def images_four(imgs, save, title):
     from mpl_toolkits.axes_grid1 import Grid
     
     f = plt.figure(figsize=(4,4))
-    grid = Grid(f, rect=111, nrows_ncols=(2,2),
-            axes_pad=0.01, label_mode='none',)
+    grid = Grid(
+        f, rect=111, nrows_ncols=(2,2),
+        axes_pad=0.0, label_mode='none',)
 
     for ax, im in zip(grid, imgs):
         ax.imshow(im)
@@ -333,6 +348,10 @@ def images_four(imgs, save, title):
         ax.spines['bottom'].set_visible(False)
         ax.spines['left'].set_visible(False)
         ax.spines['right'].set_visible(False)
+        ax.yaxis.set_ticks_position('none')
+        ax.yaxis.set_ticklabels([])
+        ax.xaxis.set_ticks_position('none')
+        ax.xaxis.set_ticklabels([])
         ax.axis('off')
          
     f.text(.08, .52, 'FP', ha='left', va='center')
@@ -341,9 +360,41 @@ def images_four(imgs, save, title):
     f.text(.52, .08, 'common', ha='center', va='bottom',)   
 
     if save:
-        save_figure(title)       
+        return save_figure(title)       
     else:
         plt.show()
+
+def scale(y_maximum, image, save, title, size):
+    labels = ['%0.2f'%y_maximum, '0\n(transparent)']
+    # frame.get_xaxis().set_visible(False)
+    # plt.yticks([0, 256], labels)
+    # frame.yaxis.tick_right()
+    dpi = 100
+    figure = plt.figure(figsize=(1, size/dpi), dpi=dpi)
+    frame = plt.gca()
+    frame.imshow(image)
+    frame.set_title(labels[0], fontsize=10)
+    frame.set_xlabel(labels[1], fontsize=10)
+
+    # remove outer frame
+    frame.spines['top'].set_visible(False)
+    frame.spines['bottom'].set_visible(False)
+    frame.spines['left'].set_visible(False)
+    frame.spines['right'].set_visible(False) 
+
+    # remove ticks and tick labels
+    frame.axes.yaxis.set_ticks_position('none')
+    frame.axes.yaxis.set_ticklabels([])
+    frame.axes.xaxis.set_ticks_position('none')
+    frame.axes.xaxis.set_ticklabels([])
+    
+    if save:
+        filename = save_figure(title+'_scale')
+        plt.gcf().clear()  
+        return filename       
+    else:
+        plt.show() 
+        plt.gcf().clear() 
 
 if __name__ == '__main__':
     from random import randrange
