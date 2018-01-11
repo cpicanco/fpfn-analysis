@@ -70,7 +70,14 @@ p_value_plot <- function(data, filen= -1, p_value=0.001, intra_subject=FALSE) {
 		cex.main= 1.2, cex.lab= 1.0, font.main= 1, font.lab= 1
 	)
 
-	legend(0.8, 1., legend=c("p < 0.05", "p >= 0.05"),
+	if (p_value <= 0.005) {
+		s1 <- sprintf("p < %.03f", p_value)
+		s2 <- sprintf("p >= %.03f", p_value)
+	} else {
+		s1 <- sprintf("p < %.02f", p_value)
+		s2 <- sprintf("p >= %.02f", p_value)
+	}
+	legend(0.8, 1., legend=c(s1, s2),
        col=c("black", "gray"), pch=c(16, 16))
 }
 
@@ -233,11 +240,10 @@ boxplot_comparison <- function(pdata, ndata) {
 
 
 # some alternative approachs:
-
 # Eoin (https://stats.stackexchange.com/users/42952/eoin),
 # How to compare difference between two time series?,
 # URL (version: 2014-07-17): https://stats.stackexchange.com/q/108323
-rank_test_per_col <- function(positive, negative, jittered= FALSE, algorithm= 'kruskal') {
+test_per_col <- function(positive, negative, jittered= FALSE, algorithm= 'kruskal') {
 	result <- vector()
 	for (name in names(positive)) {
 		if (jittered) {
@@ -260,14 +266,20 @@ rank_test_per_col <- function(positive, negative, jittered= FALSE, algorithm= 'k
 			result = c(result, wincox.test(
 				X, Y,
 				alternative='greater',
-				paired=TRUE)$p.value)			
+				paired=TRUE)$p.value)
 		}
 
 		if (algorithm == 'mann-whitney') {
 			result = c(result, wincox.test(
 				X, Y,
 				alternative='greater',
-				paired=FALSE)$p.value)			
+				paired=FALSE)$p.value)
+		}
+
+		if (algorithm == 'student') { # jittered results equivalent to single kruskal
+			test <- t.test(X, Y, alternative='two.sided')
+			result = c(result, test$p.value)
+			# print(test)
 		}
 
 		if (result[length(result)]  > 1.0) {
@@ -305,30 +317,56 @@ rank_test_per_row <- function (positive, negative,
 }
 
 # load data
-positive <- read.table('9_intra_button_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
-negative <- read.table('9_intra_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+positive <- read.table('9_looking_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+negative <- read.table('9_looking_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
 
 
 # differentiation
-# use_jitter <- FALSE
-# if (use_jitter) {
-# 	frame <- positive[FALSE,]
-# 	for (i in seq(1,1000)) {
-# 		frame <- rbind(frame, rank_test_per_col(positive, negative, use_jitter))
-# 	}
-# } else {
-# 	frame <- rank_test_per_col(positive, negative)
-# }
-# p_value_plot(apply(frame, 2, mean), 1, p_value=0.005)
+use_jitter <- FALSE
+if (use_jitter) {
+	frame <- positive[FALSE,]
+	for (i in seq(1,1000)) {
+		frame <- rbind(frame, test_per_col(positive, negative, use_jitter))
+	}
+} else {
+	frame <- test_per_col(positive, negative)
+}
+p_value_plot(apply(frame, 2, mean), 1, p_value=0.005)
+
+# overall comparison
+# data_positive <- as.vector(t(positive)) 
+# data_negative <- as.vector(t(negative))
+# resid_plot(data_positive, data_negative, 1)
+
+# # sudo apt-get install libnlopt-dev
+# # install.packages('car', dependencies = TRUE)
+# library('car')
+# data <- c(data_positive, data_negative)
+# groups <- c(rep('posi', 270), rep('nega', 270))
+# frame <- data.frame(data, groups)
+
+# one should ensure homogeneity a priori
+# we couldn't so here we are just checking 
+# # Brown-Forsythe test for homogeneity of variance, assumes normally distributed data
+# # leveneTest(data~groups, data=frame, center=median)
+
+# # Levene's test
+# # leveneTest(data~groups, data=frame, center=mean)
+
+# # Fligner-Killeen test for homogeneity of variance, does not assumes distributed data
+# fligner.test(data~groups, data=frame)
+
+# t.test(data_positive, data_negative)
 
 # # plot means
-# positive_measure <- apply(positive, 2, sd, na.rm= TRUE)
-# negative_measure <- apply(negative, 2, sd, na.rm= TRUE)
-# norm_plot(positive_means, 1)
-# norm_plot(negative_means, 2)
-# standard_plot(positive_measure, negative_measure, 1)
+# positive_measure <- apply(positive, 2, mean)
+# negative_measure <- apply(negative, 2, mean)
 
-# differentiation intra-subject
-boxplot_comparison(positive, negative)
-frame = rank_test_per_row(positive, negative)
-p_value_plot(as.numeric(frame[1,]), 1, p_value=0.005, intra_subject= TRUE)
+# norm_plot(positive_measure, 1)
+# norm_plot(negative_measure, 2)
+# standard_plot(positive_measure, negative_measure, 1)
+# resid_plot(positive_measure, negative_measure, 5)
+# # # differentiation intra-subject
+# boxplot_comparison(positive, negative)
+# frame = rank_test_per_row(positive, negative)
+# p_value_plot(as.numeric(frame[1,]), 1, p_value=0.005, intra_subject= TRUE)
