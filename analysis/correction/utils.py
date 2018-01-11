@@ -79,6 +79,7 @@ def clean_gaze_data(all_gaze_data,
             print("Removed %i from %i (%.2f%%) data point(s) below confidence threshold!"%(deleted_count, data_count, (deleted_count/data_count)*100))
 
     if inspect and do_correction:
+        from drawing.draw import xy_plot
         data_count = all_gaze_data.shape[0]
         for block_start in range(0, data_count, min_block_size):
             block_end = block_start + min_block_size
@@ -86,7 +87,7 @@ def clean_gaze_data(all_gaze_data,
                 pass  
             else:
                 block_end = data_count
-            plot_xy(np.array([all_gaze_data[x_norm][block_start:block_end],
+            xy_plot(np.array([all_gaze_data[x_norm][block_start:block_end],
                               all_gaze_data[y_norm][block_start:block_end]]), factor=1.)
     if do_correction:
         print("Remaining data points will be corrected using %s algorithm!"%ALGORITHM_QUANTILES)
@@ -97,5 +98,9 @@ def clean_gaze_data(all_gaze_data,
     if do_manual_correction:
         print("Remaining data points will be corrected using manual (x=%.2f, y=%.2f) correction also!"%(do_manual_correction[0], do_manual_correction[1]))
         manual_correction(all_gaze_data, do_manual_correction[0], do_manual_correction[1])
+
+    if inspect:
+        from drawing.draw import xy_plot
+        xy_plot(np.array([all_gaze_data[x_norm],all_gaze_data[y_norm]]), factor=1.)
 
     return all_gaze_data
