@@ -327,9 +327,9 @@ PATHS_DESTIN = [os.path.join(get_data_path(), p) for p in PATHS_DESTIN]
 
 PARAMETERS = [
     # '2017_12_18_001_BRE'
-    {'min_block_size': 42806,
-     'do_correction': False,
-     'do_remove_outside_screen': [1., .0, 1., .0],
+    {'min_block_size': 42778,
+     'do_correction': False, # looking a lot at the top
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [-0.015, 0.03],     
@@ -337,9 +337,9 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_12_18_000_MAR'
-    {'min_block_size': 10000,
+    {'min_block_size': 42300 // 8,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
@@ -348,39 +348,39 @@ PARAMETERS = [
 
 
     # '2017_12_15_002_RUB'
-    {'min_block_size': 10000,
+    {'min_block_size': 42474 // 8,
      'do_correction': True,
      'do_remove_outside_screen': [.80, .20, 1.25, .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*2d_pr*',
-     'do_manual_correction': [0., 0.02],
+     'do_manual_correction': [],
      'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_15_001_KAR'
-    {'min_block_size': 42392,
+    {'min_block_size': 41950 // 8,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*2d_pr*',
-     'do_manual_correction': [0., 0.01],
+     'do_manual_correction': [],
      'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_15_000_RAF'
-    {'min_block_size': 42298,
+    {'min_block_size': 41620 // 8,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*2d_pr*',
-     'do_manual_correction': [0., 0.03],
+     'do_manual_correction': [],
      'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_14_002_JOS'
-    {'min_block_size': 10000,
+    {'min_block_size': 42736 // 8,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
@@ -388,7 +388,7 @@ PARAMETERS = [
      'excluded':True}, # no conditional disc.
 
     # '2017_12_14_001_JUL'
-    {'min_block_size': 40721,
+    {'min_block_size': 40516 // 4,
      'do_correction': True,
      'do_remove_outside_screen': [0.80, .27, 1.10, .0],
      'do_remove_outside_session_time': True,
@@ -398,7 +398,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_12_14_000_TAT'
-    {'min_block_size': 10000,
+    {'min_block_size': 41339 // 8,
      'do_correction': True,
      'do_remove_outside_screen': [.83, .26, 1., -.08],
      'do_remove_outside_session_time': True,
@@ -418,9 +418,9 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_12_13_003_JOE'
-    {'min_block_size': 42897,
+    {'min_block_size': 40536 // 4,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
@@ -428,9 +428,9 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_12_13_002_FER'
-    {'min_block_size': 42895,
+    {'min_block_size': 42895 // 4,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
@@ -438,9 +438,9 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_12_13_001_LUK'
-    {'min_block_size': 42800,
+    {'min_block_size': 42308 // 8,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
@@ -448,9 +448,9 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_12_13_000_WAN'
-    {'min_block_size': 20000,
+    {'min_block_size': 42413 // 4,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1.20, .0],
+     'do_remove_outside_screen': [.80, .20, 1.20, .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
@@ -462,13 +462,13 @@ PARAMETERS = [
      'do_correction': True,
      'do_remove_outside_screen': [.85, .23, 1., .0],
      'do_remove_outside_session_time': True,
-     'gaze_file_filter': '*2d_pr*',
+     'gaze_file_filter': '*2d_pr*', # unstable 3d models
      'do_manual_correction': [0., 0.06],
      'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_12_01_000_LUI'  
-    {'min_block_size': 20636,
+    {'min_block_size': 19984,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -478,7 +478,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_29_001_FEL'    
-    {'min_block_size': 10597,
+    {'min_block_size': 18842//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -488,7 +488,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_29_000_DAN'
-    {'min_block_size': 20643,
+    {'min_block_size': 20468,
      'do_correction': False,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -498,7 +498,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_28_003_GIO'
-    {'min_block_size': 20650,
+    {'min_block_size': 20228//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -518,7 +518,7 @@ PARAMETERS = [
      'excluded':True}, # no conditional disc.
 
     # '2017_11_28_001_ELI'
-    {'min_block_size': 20654,
+    {'min_block_size': 20212//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -548,7 +548,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_27_004_AUR'
-    {'min_block_size': 20627,
+    {'min_block_size': 20183,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -558,7 +558,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_27_003_LUC'
-    {'min_block_size': 20628,
+    {'min_block_size': 19863//6,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -568,27 +568,27 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_27_002_JOR'
-    {'min_block_size': 20623,
-     'do_correction': False,
+    {'min_block_size': 20209//4,
+     'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
-     'do_manual_correction': [-0.02, 0.],
+     'do_manual_correction': [0.02, 0.],
      'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_27_001_TUL'
-    {'min_block_size': 20575,
-     'do_correction': False,
+    {'min_block_size': 20365,
+     'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
-     'do_manual_correction': [],
+     'do_manual_correction': [0.02, 0.04],
      'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_27_000_NAT'
-    {'min_block_size': 20359//3,
+    {'min_block_size': 20359//2,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -608,8 +608,8 @@ PARAMETERS = [
      'excluded':True}, # bad eyes, looking to a fixed point
 
     # '2017_11_24_005_THA'
-    {'min_block_size': 20660,
-     'do_correction': False,
+    {'min_block_size': 19119//4,
+     'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
@@ -628,7 +628,7 @@ PARAMETERS = [
      'excluded':True}, # no button differatiation
 
     # '2017_11_24_003_FER'
-    {'min_block_size': 20387,
+    {'min_block_size': 20300//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -638,7 +638,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_24_002_JON'
-    {'min_block_size': 20545,
+    {'min_block_size': 20317,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -648,7 +648,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_24_001_PED'
-    {'min_block_size': 20499,
+    {'min_block_size': 19980//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -658,7 +658,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_24_000_MAN'
-    {'min_block_size': 20440,
+    {'min_block_size': 19214//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -668,7 +668,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_23_006_MAY'
-    {'min_block_size': 20628,
+    {'min_block_size': 20561//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -678,17 +678,17 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_23_005_RAU'
-    {'min_block_size': 20407,
+    {'min_block_size': 20327//4,
      'do_correction': True,
      'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
-     'do_manual_correction': [],
+     'do_manual_correction': [0., 0.01],
      'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_23_004_ROM'
-    {'min_block_size': 20656,
+    {'min_block_size': 20416,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -708,7 +708,7 @@ PARAMETERS = [
      'excluded':True}, # no button differentiation
 
     # '2017_11_23_002_EIL'
-    {'min_block_size': 20468,
+    {'min_block_size': 19876,
      'do_correction': True,
      'do_remove_outside_screen': [.80, .20, 1.03, .0],
      'do_remove_outside_session_time': True,
@@ -728,7 +728,7 @@ PARAMETERS = [
      'excluded':True}, # no button differentiation
 
     # '2017_11_23_000_DEN'
-    {'min_block_size': 20500,
+    {'min_block_size': 20310//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1.06, .0],
      'do_remove_outside_session_time': True,
@@ -738,7 +738,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_22_001_TIA'
-    {'min_block_size': 20249,
+    {'min_block_size': 20113,
      'do_correction': True,
      'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
@@ -748,9 +748,9 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_22_000_EUL'          
-    {'min_block_size': 20349,
+    {'min_block_size': 20310//2,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1.30, .0],
+     'do_remove_outside_screen': [1., .0, 1.20, .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_ba*',
      'do_manual_correction': [0.03, 0.03],
@@ -758,7 +758,7 @@ PARAMETERS = [
      'excluded':False}, # differentiation at the very end
 
     # '2017_11_16_003_ALI'
-    {'min_block_size': 20643,
+    {'min_block_size': 19631//8,
      'do_correction': True,
      'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
@@ -768,17 +768,17 @@ PARAMETERS = [
      'excluded':False},
     
     # '2017_11_16_002_LAR'
-    {'min_block_size': 19489,
-     'do_correction': False,
-     'do_remove_outside_screen': [],
+    {'min_block_size': 18869//4,
+     'do_correction': True,
+     'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
-     'do_manual_correction': [-0.04, 0.0],
+     'do_manual_correction': [0.02, 0.02],
      'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_16_001_MAT'
-    {'min_block_size': 19253,
+    {'min_block_size': 19176//8, # bias at the end
      'do_correction': True,           
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -788,12 +788,12 @@ PARAMETERS = [
      'excluded':True}, # does not follow instructions
 
     # '2017_11_16_000_VIN'
-    {'min_block_size': 20000,
+    {'min_block_size': 20354//4,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1.30, .0],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_ba*',
-     'do_manual_correction': [],
+     'do_manual_correction': [0.01, 0.01],
      'confidence_threshold' :.65,
      'excluded':False}, # differentiation at the very end
  
@@ -803,32 +803,32 @@ PARAMETERS = [
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_ba*',
-     'do_manual_correction': [],
+     'do_manual_correction': [-0.04, -0.09],
      'confidence_threshold' :.65,
      'excluded':False}, # using too much peripheral vision
 
     # '2017_11_14_005_JOA'
-    {'min_block_size': 20000,
-     'do_correction': False,
+    {'min_block_size': 18608//2,
+     'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
-     'do_manual_correction': [-0.04, 0.06],
+     'do_manual_correction': [], # [-0.04, 0.06],
      'confidence_threshold': .65,
      'excluded':False},
     
     # '2017_11_14_004_NEL'
-    {'min_block_size': 20000,
-     'do_correction': False,
+    {'min_block_size': 20234//4,
+     'do_correction': True,
      'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
-     'do_manual_correction': [-0.01, 0.065],
+     'do_manual_correction': [0.0, 0.05],
      'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_14_003_LUC'
-    {'min_block_size': 20000,
+    {'min_block_size': 17836//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -838,7 +838,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_14_002_TAT'
-    {'min_block_size': 20000,
+    {'min_block_size': 20557,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -848,7 +848,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_14_001_MAR'
-    {'min_block_size': 20342,
+    {'min_block_size': 20179,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -858,17 +858,17 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_14_000_SON'
-    {'min_block_size': 20000,
+    {'min_block_size': 20130//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
-     'do_manual_correction': [],
+     'do_manual_correction': [0., 0.05],
      'confidence_threshold': .65,
      'excluded':False},
 
     # '2017_11_13_005_KAR'  #***********
-    {'min_block_size': 20000,
+    {'min_block_size': 19042//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -888,7 +888,7 @@ PARAMETERS = [
      'excluded':True},
 
     # '2017_11_13_003_LIZ'
-    {'min_block_size': 10000,
+    {'min_block_size': 19409//3,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -898,7 +898,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_13_002_MAX'   
-    {'min_block_size': 20577,
+    {'min_block_size': 20472,
      'do_correction': False,       
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -908,7 +908,7 @@ PARAMETERS = [
      'excluded':False}, # looking first, then button
 
     # '2017_11_13_001_MAR'
-    {'min_block_size': 20087,
+    {'min_block_size': 19067//3, # bias at the end
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -918,7 +918,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_13_000_GAB'
-    {'min_block_size': 26933,
+    {'min_block_size': 26905//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -928,8 +928,8 @@ PARAMETERS = [
      'excluded':False}, # wrong size, 108 instead 54
 
     # '2017_11_09_007_REN'
-    {'min_block_size': 20404,
-     'do_correction': False,
+    {'min_block_size': 20217,
+     'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
@@ -938,9 +938,9 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_09_005_AMA'
-    {'min_block_size': 20439,
+    {'min_block_size': 19738//4,
      'do_correction': True,
-     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
@@ -958,9 +958,9 @@ PARAMETERS = [
      'excluded':True}, # no button differentiation # unstable 3d model
 
     # '2017_11_09_002_EST'       
-    {'min_block_size': 20299,
+    {'min_block_size': 19777//6,
      'do_correction': True,              
-     'do_remove_outside_screen': [1., .0, 1., .0],
+     'do_remove_outside_screen': [.80, .20, 1., .0],
      'do_remove_outside_session_time': True,
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
@@ -968,7 +968,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_09_001_KAL'
-    {'min_block_size': 19096,
+    {'min_block_size': 17264,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -988,7 +988,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_08_003_REU'
-    {'min_block_size': 20657, 
+    {'min_block_size': 20312, 
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -998,7 +998,7 @@ PARAMETERS = [
      'excluded':False},
 
     # '2017_11_06_000_ROB'
-    {'min_block_size': 20657,
+    {'min_block_size': 20068//4,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
      'do_remove_outside_session_time': True,
@@ -1012,7 +1012,7 @@ if __name__ == '__main__':
     '2017_12_18_001_BRE','2017_12_18_000_MAR','2017_12_15_002_RUB','2017_12_15_001_KAR',
     '2017_12_15_000_RAF','2017_12_14_002_JOS','2017_12_14_001_JUL','2017_12_14_000_TAT',
     '2017_12_13_004_ANT','2017_12_13_003_JOE','2017_12_13_002_FER','2017_12_13_001_LUK',
-    '2017_12_13_000_WAN','2017_12_01_001_LEX','2017_12_01_000_LUI','2017_11_29_001_FEL',
+    '2017_12_13_000_WAN','2017_12_01_000_LUI','2017_11_29_001_FEL','2017_12_01_001_LEX',
     '2017_11_29_000_DAN','2017_11_28_003_GIO','2017_11_28_002_FRA','2017_11_28_001_ELI',
     '2017_11_28_000_SID','2017_11_27_005_ANA','2017_11_27_004_AUR','2017_11_27_003_LUC',
     '2017_11_27_002_JOR','2017_11_27_001_TUL','2017_11_27_000_NAT','2017_11_24_006_VER',
@@ -1020,7 +1020,7 @@ if __name__ == '__main__':
     '2017_11_24_001_PED','2017_11_24_000_MAN','2017_11_23_006_MAY','2017_11_23_005_RAU',
     '2017_11_23_004_ROM','2017_11_23_003_YUR','2017_11_23_002_EIL','2017_11_22_001_TIA',
     '2017_11_23_001_JOS','2017_11_23_000_DEN','2017_11_22_000_EUL','2017_11_16_003_ALI',
-    '2017_11_16_002_LAR','2017_11_16_001_MAT','2017_11_16_000_VIN',
+    '2017_11_16_002_LAR','2017_11_16_001_MAT','2017_11_16_000_VIN','2017_11_14_006_ALE',
     '2017_11_14_005_JOA','2017_11_14_004_NEL','2017_11_14_003_LUC','2017_11_14_002_TAT',
     '2017_11_14_001_MAR','2017_11_14_000_SON','2017_11_13_005_KAR','2017_11_13_004_ISA',
     '2017_11_13_003_LIZ','2017_11_13_002_MAX','2017_11_13_001_MAR','2017_11_13_000_GAB',
