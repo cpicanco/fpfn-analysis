@@ -48,7 +48,7 @@ def analyse_button(trials, responses, title, inspect=False):
     #     ) 
     return button_relative_rate
 
-def analyse(i, inspect=False, data_files=None):
+def analyse(i, factor='donut_slice', inspect=False, data_files=None):
     print('\nRunning analysis for session:')
     print('\t', PATHS_DESTIN[i])
     print('\t', PATHS_SOURCE[i])
@@ -62,7 +62,7 @@ def analyse(i, inspect=False, data_files=None):
     ini_file = load_ini_data(data_files[1])
     time_file = load_fpe_timestamps(data_files[2])
     all_gaze_data = load_gaze_data(data_files[3])
-    title = ' - '.join(['%02d'%i, '%02d'%info_file['feature_degree'], info_file['group'], info_file['nickname']])
+    title = ' - '.join(['%02d'%i, '%02d'%info_file['feature_degree'], info_file['group'], info_file['nickname'], str(factor)])
 
     time_data = zip(time_file['time'], time_file['bloc'], time_file['trial'], time_file['event'])
     ini_data = zip(ini_file['trial'], ini_file['contingency'], ini_file['feature'])
@@ -73,7 +73,6 @@ def analyse(i, inspect=False, data_files=None):
     features = ini_file['feature']
     trial_intervals = get_trial_intervals(trials, uncategorized=True)  
 
-    factor = 'donut_slice'
     gaze_rate_per_trial, gaze_rate_mirror = get_gaze_rate_per_trial(
         trial_intervals,
         all_gaze_data,
@@ -112,7 +111,7 @@ def analyse(i, inspect=False, data_files=None):
 
     return gaze_rate, button_proportion, latency(trials)
 
-def analyse_experiment(feature_degree):
+def analyse_experiment(feature_degree, factor):
     positive = []
     negative = []
 
@@ -135,6 +134,7 @@ def analyse_experiment(feature_degree):
         if info_file['feature_degree'] == feature_degree:
             looking_rate, button_rate, latencies = analyse(
                 i,
+                factor,
                 inspect=False,
                 data_files=data_files)
 
@@ -164,7 +164,7 @@ def analyse_experiment(feature_degree):
     draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='average looking proportion along trials - fp %i°'%feature_degree,
+        title= ' - '.join(['average looking proportion', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
         y_label='average looking proportion',
         single=False,
@@ -183,7 +183,7 @@ def analyse_experiment(feature_degree):
     draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='average button-pressing proportion along trials - fp %i°'%feature_degree,
+        title=' - '.join(['average button-pressing proportion', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
         y_label='average button-pressing proportion',
         single=False,
@@ -201,7 +201,7 @@ def analyse_experiment(feature_degree):
     draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='average latency along trials - fp %i°'%feature_degree,
+        title=' - '.join(['average latency', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
         y_label='latency (s)',
         single=False,
@@ -209,7 +209,7 @@ def analyse_experiment(feature_degree):
         second_label='FN group'
         )
 
-def analyse_intra_subject(i, inspect=False, data_files=None):
+def analyse_intra_subject(i, factor='donut_slice', inspect=False, data_files=None):
     print('\nRunning analysis for session:')
     print('\t', PATHS_DESTIN[i])
     print('\t', PATHS_SOURCE[i])
@@ -223,19 +223,18 @@ def analyse_intra_subject(i, inspect=False, data_files=None):
     
     responses = get_responses(time_file) 
 
-    title = ' - '.join(['%02d'%i, info_file['nickname'], 'square (FP)'])
+    title = ' - '.join(['%02d'%i, info_file['nickname'], 'square (FP)', str(factor)])
     time_data = zip(time_file['time'], time_file['bloc'], time_file['trial'], time_file['event'])
     fp_ini_data = zip(fp_ini_file['trial'], fp_ini_file['contingency'], fp_ini_file['feature'])
     fp_trials = get_events_per_trial(fp_ini_data, time_data)
     fp_button_proportion = analyse_button(fp_trials, responses, title)  
 
-    title = ' - '.join(['%02d'%i, info_file['nickname'], 'X (FN)'])
+    title = ' - '.join(['%02d'%i, info_file['nickname'], 'X (FN)', str(factor)])
     time_data = zip(time_file['time'], time_file['bloc'], time_file['trial'], time_file['event'])
     fn_ini_data = zip(fn_ini_file['trial'], fn_ini_file['contingency'], fn_ini_file['feature'])
     fn_trials = get_events_per_trial(fn_ini_data, time_data)
     fn_button_proportion = analyse_button(fn_trials, responses, title)  
 
-    factor = 'donut_slice'
     all_gaze_data = load_gaze_data(data_files[3])
     all_trial_intervals = get_trial_intervals({**fp_trials, **fn_trials}, uncategorized=True)   
     gaze_rate_per_trial, gaze_rate_mirror = get_gaze_rate_per_trial(
@@ -260,7 +259,7 @@ def analyse_intra_subject(i, inspect=False, data_files=None):
         gaze_rate_per_trial[fn_ini_file['trial']],
         gaze_rate_mirror[fn_ini_file['trial']])
 
-    title = ' - '.join(['%02d'%i, info_file['nickname'],'square(FP)_X(FN)'+'_factor_'+str(factor)])
+    title = ' - '.join(['%02d'%i, info_file['nickname'],'square(FP)_X(FN)', str(factor)])
     draw.rates([fp_gaze_rate, fn_gaze_rate], title,
         save=not inspect,
         y_label='Looking proportion at the feature',
@@ -274,7 +273,7 @@ def analyse_intra_subject(i, inspect=False, data_files=None):
     gaze = (fp_gaze_rate, fn_gaze_rate)
     return button, gaze, latencies
 
-def analyse_experiment_intrasubject(feature_degree=9):
+def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
     positive_gaze = []
     negative_gaze = []
 
@@ -297,6 +296,7 @@ def analyse_experiment_intrasubject(feature_degree=9):
         if info_file['feature_degree'] == feature_degree:
             button_rate, looking_rate, latencies = analyse_intra_subject(
                 i,
+                factor,
                 inspect=False,
                 data_files=data_files)
 
@@ -321,7 +321,7 @@ def analyse_experiment_intrasubject(feature_degree=9):
     draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='average button-pressing proportion - intra-subject - fp %i°'%feature_degree,
+        title=' - '.join(['average button-pressing proportion', 'intra-subject', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
         y_label='average button-pressing proportion',
         single=False,
@@ -340,7 +340,7 @@ def analyse_experiment_intrasubject(feature_degree=9):
     draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='average looking proportion - intra-subject - fp %i°'%feature_degree,
+        title=' - '.join(['average looking proportion', 'intra-subject', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
         y_label='average looking proportion',
         single=False,
@@ -358,7 +358,7 @@ def analyse_experiment_intrasubject(feature_degree=9):
     draw.rates(
         data=[positive, negative],
         error=[positive_error, negative_error],
-        title='average latency along trials - fp %i°- intra-subject'%feature_degree,
+        title=' - '.join(['average latency', 'intra-subject', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
         y_label='average latency',
         single=False,
@@ -404,11 +404,12 @@ def analyse_excluded(feature_degree):
                 negative_latency.append(np.array(latencies))
 
 if __name__ == '__main__':
-    # analyse_experiment(feature_degree=9)
-    # analyse_experiment(feature_degree=90)
-    # analyse_experiment_intrasubject(feature_degree=9)
+    factors = ['donut_slice', 1, 2, 3, 4]
+    for factor in factors:
+        # analyse_experiment(feature_degree=9, factor=factor)
+        # analyse_experiment(feature_degree=90, factor=factor)
+        analyse_experiment_intrasubject(feature_degree=9, factor=factor)
 
-    analyse_excluded(9)
-
-    # analyse(47)
-    # analyse_intra_subject(i)    
+    # analyse_excluded(9)
+    # analyse(13)
+    # analyse_intra_subject(8)    
