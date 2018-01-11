@@ -16,19 +16,31 @@ import random
 import numpy as np
 
 
-EXTERNAL_SCREEN_RECT = [
-    240, # left 
-    -16, # top
-    800, # width
-    800  # height
-]
+STIMULI_WIDTH_PX = 100
+STIMULI_HEIGHT_PX = 100
 
-INTERNAL_SCREEN_RECT = [
-    540, # left 
-    284, # top
-    200, # width
-    200  # height
-]
+SCREEN_WIDTH_PX = 1280
+SCREEN_HEIGHT_PX = 768
+
+SCREEN_DISTANCE_CM = 240.
+SCREEN_WIDTH_CM = 70.
+
+EXT_W = 830
+EXT_H = 830
+
+INT_W = 300
+INT_H = 300
+
+def get_central_rect(width, height):
+    left = (SCREEN_WIDTH_PX // 2) - (width // 2)
+    top = (SCREEN_HEIGHT_PX // 2) - (height // 2)
+    return (left, top)
+
+(EXT_L, EXT_T) = get_central_rect(EXT_W, EXT_H)
+EXTERNAL_SCREEN_RECT = [EXT_L, EXT_T, EXT_W, EXT_H]
+
+(INT_L, INT_T) = get_central_rect(INT_W, INT_H)
+INTERNAL_SCREEN_RECT = [INT_L, INT_T, INT_W, INT_H]
 
 STIMULI_COORDENATES = [
     (874, 334), # <=== right, 0 degree
@@ -40,20 +52,6 @@ STIMULI_COORDENATES = [
     (448, 88 ),
     (639, 54 ),
     (808, 151)]
-
-STIMULI_WIDTH_PX = 100
-STIMULI_HEIGHT_PX = 100
-
-SCREEN_WIDTH_PX = 1280
-SCREEN_HEIGHT_PX = 768
-
-SCREEN_DISTANCE_CM = 240.
-SCREEN_WIDTH_CM = 70.
-
-def get_central_rect(width, height):
-    left = (SCREEN_WIDTH_PX // 2) - (width // 2)
-    top = (SCREEN_HEIGHT_PX // 2) - (height // 2)
-    return [left, top]
 
 def normalize(x_px, y_px, inverted_y=False, screen=(SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX)):
     if inverted_y:
@@ -237,4 +235,4 @@ def debug_window():
 
 if __name__ == '__main__':
     debug_window()
-    # print(get_central_rect(200, 200))
+    
