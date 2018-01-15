@@ -121,6 +121,12 @@ def analyse_experiment(feature_degree, factor):
     positive_latency = []
     negative_latency = []
 
+    positive_sex = []
+    negative_sex = []
+
+    positive_age = []
+    negative_age = []
+
     for path in PATHS_DESTIN:
         i = PATHS_DESTIN.index(path)
         if p[i]['excluded']:
@@ -146,14 +152,29 @@ def analyse_experiment(feature_degree, factor):
                     positive_latency.append(np.array(latencies)[:27])
                     continue
 
+                positive_sex.append(info_file['sex'])
+                positive_age.append(info_file['age'])
+
                 positive.append(np.array(looking_rate))
                 positive_button.append(np.array(button_rate))
                 positive_latency.append(np.array(latencies))
 
             elif info_file['group'] == 'negative':
+                negative_sex.append(info_file['sex'])
+                negative_age.append(info_file['age'])
+
                 negative.append(np.array(looking_rate))
                 negative_button.append(np.array(button_rate))
                 negative_latency.append(np.array(latencies))
+
+    print('positive male: %02d'%positive_sex.count('m'))
+    print('positive fema: %02d'%positive_sex.count('f'))
+    print('negative male: %02d'%negative_sex.count('m'))
+    print('negative fema: %02d'%negative_sex.count('f'))
+
+    print('positive age min. %.2f, avg. %.2f, max. %.2f'%(np.min(positive_age),np.mean(positive_age),np.max(positive_age)))
+    print('negative age min. %.2f, avg. %.2f, max. %.2f'%(np.min(negative_age),np.mean(negative_age),np.max(negative_age)))
+        
 
     positive, negative, positive_error, negative_error = statistics(
         positive,
@@ -268,6 +289,15 @@ def analyse_intra_subject(i, factor='donut_slice', inspect=False, data_files=Non
         second_label='FN group',
         y_limit=[-0.1, 1.1],
         )
+    title = ' - '.join(['%02d'%i, info_file['nickname'],'square(FP)_X(FN)', str(factor), 'button'])
+    draw.rates([fp_button_proportion, fn_button_proportion], title,
+        save=not inspect,
+        y_label='Button-pressing proportion',
+        single=False,
+        first_label='FP group',
+        second_label='FN group',
+        y_limit=[-0.1, 1.1],
+        )
     latencies = (latency(fp_trials), latency(fn_trials))
     button = (fp_button_proportion, fn_button_proportion)
     gaze = (fp_gaze_rate, fn_gaze_rate)
@@ -283,6 +313,18 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
     positive_latency = []
     negative_latency = []
 
+    sex = []
+    age = []
+    
+    preference_xs = []
+    preference_sq = []
+    preference_na = []
+
+    no_conditional_discrimination = [
+        '2017_12_18_001_BRE', '2017_12_15_001_KAR', '2017_12_14_001_JUL',
+        '2017_12_14_002_JOS', '2017_12_14_000_TAT', '2017_12_13_004_ANT',
+    ]
+
     for path in PATHS_DESTIN:
         i = PATHS_DESTIN.index(path)
         if p[i]['excluded']:
@@ -293,6 +335,9 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
         if not info_file['group'] == 'fp-square/fn-x':
             continue
             
+        if info_file['nickname'] not in no_conditional_discrimination:
+            continue
+
         if info_file['feature_degree'] == feature_degree:
             button_rate, looking_rate, latencies = analyse_intra_subject(
                 i,
@@ -311,6 +356,17 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
 
             positive_latency.append(np.array(fp_latency))
             negative_latency.append(np.array(fn_latency))
+
+            sex.append(info_file['sex'])
+            age.append(info_file['age'])
+
+            preference_xs.append(info_file['nickname']+' '+info_file['after_the_fact_preference'])
+
+    print('male: %02d'%sex.count('m'))
+    print('fema: %02d'%sex.count('f'))
+    print('age min. %.2f, avg. %.2f, max. %.2f'%(np.min(age),np.mean(age),np.max(age)))
+
+    print(preference_xs)
 
     positive, negative, positive_error, negative_error = statistics(
         positive_button,
@@ -376,7 +432,6 @@ def analyse_excluded(feature_degree):
 
     positive_latency = []
     negative_latency = []
-
     for path in PATHS_DESTIN:
         i = PATHS_DESTIN.index(path)
         if not p[i]['excluded']:
@@ -403,8 +458,15 @@ def analyse_excluded(feature_degree):
                 negative_button.append(np.array(button_rate))
                 negative_latency.append(np.array(latencies))
 
+def qualitative_analysis(info_file):
+    # cout sex
+    # count x, square preference
+    # create verbal table
+    pass
+
 if __name__ == '__main__':
-    factors = ['donut_slice', 1, 2, 3, 4]
+    # factors = ['donut_slice', 1, 2, 3, 4]
+    factors = ['donut_slice']
     for factor in factors:
         # analyse_experiment(feature_degree=9, factor=factor)
         # analyse_experiment(feature_degree=90, factor=factor)
