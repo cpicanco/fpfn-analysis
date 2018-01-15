@@ -385,7 +385,7 @@ PARAMETERS = [
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # no conditional disc.
+     'excluded':True}, # eye vision concerns
 
     # '2017_12_14_001_JUL'
     {'min_block_size': 40516 // 4,
