@@ -111,6 +111,47 @@ def analyse(i, factor='donut_slice', inspect=False, data_files=None):
 
     return gaze_rate, button_proportion, latency(trials)
 
+def outputs_exists(outputs):
+    filenames = []
+    for output in outputs:
+        filenames += output 
+
+    for filename in filenames:
+        if os.path.isfile(filename):
+            continue
+        else:
+            return False
+    return True
+
+def cache_exists(nickname):
+    cache_root = os.path.join('cache', nickname)
+    filenames = [
+        os.path.join(cache_root, 'looking_rate.npy'),
+        os.path.join(cache_root, 'button_rate.npy'),
+        os.path.join(cache_root, 'latencies.npy')
+    ]
+    for filename in filenames:
+        if os.path.isfile(filename):
+            continue
+        else:
+            return False
+    return True
+
+def load_from_cache(nickname):
+    cache_root = os.path.join('cache', nickname)
+    looking_rate = np.load(os.path.join(cache_root, 'looking_rate.npy'))
+    button_rate = np.load(os.path.join(cache_root, 'button_rate.npy'))
+    latencies = np.load(os.path.join(cache_root, 'latencies.npy'))
+    return looking_rate, button_rate, latencies 
+
+def save_to_cache(nickname, data):
+    cache_root = os.path.join('cache', nickname)
+    if not os.path.exists(cache_root):
+        os.makedirs(cache_root)
+    np.save(os.path.join(cache_root, 'looking_rate'), data[0])
+    np.save(os.path.join(cache_root, 'button_rate'), data[1])
+    np.save(os.path.join(cache_root, 'latencies'), data[2])
+
 def analyse_experiment(feature_degree, factor):
     positive = []
     negative = []
@@ -127,6 +168,15 @@ def analyse_experiment(feature_degree, factor):
     positive_age = []
     negative_age = []
 
+    looking_output = [str(feature_degree)+'_looking_negative_relative_rate.txt',
+                      str(feature_degree)+'_looking_positive_relative_rate.txt']
+
+    button_output = [str(feature_degree)+'_button_positive_relative_rate.txt',
+                     str(feature_degree)+'_button_negative_relative_rate.txt']
+
+    latency_output = [str(feature_degree)+'_latency_positive_relative_rate.txt',
+                      str(feature_degree)+'_latency_negative_relative_rate.txt']
+
     for path in PATHS_DESTIN:
         i = PATHS_DESTIN.index(path)
         if p[i]['excluded']:
@@ -138,22 +188,23 @@ def analyse_experiment(feature_degree, factor):
             continue
 
         if info_file['feature_degree'] == feature_degree:
-            looking_rate, button_rate, latencies = analyse(
-                i,
-                factor,
-                inspect=False,
-                data_files=data_files)
+            if cache_exists(info_file['nickname']):
+                looking_rate, button_rate, latencies = load_from_cache(info_file['nickname'])
+            else:
+                looking_rate, button_rate, latencies = analyse(i,factor,
+                    inspect=False,
+                    data_files=data_files)
+                save_to_cache(info_file['nickname'],(looking_rate, button_rate, latencies))
 
             if info_file['group'] == 'positive':
+                positive_sex.append(info_file['sex'])
+                positive_age.append(info_file['age'])
                 # wrong size
                 if '2017_11_13_000_GAB' in info_file['nickname']:
                     positive.append(np.array(looking_rate)[:27])
                     positive_button.append(np.array(button_rate)[:27])
                     positive_latency.append(np.array(latencies)[:27])
                     continue
-
-                positive_sex.append(info_file['sex'])
-                positive_age.append(info_file['age'])
 
                 positive.append(np.array(looking_rate))
                 positive_button.append(np.array(button_rate))
@@ -179,8 +230,7 @@ def analyse_experiment(feature_degree, factor):
     positive, negative, positive_error, negative_error = statistics(
         positive,
         negative,
-        [str(feature_degree)+'_looking_negative_relative_rate.txt',
-         str(feature_degree)+'_looking_positive_relative_rate.txt']
+        looking_output
     )
     draw.rates(
         data=[positive, negative],
@@ -194,12 +244,10 @@ def analyse_experiment(feature_degree, factor):
         y_limit=[-0.1, 1.1]
         )
 
-
     positive, negative, positive_error, negative_error = statistics(
         positive_button,
         negative_button,
-        [str(feature_degree)+'_button_positive_relative_rate.txt',
-         str(feature_degree)+'_button_negative_relative_rate.txt']
+        button_output
     )
     draw.rates(
         data=[positive, negative],
@@ -216,8 +264,7 @@ def analyse_experiment(feature_degree, factor):
     positive, negative, positive_error, negative_error = statistics(
         positive_latency,
         negative_latency,
-        [str(feature_degree)+'_latency_positive_relative_rate.txt',
-         str(feature_degree)+'_latency_negative_relative_rate.txt']
+        latency_output
     )
     draw.rates(
         data=[positive, negative],
@@ -320,10 +367,11 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
     preference_sq = []
     preference_na = []
 
-    no_conditional_discrimination = [
-        '2017_12_18_001_BRE', '2017_12_15_001_KAR', '2017_12_14_001_JUL',
-        '2017_12_14_002_JOS', '2017_12_14_000_TAT', '2017_12_13_004_ANT',
-    ]
+    # no_conditional_discrimination = [
+    #     '2017_12_18_001_BRE', '2017_12_15_001_KAR', '2017_12_14_001_JUL',
+    #     '2017_12_14_000_TAT', '2017_12_13_004_ANT',
+    #     '2017_12_18_000_MAR', '2017_12_13_003_JOE'
+    # ]
 
     for path in PATHS_DESTIN:
         i = PATHS_DESTIN.index(path)
@@ -335,15 +383,19 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
         if not info_file['group'] == 'fp-square/fn-x':
             continue
             
-        if info_file['nickname'] not in no_conditional_discrimination:
-            continue
+        # if info_file['nickname'] in no_conditional_discrimination:
+        #     continue
 
         if info_file['feature_degree'] == feature_degree:
-            button_rate, looking_rate, latencies = analyse_intra_subject(
-                i,
-                factor,
-                inspect=False,
-                data_files=data_files)
+            if cache_exists(info_file['nickname']):
+                looking_rate, button_rate, latencies = load_from_cache(info_file['nickname'])
+            else:
+                button_rate, looking_rate, latencies = analyse_intra_subject(
+                    i,
+                    factor,
+                    inspect=False,
+                    data_files=data_files)
+                save_to_cache(info_file['nickname'],(looking_rate, button_rate, latencies))
 
             (fp_button, fn_button) = button_rate
             (fp_gaze, fn_gaze) = looking_rate
@@ -385,7 +437,6 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
         second_label='FN group',
         y_limit=[-0.1, 1.1]
         )
-
 
     positive, negative, positive_error, negative_error = statistics(
         positive_gaze,
@@ -468,9 +519,9 @@ if __name__ == '__main__':
     # factors = ['donut_slice', 1, 2, 3, 4]
     factors = ['donut_slice']
     for factor in factors:
+        analyse_experiment(feature_degree=90, factor=factor)
         # analyse_experiment(feature_degree=9, factor=factor)
-        # analyse_experiment(feature_degree=90, factor=factor)
-        analyse_experiment_intrasubject(feature_degree=9, factor=factor)
+        # analyse_experiment_intrasubject(feature_degree=9, factor=factor)
 
     # analyse_excluded(9)
     # analyse(13)
