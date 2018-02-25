@@ -106,3 +106,4 @@ ENV/
 *.png
 *.pdf
 *.zip
+*.npy
