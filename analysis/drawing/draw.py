@@ -34,7 +34,7 @@ def save_figure(filename):
     f = os.path.join(f,'images')
     f = os.path.join(f, filename+'.png')
     print(f)
-    plt.savefig(f, bbox_inches='tight')
+    plt.savefig(f, bbox_inches='tight', dpi=100)
     plt.close() 
     return f
 
@@ -98,8 +98,8 @@ def rate(data,title, save=False, y_label = 'FPS by trial'):
         plt.show()
 
 
-def relative_rate(data,title, save=False, y_label = 'Button-pressing proportion', name=''):
-    x_label = 'Trials'
+def relative_rate(data,title, save=False, y_label = 'Proporção de pressionar o botão', name=''):
+    x_label = 'Tentativas'
     axes = plt.gca()
     plt.suptitle(title, fontsize=12)
 
@@ -136,25 +136,31 @@ def relative_rate(data,title, save=False, y_label = 'Button-pressing proportion'
         plt.show()
 
 def rates(data,title, save=False,
-    y_label='Button-pressing rate',
+    y_label='Proporção de pressionar o botão',
     name='',
     single=False,
-    first_label="positive",
-    second_label="negative",
+    first_label="Positivo",
+    second_label="Negativo",
     y_limit=[],
     error=None):
-    x_label = 'Trials'
+    x_label = 'Tentativas'
     axes = plt.gca()
-    plt.suptitle(title, fontsize=12)
+    # plt.suptitle(title, fontsize=12)
+
+    if y_limit:
+        axes.set_ylim(y_limit[0], y_limit[1])
+
+    if 'latency' in title:
+        axes.set_ylim(-0.1, 4.)
     
     # positive
     if error:
         #axes.plot(data[0],color="k",marker='.', lw=1, label=first_label)
         #axes.plot(data[1],color="k",marker='x',ls='--', lw=1, label=second_label)
         axes.errorbar(range(len(data[0])), data[0], error[0], label=first_label,
-            color="k",marker='.', lw=1, alpha=0.6)
+            color="k",marker='o', markersize= 2, lw=1, alpha=0.8)
         axes.errorbar(np.array(range(len(data[1])))+0.18, data[1], error[1], label=second_label,
-            color="k",marker='x', fmt='.k', ls='--', lw=1, alpha=0.3)
+            color="k",marker='x', markersize=4, fmt='.k', ls='--', lw=1, alpha=0.3)
     else:
         axes.plot(data[0],color="k",marker='.', lw=1, label=first_label)
         if not single:
@@ -175,17 +181,12 @@ def rates(data,title, save=False,
     axes.spines['left'].set_visible(False)
     axes.spines['right'].set_visible(False)
 
-    if y_limit:
-        axes.set_ylim(y_limit[0], y_limit[1])
-
-    if 'latency' in title:
-        axes.set_ylim(-0.1, 4.)
 
     axes.set_xlim(-0.5, len(data[0])+0.5)
 
     #remove ticks
-    axes.xaxis.set_ticks_position('none')
-    axes.yaxis.set_ticks_position('none')
+    # axes.xaxis.set_ticks_position('none')
+    # axes.yaxis.set_ticks_position('none')
 
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
@@ -277,6 +278,7 @@ def xy_plot(data, factor=1.0):
     plt.gcf().clear() 
 
 def xy_donut_plot(data):
+    from matplotlib.path import Path
     axes = plt.gca()
     axes.set_ylim(ymax = 2, ymin = -1)
     axes.set_xlim(xmax = 2, xmin = -1)
@@ -284,7 +286,7 @@ def xy_donut_plot(data):
     for donut in donut_grid(normalized=True):
         axes.add_patch(
             patches.PathPatch(
-                mp(donut),
+                Path(donut),
                 facecolor="gray",
                 edgecolor="red",
                 alpha=0.5        
@@ -293,9 +295,40 @@ def xy_donut_plot(data):
     plt.show()   
     plt.gcf().clear() 
 
+def xy_example(data):
+    from matplotlib.path import Path
+    axes = plt.gca()
+    axes.set_ylim(ymax = 1.1, ymin = -0.1)
+    axes.set_xlim(xmax = .86, xmin = .14)
+    for donut in donut_grid(normalized=True):
+        axes.add_patch(
+            patches.PathPatch(
+                Path(donut),
+                facecolor="gray",
+                edgecolor="black",
+                alpha=0.5        
+            )
+        ) 
+    for circle in circle_grid(normalized=True):
+        axes.add_patch(
+            patches.Ellipse(
+                circle.center,   
+                width=circle.width,          
+                height=circle.height,
+                angle=360,
+                facecolor="white",
+                edgecolor="black",
+                alpha=0.5        
+            )
+        ) 
+    plt.scatter(*data, s=3, c='k')   
+    plt.axes().set_aspect(0.596875)
+    plt.show()   
+    plt.gcf().clear() 
+
 def images(imgs, screen, save, title):
     (img1, img2) = imgs
-    (w, h) = screen
+    # (w, h) = screen
     def fax(ax):
         # for circle in circle_grid(normalized=False):
         #     ax.add_patch(
@@ -321,7 +354,7 @@ def images(imgs, screen, save, title):
         # ax.set_ylim(0, h)
         # ax.set_xlim(0, w)        
 
-    dpi = 100
+    # dpi = 100
     f, (ax1, ax2) = plt.subplots(1, 2, figsize=(3.5,3.5), sharey=True, sharex=True)
     ax1.imshow(img1)
     fax(ax1)
@@ -354,10 +387,15 @@ def images_four(imgs, save, title):
         ax.xaxis.set_ticklabels([])
         ax.axis('off')
          
-    f.text(.08, .52, 'FP', ha='left', va='center')
-    f.text(.95, .52, 'FN', ha='right', va='center')
-    f.text(.52, .95, 'distinctive', ha='center', va='top',)
-    f.text(.52, .08, 'common', ha='center', va='bottom',)   
+    f.text(.08, .52, 'AP', ha='left', va='center')
+    f.text(.95, .52, 'AN', ha='right', va='center')
+    f.text(.50, .95, 'distintivo', ha='center', va='top',)
+    f.text(.50, .08, 'comum', ha='center', va='bottom',)   
+
+    f.text(.15, .90, 'S+', ha='left', va='top')
+    f.text(.85, .90, 'S-', ha='right', va='top')
+    f.text(.90, .15, 'S+', ha='right', va='bottom',)
+    f.text(.15, .15, 'S-', ha='left', va='bottom',)   
 
     if save:
         return save_figure(title)       
@@ -365,7 +403,7 @@ def images_four(imgs, save, title):
         plt.show()
 
 def scale(y_maximum, image, save, title, size):
-    labels = ['%0.2f'%y_maximum, '0\n(transparent)']
+    labels = ['%0.2f'%y_maximum, '0\n(transparente)']
     # frame.get_xaxis().set_visible(False)
     # plt.yticks([0, 256], labels)
     # frame.yaxis.tick_right()
