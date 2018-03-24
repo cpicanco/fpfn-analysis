@@ -85,12 +85,12 @@ def analyse(i, factor='donut_slice', inspect=False, data_files=None):
         do_manual_correction=parameters['do_manual_correction'],
         do_confidence_threshold=parameters['confidence_threshold']
         )
-    gaze_rate = get_relative_gaze_rate(
+    gaze_proportion = get_relative_gaze_rate(
         ini_file['feature'],
         gaze_rate_per_trial,
         gaze_rate_mirror)
 
-    # draw.rates([gaze_rate, []],
+    # draw.rates([gaze_proportion, []],
     #     title= title,
     #     save= not inspect,
     #     y_label='Looking proportion',
@@ -99,17 +99,7 @@ def analyse(i, factor='donut_slice', inspect=False, data_files=None):
     #     y_limit= [-0.1, 1.1],
     #     ) 
 
-    draw.rates([button_proportion, gaze_rate],
-        title= title,
-        save= not inspect,
-        y_label='Looking/button-pressing proportion',
-        single= False,
-        first_label= 'feature looking',
-        second_label='button-pressing',
-        y_limit= [-0.1, 1.1],
-        ) 
-
-    return gaze_rate, button_proportion, latency(trials)
+    return gaze_proportion, button_proportion, latency(trials)
 
 def outputs_exists(outputs):
     filenames = []
@@ -196,6 +186,15 @@ def analyse_experiment(feature_degree, factor):
                     data_files=data_files)
                 save_to_cache(info_file['nickname'],(looking_rate, button_rate, latencies))
 
+            draw.rates([button_proportion, gaze_proportion],
+                title = ' - '.join(['%02d'%i, '%02d'%info_file['feature_degree'], info_file['group'], info_file['nickname'], str(factor)]),
+                save= True,
+                y_label='Proporção',
+                single= False,
+                first_label= 'Pressionar botão durante S+',
+                second_label='Olhar estímulo distintivo',
+                y_limit= [-0.1, 1.1],
+                ) 
             if info_file['group'] == 'positive':
                 positive_sex.append(info_file['sex'])
                 positive_age.append(info_file['age'])
@@ -237,10 +236,10 @@ def analyse_experiment(feature_degree, factor):
         error=[positive_error, negative_error],
         title= ' - '.join(['average looking proportion', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
-        y_label='average looking proportion',
+        y_label='Proporção média de olhar ao estímulo distintivo',
         single=False,
-        first_label='FP group',
-        second_label='FN group',
+        first_label='Aspecto Positivo',
+        second_label='Aspecto Negativo',
         y_limit=[-0.1, 1.1]
         )
 
@@ -254,10 +253,10 @@ def analyse_experiment(feature_degree, factor):
         error=[positive_error, negative_error],
         title=' - '.join(['average button-pressing proportion', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
-        y_label='average button-pressing proportion',
+        y_label='Proporção média de R durante o S+',
         single=False,
-        first_label='FP group',
-        second_label='FN group',
+        first_label='Aspecto Positivo',
+        second_label='Aspecto Negativo',
         y_limit=[-0.1, 1.1]
         )
 
@@ -271,10 +270,10 @@ def analyse_experiment(feature_degree, factor):
         error=[positive_error, negative_error],
         title=' - '.join(['average latency', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
-        y_label='latency (s)',
+        y_label='Latência média (s)',
         single=False,
-        first_label='FP group',
-        second_label='FN group'
+        first_label='Aspecto Positivo',
+        second_label='Aspecto Negativo'
         )
 
 def analyse_intra_subject(i, factor='donut_slice', inspect=False, data_files=None):
@@ -330,19 +329,19 @@ def analyse_intra_subject(i, factor='donut_slice', inspect=False, data_files=Non
     title = ' - '.join(['%02d'%i, info_file['nickname'],'square(FP)_X(FN)', str(factor)])
     draw.rates([fp_gaze_rate, fn_gaze_rate], title,
         save=not inspect,
-        y_label='Looking proportion at the feature',
+        y_label='Proporção média de olhar estímulo distintivo',
         single=False,
-        first_label='FP group',
-        second_label='FN group',
+        first_label='Aspecto Positivo',
+        second_label='Aspecto Negativo',
         y_limit=[-0.1, 1.1],
         )
     title = ' - '.join(['%02d'%i, info_file['nickname'],'square(FP)_X(FN)', str(factor), 'button'])
     draw.rates([fp_button_proportion, fn_button_proportion], title,
         save=not inspect,
-        y_label='Button-pressing proportion',
+        y_label='Proporção média de R durante o S+',
         single=False,
-        first_label='FP group',
-        second_label='FN group',
+        first_label='Aspecto Positivo',
+        second_label='Aspecto Negativo',
         y_limit=[-0.1, 1.1],
         )
     latencies = (latency(fp_trials), latency(fn_trials))
@@ -431,10 +430,10 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
         error=[positive_error, negative_error],
         title=' - '.join(['average button-pressing proportion', 'intra-subject', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
-        y_label='average button-pressing proportion',
+        y_label='Proporção média de R durante S+',
         single=False,
-        first_label='FP group',
-        second_label='FN group',
+        first_label='Aspecto Positivo',
+        second_label='Aspecto Negativo',
         y_limit=[-0.1, 1.1]
         )
 
@@ -449,10 +448,10 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
         error=[positive_error, negative_error],
         title=' - '.join(['average looking proportion', 'intra-subject', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
-        y_label='average looking proportion',
+        y_label='Proporção média de olhar ao estímulo distintivo',
         single=False,
-        first_label='FP group',
-        second_label='FN group',
+        first_label='Aspecto Positivo',
+        second_label='Aspecto Negativo',
         y_limit=[-0.1, 1.1]
         )
 
@@ -467,10 +466,10 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
         error=[positive_error, negative_error],
         title=' - '.join(['average latency', 'intra-subject', 'fp %i°'%feature_degree, str(factor)]),
         save= True,
-        y_label='average latency',
+        y_label='Latência média (s)',
         single=False,
-        first_label='FP group',
-        second_label='FN group'
+        first_label='Aspecto Positivo',
+        second_label='Aspecto Negativo'
         )
 
 
