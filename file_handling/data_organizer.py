@@ -385,7 +385,7 @@ PARAMETERS = [
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # eye vision concerns
+     'excluded':'anormal vision concerns'},
 
     # '2017_12_14_001_JUL'
     {'min_block_size': 40516 // 4,
@@ -465,7 +465,7 @@ PARAMETERS = [
      'gaze_file_filter': '*2d_pr*', # unstable 3d models
      'do_manual_correction': [0., 0.06],
      'confidence_threshold': .65,
-     'excluded':False},
+     'excluded':'after day 16'},
 
     # '2017_12_01_000_LUI'  
     {'min_block_size': 19984,
@@ -475,7 +475,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
      'confidence_threshold': .65,
-     'excluded':False},
+     'excluded':'after day 16'},
 
     # '2017_11_29_001_FEL'    
     {'min_block_size': 18842//4,
@@ -515,7 +515,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # no conditional disc.
+     'excluded':'no conditional discrimination'},
 
     # '2017_11_28_001_ELI'
     {'min_block_size': 20212//4,
@@ -535,7 +535,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # no button differetiation
+     'excluded':'no button differetiation'},
 
     # '2017_11_27_005_ANA'
     {'min_block_size': 20609,
@@ -605,7 +605,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # bad eyes, looking to a fixed point
+     'excluded':'looking at a fixed point'},
 
     # '2017_11_24_005_THA'
     {'min_block_size': 19119//4,
@@ -625,7 +625,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [-0.05, 0.02],
      'confidence_threshold' :.65,
-     'excluded':True}, # no button differatiation
+     'excluded':'no button differatiation'}, # no button differatiation
 
     # '2017_11_24_003_FER'
     {'min_block_size': 20300//4,
@@ -705,7 +705,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # no button differentiation
+     'excluded':'no button differentiation'}, # no button differentiation
 
     # '2017_11_23_002_EIL'
     {'min_block_size': 19876,
@@ -725,7 +725,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # no button differentiation
+     'excluded':'no button differentiation'}, # no button differentiation
 
     # '2017_11_23_000_DEN'
     {'min_block_size': 20310//4,
@@ -745,7 +745,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
      'confidence_threshold': .65,
-     'excluded':False},
+     'excluded':'after day 16'},
 
     # '2017_11_22_000_EUL'          
     {'min_block_size': 20310//2,
@@ -755,7 +755,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_ba*',
      'do_manual_correction': [0.03, 0.03],
      'confidence_threshold' :.65,
-     'excluded':False}, # differentiation at the very end
+     'excluded':'after day 16'}, # differentiation at the very end
 
     # '2017_11_16_003_ALI'
     {'min_block_size': 19631//8,
@@ -785,7 +785,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_ba*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # does not follow instructions
+     'excluded':False},
 
     # '2017_11_16_000_VIN'
     {'min_block_size': 20354//4,
@@ -885,9 +885,9 @@ PARAMETERS = [
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True},
+     'excluded':'no button differentiation, unstable eye tracking'},
 
-    # '2017_11_13_003_LIZ'
+    # '2017_11_13_003_LIZ' 
     {'min_block_size': 19409//3,
      'do_correction': True,
      'do_remove_outside_screen': [1., .0, 1., .0],
@@ -905,7 +905,7 @@ PARAMETERS = [
      'gaze_file_filter': '*3d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':False}, # looking first, then button
+     'excluded':'looking first, then button, did not follow instructions'}, # looking first, then button
 
     # '2017_11_13_001_MAR'
     {'min_block_size': 19067//3, # bias at the end
@@ -955,7 +955,7 @@ PARAMETERS = [
      'gaze_file_filter': '*2d_pr*',
      'do_manual_correction': [],
      'confidence_threshold' :.65,
-     'excluded':True}, # no button differentiation # unstable 3d model
+     'excluded':'no button differentiation, unstable eye tracking'}, # no button differentiation # unstable 3d model
 
     # '2017_11_09_002_EST'       
     {'min_block_size': 19777//6,
