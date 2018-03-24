@@ -179,12 +179,12 @@ def analyse_experiment(feature_degree, factor):
 
         if info_file['feature_degree'] == feature_degree:
             if cache_exists(info_file['nickname']):
-                looking_rate, button_rate, latencies = load_from_cache(info_file['nickname'])
+                gaze_proportion, button_proportion, latencies = load_from_cache(info_file['nickname'])
             else:
-                looking_rate, button_rate, latencies = analyse(i,factor,
+                gaze_proportion, button_proportion, latencies = analyse(i,factor,
                     inspect=False,
                     data_files=data_files)
-                save_to_cache(info_file['nickname'],(looking_rate, button_rate, latencies))
+                save_to_cache(info_file['nickname'],(gaze_proportion, button_proportion, latencies))
 
             draw.rates([button_proportion, gaze_proportion],
                 title = ' - '.join(['%02d'%i, '%02d'%info_file['feature_degree'], info_file['group'], info_file['nickname'], str(factor)]),
@@ -200,21 +200,21 @@ def analyse_experiment(feature_degree, factor):
                 positive_age.append(info_file['age'])
                 # wrong size
                 if '2017_11_13_000_GAB' in info_file['nickname']:
-                    positive.append(np.array(looking_rate)[:27])
-                    positive_button.append(np.array(button_rate)[:27])
+                    positive.append(np.array(gaze_proportion)[:27])
+                    positive_button.append(np.array(button_proportion)[:27])
                     positive_latency.append(np.array(latencies)[:27])
                     continue
 
-                positive.append(np.array(looking_rate))
-                positive_button.append(np.array(button_rate))
+                positive.append(np.array(gaze_proportion))
+                positive_button.append(np.array(button_proportion))
                 positive_latency.append(np.array(latencies))
 
             elif info_file['group'] == 'negative':
                 negative_sex.append(info_file['sex'])
                 negative_age.append(info_file['age'])
 
-                negative.append(np.array(looking_rate))
-                negative_button.append(np.array(button_rate))
+                negative.append(np.array(gaze_proportion))
+                negative_button.append(np.array(button_proportion))
                 negative_latency.append(np.array(latencies))
 
     print('positive male: %02d'%positive_sex.count('m'))
@@ -229,7 +229,7 @@ def analyse_experiment(feature_degree, factor):
     positive, negative, positive_error, negative_error = statistics(
         positive,
         negative,
-        looking_output
+        looking_output, True
     )
     draw.rates(
         data=[positive, negative],
@@ -246,7 +246,7 @@ def analyse_experiment(feature_degree, factor):
     positive, negative, positive_error, negative_error = statistics(
         positive_button,
         negative_button,
-        button_output
+        button_output, True
     )
     draw.rates(
         data=[positive, negative],
@@ -263,7 +263,7 @@ def analyse_experiment(feature_degree, factor):
     positive, negative, positive_error, negative_error = statistics(
         positive_latency,
         negative_latency,
-        latency_output
+        latency_output, True
     )
     draw.rates(
         data=[positive, negative],
@@ -423,7 +423,7 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
         positive_button,
         negative_button,
         [str(feature_degree)+'_intra_button_positive_relative_rate.txt',
-         str(feature_degree)+'_intra_button_negative_relative_rate.txt']
+         str(feature_degree)+'_intra_button_negative_relative_rate.txt'], True
     )
     draw.rates(
         data=[positive, negative],
@@ -441,7 +441,7 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
         positive_gaze,
         negative_gaze,
         [str(feature_degree)+'_intra_gaze_positive_relative_rate.txt',
-         str(feature_degree)+'_intra_gaze_negative_relative_rate.txt']
+         str(feature_degree)+'_intra_gaze_negative_relative_rate.txt'], True
     )
     draw.rates(
         data=[positive, negative],
@@ -459,7 +459,7 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
         positive_latency,
         negative_latency,
         [str(feature_degree)+'_intra_latency_positive_relative_rate.txt',
-         str(feature_degree)+'_intra_latency_negative_relative_rate.txt']
+         str(feature_degree)+'_intra_latency_negative_relative_rate.txt'], True
     )
     draw.rates(
         data=[positive, negative],
