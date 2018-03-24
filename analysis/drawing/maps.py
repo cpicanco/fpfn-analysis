@@ -7,6 +7,7 @@
     You should have received a copy of the GNU General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
+import os
 import sys
 sys.path.append('../../analysis')
 sys.path.append('../../file_handling')
@@ -22,6 +23,7 @@ from categorization.stimuli import SCREEN_WIDTH_PX as sw
 from categorization.stimuli import SCREEN_HEIGHT_PX as sh
 from categorization.stimuli import SCREEN_DISTANCE_CM as sd_cm
 from categorization.stimuli import SCREEN_WIDTH_CM as sw_cm
+from categorization.stimuli import SCREEN_HEIGHT_CM as sh_cm
 
 from drawing import colormaps, draw
 
@@ -116,13 +118,18 @@ def denormalize(gaze_points):
     gaze_points['y_norm'] *= sh
     return gaze_points
 
-def cm_to_degree(sw, sh):
-    V = 2 * np.arctan(sw_cm/(sd_cm*2))
-    degrees = np.degrees(V)
-    return degrees, (sh*degrees)/sw
+# def cm_to_degree(sw, sh):
+#     V = 2 * np.arctan(sw_cm/(sd_cm*2))
+#     degrees = np.degrees(V)
+#     return degrees, (sh*degrees)/sw
+
+def cm_to_degree(screen_w, screen_h):
+    x = np.degrees(2 * np.arctan(screen_w/(sd_cm*2)))
+    y = np.degrees(2 * np.arctan(screen_h/(sd_cm*2)))
+    return x, y
 
 def pixels_per_degree():
-    sw_d, sh_d = cm_to_degree(sw, sh)
+    sw_d, sh_d = cm_to_degree(sw_cm, sh_cm)
     return np.sqrt((sw**2)+(sh**2))/np.sqrt((sw_d**2)+(sh_d**2))
 
 PIXELS_PER_DEGREE = pixels_per_degree()
@@ -207,7 +214,7 @@ def analyse(i, inspect=False, data_files=None):
         single=False,
         first_label='S+',
         second_label='S-',
-        y_limit= [1., 10.]       
+        y_limit= [1., 15.]       
     )
     title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['group'], info_file['nickname'], 'S+ S-')) 
     imgs, y_max = custom_heatmap([positive_gaze_data, negative_gaze_data])
@@ -265,7 +272,7 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
         do_manual_correction=parameters['do_manual_correction'],
         do_confidence_threshold=parameters['confidence_threshold'],
         min_block_size=parameters['min_block_size'],
-        inspect=True)
+        inspect=False)
 
     mask = remove_outside_session_time(all_gaze_data['time'], fp_positive_intervals)
     fp_positive_gaze_data = all_gaze_data[mask]      
@@ -292,7 +299,7 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
         single=False,
         first_label='FP Group',
         second_label='FN Group',
-        y_limit= [1., 10.]       
+        y_limit= [1., 15.]       
     )
 
     title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'common'))   
@@ -304,7 +311,7 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
         single=False,
         first_label='FP Group',
         second_label='FN Group',
-        y_limit= [1., 10.]       
+        y_limit= [1., 15.]       
     )
 
     title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'distinctive-common'))   
@@ -321,6 +328,40 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
     gaze = (fp_positive_gaze_data, fp_negative_gaze_data, fn_positive_gaze_data, fn_negative_gaze_data)
     disp = (fp_pdispersion, fp_ndispersion, fn_pdispersion, fn_ndispersion)
     return gaze, disp
+
+def cache_exists(nickname):
+    cache_root = os.path.join('cache', nickname)
+    filenames = [
+        os.path.join(cache_root, 'positive_gaze_data.npy'),
+        os.path.join(cache_root, 'negative_gaze_data.npy'),
+        os.path.join(cache_root, 'pdispersion.npy'),
+        os.path.join(cache_root, 'ndispersion.npy')
+    ]
+    for filename in filenames:
+        if os.path.isfile(filename):
+            continue
+        else:
+            return False
+    return True
+
+def load_from_cache(nickname):
+    cache_root = os.path.join('cache', nickname)
+    positive_gaze_data = np.load(os.path.join(cache_root, 'positive_gaze_data.npy'))
+    negative_gaze_data = np.load(os.path.join(cache_root, 'negative_gaze_data.npy'))
+    pdispersion = np.load(os.path.join(cache_root, 'pdispersion.npy'))
+    ndispersion = np.load(os.path.join(cache_root, 'ndispersion.npy'))
+    return (positive_gaze_data, negative_gaze_data), (pdispersion, ndispersion)
+
+def save_to_cache(nickname, data):
+    (positive_gaze_data, negative_gaze_data) = data[0]
+    (pdispersion, ndispersion) = data[1]
+    cache_root = os.path.join('cache', nickname)
+    if not os.path.exists(cache_root):
+        os.makedirs(cache_root)
+    np.save(os.path.join(cache_root, 'positive_gaze_data'), positive_gaze_data)
+    np.save(os.path.join(cache_root, 'negative_gaze_data'), negative_gaze_data)
+    np.save(os.path.join(cache_root, 'pdispersion'), pdispersion)
+    np.save(os.path.join(cache_root, 'ndispersion'), ndispersion)
 
 def analyse_experiment(feature_degree):
     fp_positivex, fp_positivey = [], []
@@ -344,9 +385,11 @@ def analyse_experiment(feature_degree):
             continue
 
         if info_file['feature_degree'] == feature_degree:
-            gaze, gaze_dispersion = analyse(i, 
-                inspect= False,
-                data_files= data_files)
+            if cache_exists(info_file['nickname']):
+                gaze, gaze_dispersion = load_from_cache(info_file['nickname'])            
+            else:
+                gaze, gaze_dispersion = analyse(i, inspect= False, data_files= data_files)
+                save_to_cache(info_file['nickname'],(gaze, gaze_dispersion))
 
             (positive_gaze, negative_gaze) = gaze
             (pdispersion, ndispersion) = gaze_dispersion
@@ -415,7 +458,8 @@ def analyse_experiment(feature_degree):
         (d1, d4, d2, d3),
         (e1, e4, e2, e3),
         title= 'comparing FP and FN looking dispersion - '+str(feature_degree),
-        labels= labels
+        labels= labels,
+        y_limit=[6., 16.]
     )
     title = ' - '.join(['heat', str(feature_degree)])
     imgs, y_max = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
@@ -426,6 +470,55 @@ def analyse_experiment(feature_degree):
         save= True)
        
     draw.join_images(plot_path, scale_path)
+
+def cache_exists_i(nickname):
+    cache_root = os.path.join('cache', nickname)
+    filenames = [
+        os.path.join(cache_root, 'fp_positive_gaze_data.npy'),
+        os.path.join(cache_root, 'fp_negative_gaze_data.npy'),
+        os.path.join(cache_root, 'fn_positive_gaze_data.npy'),
+        os.path.join(cache_root, 'fn_negative_gaze_data.npy'),
+        os.path.join(cache_root, 'fp_pdispersion.npy'),
+        os.path.join(cache_root, 'fp_ndispersion.npy'),
+        os.path.join(cache_root, 'fn_pdispersion.npy'),
+        os.path.join(cache_root, 'fn_ndispersion.npy')
+    ]
+    for filename in filenames:
+        if os.path.isfile(filename):
+            continue
+        else:
+            return False
+    return True
+
+def load_from_cache_i(nickname):
+    cache_root = os.path.join('cache', nickname)
+    fp_positive_gaze_data = np.load(os.path.join(cache_root, 'fp_positive_gaze_data.npy'))
+    fp_negative_gaze_data = np.load(os.path.join(cache_root, 'fp_negative_gaze_data.npy'))
+    fn_positive_gaze_data = np.load(os.path.join(cache_root, 'fn_positive_gaze_data.npy'))
+    fn_negative_gaze_data = np.load(os.path.join(cache_root, 'fn_negative_gaze_data.npy'))
+    fp_pdispersion = np.load(os.path.join(cache_root, 'fp_pdispersion.npy'))
+    fp_ndispersion = np.load(os.path.join(cache_root, 'fp_ndispersion.npy'))
+    fn_pdispersion = np.load(os.path.join(cache_root, 'fn_pdispersion.npy'))
+    fn_ndispersion = np.load(os.path.join(cache_root, 'fn_ndispersion.npy'))
+    gaze = (fp_positive_gaze_data, fp_negative_gaze_data, fn_positive_gaze_data, fn_negative_gaze_data)
+    disp = (fp_pdispersion, fp_ndispersion, fn_pdispersion, fn_ndispersion)
+    return gaze, disp
+
+def save_to_cache_i(nickname, data):
+    (fp_positive_gaze_data, fp_negative_gaze_data, fn_positive_gaze_data, fn_negative_gaze_data) = data[0]
+    (fp_pdispersion, fp_ndispersion, fn_pdispersion, fn_ndispersion) = data[1]
+    cache_root = os.path.join('cache', nickname)
+    if not os.path.exists(cache_root):
+        os.makedirs(cache_root)
+    np.save(os.path.join(cache_root, 'fp_positive_gaze_data'), fp_positive_gaze_data)
+    np.save(os.path.join(cache_root, 'fp_negative_gaze_data'), fp_negative_gaze_data)
+    np.save(os.path.join(cache_root, 'fn_positive_gaze_data'), fn_positive_gaze_data)
+    np.save(os.path.join(cache_root, 'fn_negative_gaze_data'), fn_negative_gaze_data)
+    np.save(os.path.join(cache_root, 'fp_pdispersion'), fp_pdispersion)
+    np.save(os.path.join(cache_root, 'fp_ndispersion'), fp_ndispersion)
+    np.save(os.path.join(cache_root, 'fn_pdispersion'), fn_pdispersion)
+    np.save(os.path.join(cache_root, 'fn_ndispersion'), fn_ndispersion)
+
 def analyse_experiment_intrasubject(feature_degree):
     fp_positivex, fp_positivey = [], []
     fp_negativex, fp_negativey = [], []
@@ -448,10 +541,12 @@ def analyse_experiment_intrasubject(feature_degree):
             continue
             
         if info_file['feature_degree'] == feature_degree:
-            gaze, gaze_dispersion = analyse_intrasubject(i, 
-                inspect= False,
-                data_files= data_files)
-
+            if cache_exists_i(info_file['nickname']):
+                gaze, gaze_dispersion = load_from_cache_i(info_file['nickname'])            
+            else:
+                gaze, gaze_dispersion = analyse_intrasubject(i, inspect= False,data_files= data_files)
+                save_to_cache_i(info_file['nickname'],(gaze, gaze_dispersion))
+  
             (fp_posgaze, fp_neggaze, fn_posgaze, fn_neggaze) = gaze
             (fp_pdisp, fp_ndisp, fn_pdisp, fn_ndisp) = gaze_dispersion
 
@@ -516,7 +611,8 @@ def analyse_experiment_intrasubject(feature_degree):
         (d1, d4, d2, d3),
         (e1, e4, e2, e3),
         title= 'comparing FP and FN looking dispersion - '+str(feature_degree)+'_intra',
-        labels= labels
+        labels= labels,
+        y_limit=[6., 16.]
     )
 
     title = ' - '.join(['heat', str(feature_degree),'intra'])
@@ -569,9 +665,9 @@ def analyse_excluded(feature_degree):
 if __name__ == '__main__':
     # analyse_experiment_intrasubject(9)
     # analyse_experiment(9)
-    # analyse_experiment(90)
+    analyse_experiment(90)
    
     # analyse_excluded(9)
 
     # analyse(17) 
-    analyse_intrasubject(8)
+    # analyse_intrasubject(8)
