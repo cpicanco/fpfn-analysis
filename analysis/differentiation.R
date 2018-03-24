@@ -311,27 +311,99 @@ rank_test_per_row <- function (positive, negative,
 			if (output == 'stats') {
 				result = c(result, test$statistic)
 			}	
-		} 
+		}
 	} 
 	return(data.frame(t(result)))
 }
 
+test_per_row <- function (positive, negative, experiment_name) {
+	positive_result <- vector()
+	negative_result <- vector()
+	positive_mu <- vector()
+	negative_mu <- vector()
+	trials <- 1:27
+	for (row in 1:nrow(positive)) {
+		X <- as.numeric(positive[row,])
+		Y <- as.numeric(negative[row,])
+
+		# a participant from the feature positive group
+		testp <- cor.test(X, trials, method='kendall')
+		testp_mu <- mean(X)
+
+		# a participant from the feature negative group
+		testn <- cor.test(Y, trials, method='kendall')
+		testn_mu <- mean(Y)
+
+		# concatenate kendall estimates
+		positive_result <- c(positive_result, unname(testp$estimate))
+		negative_result <- c(negative_result, unname(testn$estimate))
+
+		# concatenate averages
+		positive_mu <- c(positive_mu, testp_mu)
+		negative_mu <- c(negative_mu, testn_mu)
+	}
+	print(experiment_name)
+
+	png(sprintf("images/%s_positive.png", experiment_name), width= 400, height= 400)
+	plot(positive_result, ylim=c(-1, 1))
+	title(sprintf("positive_%s", experiment_name))
+	dev.off()
+
+	png(sprintf("images/%s_negative.png", experiment_name), width= 400, height= 400)
+	plot(negative_result, ylim=c(-1, 1))
+	title(sprintf("negative_%s", experiment_name))
+	dev.off()
+
+	# participant's performances improved along time?
+	print('Performance improvement')
+	print(t.test(c(negative_result, positive_result), mu=0)$p.value)
+
+	# participant's performances were different along time?
+	print('Difference along time')
+	print(t.test(negative_result, positive_result)$p.value)
+
+	# participant's average performance was different?
+	print('Average difference')
+	print(t.test(negative_mu, positive_mu)$p.value)
+	print('--------------------')
+}
+
 # load data
+positive <- read.table('90_button_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+negative <- read.table('90_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+test_per_row(positive, negative, "90_button")
+
+positive <- read.table('90_looking_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+negative <- read.table('90_looking_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+test_per_row(positive, negative, "90_looking")
+
+positive <- read.table('90_latency_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+negative <- read.table('90_latency_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+test_per_row(positive, negative, "90_latency")
+
+positive <- read.table('9_button_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+negative <- read.table('9_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+test_per_row(positive, negative, "9_button")
+
 positive <- read.table('9_looking_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
 negative <- read.table('9_looking_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+test_per_row(positive, negative, "9_looking")
 
+positive <- read.table('9_latency_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+negative <- read.table('9_latency_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+test_per_row(positive, negative, "9_latency")
 
 # differentiation
-use_jitter <- FALSE
-if (use_jitter) {
-	frame <- positive[FALSE,]
-	for (i in seq(1,1000)) {
-		frame <- rbind(frame, test_per_col(positive, negative, use_jitter))
-	}
-} else {
-	frame <- test_per_col(positive, negative)
-}
-p_value_plot(apply(frame, 2, mean), 1, p_value=0.005)
+# use_jitter <- FALSE
+# if (use_jitter) {
+# 	frame <- positive[FALSE,]
+# 	for (i in seq(1,1000)) {
+# 		frame <- rbind(frame, test_per_col(positive, negative, use_jitter))
+# 	}
+# } else {
+# 	frame <- test_per_col(positive, negative)
+# }
+# p_value_plot(apply(frame, 2, mean), 1, p_value=0.005)
 
 # overall comparison
 # data_positive <- as.vector(t(positive)) 
