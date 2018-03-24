@@ -192,7 +192,25 @@ def variance(x, y, dependent=False):
     muy = np.mean(y)*np.mean(y)
     return (vx*vy)+(vx*muy)+(vy*mux)
     
-def statistics(positive, negative, export=None):
+def statistics(positive, negative, export=None, proportions=False):
+    def sanitize_error_limits(values, errors):
+        uperr = []
+        for value, err in zip(values, errors):
+            measure = value+err
+            if measure > 1.:
+                uperr.append(err - abs(measure - 1.))
+                continue
+            uperr.append(err)
+
+        loerr = []
+        for value, err in zip(values, errors):
+            measure = value-err
+            if measure < 0.:
+                loerr.append(err - abs(measure))
+                continue
+            loerr.append(err)
+
+        return (loerr, uperr) 
     positive = np.vstack(positive)
     negative = np.vstack(negative)
     
@@ -215,6 +233,11 @@ def statistics(positive, negative, export=None):
 
     # positive_error = [positive-positive_min, positive_max-positive]
     # negative_error = [negative-negative_min, negative_max-negative]
+
+    if proportions:
+        positive_std = sanitize_error_limits(positive, positive_std)
+        negative_std = sanitize_error_limits(negative, negative_std)   
+
     return positive, negative, positive_std, negative_std
 
 def get_events_per_trial(ini_data, time_data):
@@ -284,7 +307,7 @@ def trial_mask(target_timestamps, begin, end):
     return (target_timestamps >= begin) & (target_timestamps <= end)
 
 def relative_rate_from(data1, data2):
-    return [a/(b+a) if b+a > 0 else 0.5 for a, b in zip(data1, data2)]
+    return [a/(b+a) if b+a > 0 else np.nan for a, b in zip(data1, data2)]
     
 def latency(trials):
     def get_time(timestamped_events):
