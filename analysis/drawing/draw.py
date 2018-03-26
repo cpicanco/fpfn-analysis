@@ -28,11 +28,11 @@ def join_images(path1, path2):
     os.remove(path2)
     cv2.imwrite(path1, np.concatenate((im1, im2), axis=1))
 
-def save_figure(filename):
+def save_figure(filename, extension = '.png'):
     f = os.path.dirname(os.path.abspath(__file__))
     f = os.path.dirname(f)
     f = os.path.join(f,'images')
-    f = os.path.join(f, filename+'.png')
+    f = os.path.join(f, ''.join([filename,extension]))
     print(f)
     plt.savefig(f, bbox_inches='tight', dpi=100)
     plt.close() 
@@ -401,6 +401,149 @@ def images_four(imgs, save, title):
         return save_figure(title)       
     else:
         plt.show()
+
+def all_proportions(gaze_proportion, button_proportion):
+    def by_button(x):
+        (gz, btn, i) = x 
+        return np.sum(btn)
+
+    from mpl_toolkits.axes_grid1 import Grid
+
+    (positive_gaze, negative_gaze) = gaze_proportion
+    (positive_button, negative_button) = button_proportion
+
+    positive = [(gaze, button, 'P%i'%p) for gaze, button, p in zip(positive_gaze, positive_button, range(1, len(positive_gaze)+1))]
+    negative = [(gaze, button, 'P%i'%p) for gaze, button, p in zip(negative_gaze, negative_button, range(len(negative_gaze)+1,(len(negative_gaze)*2)+1))]
+ 
+    positive.sort(key=by_button, reverse=True)
+    negative.sort(key=by_button, reverse=True)
+
+    data = []
+    for posi, nega in zip(positive,negative):
+        data.append(posi)
+        data.append(nega)
+
+    rows = np.max([len(positive), len(negative)])
+    cols = 2
+    x_label = 'Tentativas'
+    y_label = 'Proporção'
+    first_label = 'Pressionar botão durante S+'
+    second_label = 'Olhar estímulo distintivo'
+
+    f = plt.figure(figsize=(5,8))
+    grid = Grid(
+        f, rect=111, share_all=True, nrows_ncols=(rows, cols),
+        axes_pad=0.25, label_mode='none',)
+    title = 'all_proportions'
+
+    i = 0
+    for ax, datum in zip(grid, data):
+        (gaze, button, pname) = datum
+        ax.text(.45, 1.1, pname, ha='center', va='center', transform=ax.transAxes)
+        ax.set_ylim(-0.1, 1.1)
+
+        ax.plot(button,color="k",marker='', lw=1)
+        ax.plot(gaze,color="k",marker='',ls='--', lw=1)
+
+        plt.xticks([0,(len(button)//2)-1, len(button)-1],[1, len(button)//2, len(button)])
+
+        # remove outer frame
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        ax.set_xlim(-0.5, len(button)+0.5)
+        ax.set_xticklabels([])
+
+        #remove ticks
+        # ax.xaxis.set_ticks_position('none')
+        # ax.yaxis.set_ticks_position('none')
+
+        # handles, labels = ax.get_legend_handles_labels()
+        # ax.legend(handles, labels)
+        i += 1
+
+    # 9
+    grid[8].set_ylabel(y_label)
+    grid[19].set_xlabel(x_label)
+
+    # 90
+    # grid[10].set_ylabel(y_label)
+    # grid[21].set_xlabel(x_label)
+    f.tight_layout()
+    # f.subplots_adjust(wspace=0)
+    save_figure(title, '.svg')
+
+def all_proportions_intra(gaze_proportion, button_proportion):
+    def by_button(x):
+        (gp, gn, bp, bn, p)  = x 
+        return np.mean(bp)- np.mean(bn)
+
+    from mpl_toolkits.axes_grid1 import Grid
+
+    (p_gz, n_gz) = gaze_proportion
+    (p_btn, n_btn) = button_proportion
+
+    data = [(gp, gn, bp, bn, 'P%i'%p) \
+    for gp, gn, bp, bn, p in zip(p_gz, n_gz, p_btn, n_btn, range(1, len(p_gz)+1))]
+
+    data.sort(key=by_button, reverse=True)
+
+    rows = 6
+    cols = 2
+    x_label = 'Tentativas'
+    y_label = 'Proporção'
+
+    f = plt.figure(figsize=(5,8))
+    grid = Grid(
+        f, rect=111, share_all=True, nrows_ncols=(rows, cols),
+        axes_pad=0.25, label_mode='none',)
+    title = 'all_proportions'
+
+    i = 0
+    for ax, datum in zip(grid, data):
+        (p_gaze, n_gaze, p_button, n_button, pname) = datum
+
+        bindex = '%.3f'%(np.mean(p_button)- np.mean(n_button))
+        gindex = '%.3f'%(np.mean(p_gaze)- np.mean(n_gaze))
+        ax.text(.45, 1.1, pname+', b='+bindex+', o='+gindex, ha='center', va='center', transform=ax.transAxes)
+        ax.set_ylim(-0.1, 1.1)
+
+        
+        ax.plot(n_button,color="gray",marker='', lw=1)
+        ax.plot(n_gaze,color="gray",marker='',ls='--', lw=.6)
+
+        ax.plot(p_button,color="k",marker='', lw=1)
+        ax.plot(p_gaze,color="k",marker='',ls='--', lw=.6)
+        
+        plt.xticks(
+            [0,(len(p_button)//2)-1, len(p_button)-1],[1, len(p_button)//2, len(p_button)])
+
+        # remove outer frame
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        ax.set_xlim(-0.5, len(p_button)+0.5)
+        ax.set_xticklabels([])
+
+        #remove ticks
+        # ax.xaxis.set_ticks_position('none')
+        # ax.yaxis.set_ticks_position('none')
+
+        # handles, labels = ax.get_legend_handles_labels()
+        # ax.legend(handles, labels)
+        i += 1
+
+    grid[4].set_ylabel(y_label)
+    grid[11].set_xlabel(x_label)
+
+    f.tight_layout()
+    # f.subplots_adjust(wspace=0)
+    save_figure(title, '.svg')       
+  
 
 def scale(y_maximum, image, save, title, size):
     labels = ['%0.2f'%y_maximum, '0\n(transparente)']
