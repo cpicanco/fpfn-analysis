@@ -186,15 +186,15 @@ def analyse_experiment(feature_degree, factor):
                     data_files=data_files)
                 save_to_cache(info_file['nickname'],(gaze_proportion, button_proportion, latencies))
 
-            draw.rates([button_proportion, gaze_proportion],
-                title = ' - '.join(['%02d'%i, '%02d'%info_file['feature_degree'], info_file['group'], info_file['nickname'], str(factor)]),
-                save= True,
-                y_label='Proporção',
-                single= False,
-                first_label= 'Pressionar botão durante S+',
-                second_label='Olhar estímulo distintivo',
-                y_limit= [-0.1, 1.1],
-                ) 
+            # draw.rates([button_proportion, gaze_proportion],
+            #     title = ' - '.join(['%02d'%i, '%02d'%info_file['feature_degree'], info_file['group'], info_file['nickname'], str(factor)]),
+            #     save= True,
+            #     y_label='Proporção',
+            #     single= False,
+            #     first_label= 'Pressionar botão durante S+',
+            #     second_label='Olhar estímulo distintivo',
+            #     y_limit= [-0.1, 1.1],
+            #     ) 
             if info_file['group'] == 'positive':
                 positive_sex.append(info_file['sex'])
                 positive_age.append(info_file['age'])
@@ -225,6 +225,11 @@ def analyse_experiment(feature_degree, factor):
     print('positive age min. %.2f, avg. %.2f, max. %.2f'%(np.min(positive_age),np.mean(positive_age),np.max(positive_age)))
     print('negative age min. %.2f, avg. %.2f, max. %.2f'%(np.min(negative_age),np.mean(negative_age),np.max(negative_age)))
         
+
+    draw.all_proportions(
+        gaze_proportion=(positive, negative),
+        button_proportion=(positive_button, negative_button)
+    )
 
     positive, negative, positive_error, negative_error = statistics(
         positive,
@@ -263,7 +268,7 @@ def analyse_experiment(feature_degree, factor):
     positive, negative, positive_error, negative_error = statistics(
         positive_latency,
         negative_latency,
-        latency_output, True
+        latency_output
     )
     draw.rates(
         data=[positive, negative],
@@ -419,6 +424,11 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
 
     print(preference_xs)
 
+    draw.all_proportions_intra(
+        gaze_proportion=(positive_gaze, negative_gaze),
+        button_proportion=(positive_button, negative_button)
+    )
+
     positive, negative, positive_error, negative_error = statistics(
         positive_button,
         negative_button,
@@ -459,7 +469,7 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
         positive_latency,
         negative_latency,
         [str(feature_degree)+'_intra_latency_positive_relative_rate.txt',
-         str(feature_degree)+'_intra_latency_negative_relative_rate.txt'], True
+         str(feature_degree)+'_intra_latency_negative_relative_rate.txt']
     )
     draw.rates(
         data=[positive, negative],
@@ -518,9 +528,9 @@ if __name__ == '__main__':
     # factors = ['donut_slice', 1, 2, 3, 4]
     factors = ['donut_slice']
     for factor in factors:
-        analyse_experiment(feature_degree=90, factor=factor)
+        # analyse_experiment(feature_degree=90, factor=factor)
         # analyse_experiment(feature_degree=9, factor=factor)
-        # analyse_experiment_intrasubject(feature_degree=9, factor=factor)
+        analyse_experiment_intrasubject(feature_degree=9, factor=factor)
 
     # analyse_excluded(9)
     # analyse(13)
