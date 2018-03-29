@@ -216,16 +216,16 @@ def analyse(i, inspect=False, data_files=None):
         second_label='S-',
         y_limit= [1., 15.]       
     )
-    title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['group'], info_file['nickname'], 'S+ S-')) 
-    imgs, y_max = custom_heatmap([positive_gaze_data, negative_gaze_data])
-    scale_path = heatmap_scale(size=371., title= title, y_max= y_max)
-    plot_path = draw.images(
-        imgs,
-        (sw, sh),
-        save=not inspect,
-        title=title)
+    # title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['group'], info_file['nickname'], 'S+ S-')) 
+    # imgs, y_max = custom_heatmap([positive_gaze_data, negative_gaze_data])
+    # scale_path = heatmap_scale(size=371., title= title, y_max= y_max)
+    # plot_path = draw.images(
+    #     imgs,
+    #     (sw, sh),
+    #     save=not inspect,
+    #     title=title)
 
-    draw.join_images(plot_path, scale_path)
+    # draw.join_images(plot_path, scale_path)
 
     return (positive_gaze_data, negative_gaze_data), (pdispersion, ndispersion)
 
@@ -323,7 +323,7 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
         title=title,
         save= not inspect)
     
-    draw.join_images(plot_path, scale_path)
+    # draw.join_images(plot_path, scale_path)
 
     gaze = (fp_positive_gaze_data, fp_negative_gaze_data, fn_positive_gaze_data, fn_negative_gaze_data)
     disp = (fp_pdispersion, fp_ndispersion, fn_pdispersion, fn_ndispersion)
@@ -663,9 +663,9 @@ def analyse_excluded(feature_degree):
     print('negative:', b)
 
 if __name__ == '__main__':
-    # analyse_experiment_intrasubject(9)
+    analyse_experiment_intrasubject(9)
     # analyse_experiment(9)
-    analyse_experiment(90)
+    # analyse_experiment(90)
    
     # analyse_excluded(9)
 

@@ -28,13 +28,13 @@ def join_images(path1, path2):
     os.remove(path2)
     cv2.imwrite(path1, np.concatenate((im1, im2), axis=1))
 
-def save_figure(filename, extension = '.png'):
+def save_figure(filename, extension = '.svg'):
     f = os.path.dirname(os.path.abspath(__file__))
     f = os.path.dirname(f)
     f = os.path.join(f,'images')
     f = os.path.join(f, ''.join([filename,extension]))
     print(f)
-    plt.savefig(f, bbox_inches='tight', dpi=100)
+    plt.savefig(f, bbox_inches='tight', dpi=1200)
     plt.close() 
     return f
 
@@ -144,6 +144,7 @@ def rates(data,title, save=False,
     y_limit=[],
     error=None):
     x_label = 'Tentativas'
+    f = plt.figure(figsize=(5,3))
     axes = plt.gca()
     # plt.suptitle(title, fontsize=12)
 
@@ -158,13 +159,13 @@ def rates(data,title, save=False,
         #axes.plot(data[0],color="k",marker='.', lw=1, label=first_label)
         #axes.plot(data[1],color="k",marker='x',ls='--', lw=1, label=second_label)
         axes.errorbar(range(len(data[0])), data[0], error[0], label=first_label,
-            color="k",marker='o', markersize= 2, lw=1, alpha=0.8)
+            color="k",marker='', lw=1)
         axes.errorbar(np.array(range(len(data[1])))+0.18, data[1], error[1], label=second_label,
-            color="k",marker='x', markersize=4, fmt='.k', ls='--', lw=1, alpha=0.3)
+            color="gray",marker='', ls='--', lw=1, )
     else:
         axes.plot(data[0],color="k",marker='.', lw=1, label=first_label)
         if not single:
-            axes.plot(data[1],color="k",marker='x',ls='--', lw=1, label=second_label)
+            axes.plot(data[1],color="gray",marker='x',ls='--', lw=1, label=second_label)
 
     # negative
 
@@ -193,10 +194,7 @@ def rates(data,title, save=False,
 
     handles, labels = axes.get_legend_handles_labels()
 
-    if error:
-        axes.legend(handles, labels, loc="lower right")
-    else:
-        axes.legend(handles, labels)
+    axes.legend(handles, labels, loc="upper right")
 
     if save:
         return save_figure(title+name)        
@@ -402,7 +400,7 @@ def images_four(imgs, save, title):
     else:
         plt.show()
 
-def all_proportions(gaze_proportion, button_proportion):
+def all_proportions(gaze_proportion, button_proportion, factor):
     def by_button(x):
         (gz, btn, i) = x 
         return np.sum(btn)
@@ -420,6 +418,7 @@ def all_proportions(gaze_proportion, button_proportion):
 
     data = []
     for posi, nega in zip(positive,negative):
+        print(np.nanmean(posi[1]) - np.nanmean(nega[1]))
         data.append(posi)
         data.append(nega)
 
@@ -464,13 +463,13 @@ def all_proportions(gaze_proportion, button_proportion):
         # ax.legend(handles, labels)
         i += 1
 
-    # 9
-    grid[8].set_ylabel(y_label)
-    grid[19].set_xlabel(x_label)
+    if factor == 9:
+        grid[8].set_ylabel(y_label)
+        grid[19].set_xlabel(x_label)
 
-    # 90
-    # grid[10].set_ylabel(y_label)
-    # grid[21].set_xlabel(x_label)
+    elif factor == 90:
+        grid[10].set_ylabel(y_label)
+        grid[21].set_xlabel(x_label)
     f.tight_layout()
     # f.subplots_adjust(wspace=0)
     save_figure(title, '.svg')
