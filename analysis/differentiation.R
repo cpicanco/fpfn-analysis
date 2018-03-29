@@ -319,6 +319,8 @@ rank_test_per_row <- function (positive, negative,
 test_per_row <- function (positive, negative, experiment_name) {
 	positive_result <- vector()
 	negative_result <- vector()
+	positive_result_p <- vector()
+	negative_result_p <- vector()
 	positive_mu <- vector()
 	negative_mu <- vector()
 	trials <- 1:27
@@ -327,71 +329,98 @@ test_per_row <- function (positive, negative, experiment_name) {
 		Y <- as.numeric(negative[row,])
 
 		# a participant from the feature positive group
-		testp <- cor.test(X, trials, method='kendall')
+		testp <- cor.test(X, trials, method='kendall', alternative='greater')
 		testp_mu <- mean(X)
 
 		# a participant from the feature negative group
-		testn <- cor.test(Y, trials, method='kendall')
+		testn <- cor.test(Y, trials, method='kendall', alternative='greater')
 		testn_mu <- mean(Y)
 
+		# print(sprintf("Participant%i", row))
+		# print(friedman.test(matrix(c(X, Y), ncol=2)))
+		# print(t.test(X, Y, var.equal=TRUE, paired=TRUE))
+		# print('----------')
 		# concatenate kendall estimates
+
 		positive_result <- c(positive_result, unname(testp$estimate))
 		negative_result <- c(negative_result, unname(testn$estimate))
+		positive_result_p <- c(positive_result_p, unname(testp$p.value))
+		negative_result_p <- c(negative_result_p, unname(testn$p.value))
 
 		# concatenate averages
 		positive_mu <- c(positive_mu, testp_mu)
 		negative_mu <- c(negative_mu, testn_mu)
 	}
+	print('------------------------------------------------------')
 	print(experiment_name)
+	print('------------------------------------------------------')	
 
-	png(sprintf("images/%s_positive.png", experiment_name), width= 400, height= 400)
-	plot(positive_result, ylim=c(-1, 1))
-	title(sprintf("positive_%s", experiment_name))
-	dev.off()
+	if (grepl('Estudo 4', experiment_name)) {
+		print('Kendalls Tau Summary - for intra subject')
+		performances <- positive_result - negative_result
+	} else {
+		print('Kendalls Tau Summary - for groups')
+		performances <- c(positive_result, negative_result)
+	}
+	print(performances)
+	print(summary(performances))
+	print(sd(performances, na.rm = TRUE))
+	print('Kendalls Tau One Sample T Test')
+	print(t.test(performances, mu=0))
 
-	png(sprintf("images/%s_negative.png", experiment_name), width= 400, height= 400)
-	plot(negative_result, ylim=c(-1, 1))
-	title(sprintf("negative_%s", experiment_name))
-	dev.off()
+	print('Summary Positive Group')
+	print(summary(positive_mu))
+	print(sd(positive_mu, na.rm = TRUE))
+	print('Summary Negative Group')
+	print(summary(negative_mu))
+	print(sd(negative_mu, na.rm = TRUE))
+	print('T test Positive vs. Negative')
 
-	# participant's performances improved along time?
-	print('Performance improvement')
-	print(t.test(c(negative_result, positive_result), mu=0)$p.value)
-
-	# participant's performances were different along time?
-	print('Difference along time')
-	print(t.test(negative_result, positive_result)$p.value)
-
-	# participant's average performance was different?
-	print('Average difference')
-	print(t.test(negative_mu, positive_mu)$p.value)
-	print('--------------------')
+	if (grepl('Estudo 4', experiment_name)) {
+		print(t.test(x=positive_mu, y=negative_mu, var.equal=FALSE, paired=TRUE))	
+	} else {
+		print(t.test(x=positive_mu, y=negative_mu, var.equal=FALSE, paired=FALSE))
+	}
+	
 }
 
 # load data
-positive <- read.table('90_button_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
-negative <- read.table('90_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
-test_per_row(positive, negative, "90_button")
+# positive <- read.table('90_button_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# negative <- read.table('90_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# test_per_row(positive, negative, "Estudo 2 - Estímulo com 90° BOTÃO")
+
+# positive <- read.table('90_latency_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# negative <- read.table('90_latency_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# test_per_row(positive, negative, "Estudo 2 - Estímulo com 90° LATÊNCIA")
 
 positive <- read.table('90_looking_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
 negative <- read.table('90_looking_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
-test_per_row(positive, negative, "90_looking")
+test_per_row(positive, negative, "Estudo 2 - Estímulo com 90 OLHAR°")
 
-positive <- read.table('90_latency_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
-negative <- read.table('90_latency_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
-test_per_row(positive, negative, "90_latency")
+# positive <- read.table('9_button_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# negative <- read.table('9_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# test_per_row(positive, negative, "Estudo 3 - Estímulo com 9° BOTÃO")
 
-positive <- read.table('9_button_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
-negative <- read.table('9_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
-test_per_row(positive, negative, "9_button")
+# positive <- read.table('9_latency_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# negative <- read.table('9_latency_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# test_per_row(positive, negative, "Estudo 3 - Estímulo com 9° LATÊNCIA")
 
-positive <- read.table('9_looking_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
-negative <- read.table('9_looking_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
-test_per_row(positive, negative, "9_looking")
+# positive <- read.table('9_looking_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# negative <- read.table('9_looking_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# test_per_row(positive, negative, "Estudo 3 - Estímulo com 9° OLHAR")
 
-positive <- read.table('9_latency_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
-negative <- read.table('9_latency_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
-test_per_row(positive, negative, "9_latency")
+# positive <- read.table('9_intra_button_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# negative <- read.table('9_intra_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# test_per_row(positive, negative, "Estudo 4 - Estímulo com 9° Intra Sujeito BOTÃO")
+
+# positive <- read.table('9_intra_latency_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# negative <- read.table('9_intra_latency_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# test_per_row(positive, negative, "Estudo 4 - Estímulo com 9° Intra Sujeito LATENCIA")
+
+# positive <- read.table('9_intra_gaze_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# negative <- read.table('9_intra_gaze_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# test_per_row(positive, negative, "Estudo 4 - Estímulo com 9° Intra Sujeito OLHAR")
+
 
 # differentiation
 # use_jitter <- FALSE

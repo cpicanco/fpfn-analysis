@@ -307,7 +307,7 @@ def trial_mask(target_timestamps, begin, end):
     return (target_timestamps >= begin) & (target_timestamps <= end)
 
 def relative_rate_from(data1, data2):
-    return [a/(b+a) if b+a > 0 else np.nan for a, b in zip(data1, data2)]
+    return [a/(b+a) if b+a > 0 else 0.5 for a, b in zip(data1, data2)]
     
 def latency(trials):
     def get_time(timestamped_events):

@@ -158,8 +158,8 @@ def analyse_experiment(feature_degree, factor):
     positive_age = []
     negative_age = []
 
-    looking_output = [str(feature_degree)+'_looking_negative_relative_rate.txt',
-                      str(feature_degree)+'_looking_positive_relative_rate.txt']
+    looking_output = [str(feature_degree)+'_looking_positive_relative_rate.txt',
+                      str(feature_degree)+'_looking_negative_relative_rate.txt']
 
     button_output = [str(feature_degree)+'_button_positive_relative_rate.txt',
                      str(feature_degree)+'_button_negative_relative_rate.txt']
@@ -226,10 +226,11 @@ def analyse_experiment(feature_degree, factor):
     print('negative age min. %.2f, avg. %.2f, max. %.2f'%(np.min(negative_age),np.mean(negative_age),np.max(negative_age)))
         
 
-    draw.all_proportions(
-        gaze_proportion=(positive, negative),
-        button_proportion=(positive_button, negative_button)
-    )
+    # draw.all_proportions(
+    #     gaze_proportion=(positive, negative),
+    #     button_proportion=(positive_button, negative_button),
+    #     factor=factor
+    # )
 
     positive, negative, positive_error, negative_error = statistics(
         positive,
@@ -424,10 +425,10 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
 
     print(preference_xs)
 
-    draw.all_proportions_intra(
-        gaze_proportion=(positive_gaze, negative_gaze),
-        button_proportion=(positive_button, negative_button)
-    )
+    # draw.all_proportions_intra(
+    #     gaze_proportion=(positive_gaze, negative_gaze),
+    #     button_proportion=(positive_button, negative_button)
+    # )
 
     positive, negative, positive_error, negative_error = statistics(
         positive_button,
@@ -528,8 +529,8 @@ if __name__ == '__main__':
     # factors = ['donut_slice', 1, 2, 3, 4]
     factors = ['donut_slice']
     for factor in factors:
-        # analyse_experiment(feature_degree=90, factor=factor)
-        # analyse_experiment(feature_degree=9, factor=factor)
+        analyse_experiment(feature_degree=90, factor=factor)
+        analyse_experiment(feature_degree=9, factor=factor)
         analyse_experiment_intrasubject(feature_degree=9, factor=factor)
 
     # analyse_excluded(9)
