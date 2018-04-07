@@ -206,16 +206,16 @@ def analyse(i, inspect=False, data_files=None):
         inspect=False)
     ndispersion = dispersion(negative_gaze_data, negative_intervals, titleb)
 
-    draw.rates(
-        [pdispersion, ndispersion],
-        title= title+'_dispersion',
-        save= not inspect,
-        y_label='2d dispersion (RMS) in deggres of visual angle',
-        single=False,
-        first_label='S+',
-        second_label='S-',
-        y_limit= [1., 15.]       
-    )
+    # draw.rates(
+    #     [pdispersion, ndispersion],
+    #     title= title+'_dispersion',
+    #     save= not inspect,
+    #     y_label='2d dispersion (RMS) in deggres of visual angle',
+    #     single=False,
+    #     first_label='S+',
+    #     second_label='S-',
+    #     y_limit= [1., 15.]       
+    # )
     # title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['group'], info_file['nickname'], 'S+ S-')) 
     # imgs, y_max = custom_heatmap([positive_gaze_data, negative_gaze_data])
     # scale_path = heatmap_scale(size=371., title= title, y_max= y_max)
@@ -290,38 +290,38 @@ def analyse_intrasubject(i, inspect=False, data_files=None):
     fn_negative_gaze_data = all_gaze_data[mask]
     fn_ndispersion = dispersion(fn_negative_gaze_data, fn_negative_intervals, titled)
 
-    title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'distinctive'))
-    draw.rates(
-        [fp_pdispersion, fn_pdispersion],
-        title= title+'_pdispersion',
-        save= not inspect,
-        y_label='2d dispersion (RMS) in deggres of visual angle',
-        single=False,
-        first_label='FP Group',
-        second_label='FN Group',
-        y_limit= [1., 15.]       
-    )
+    # title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'distinctive'))
+    # draw.rates(
+    #     [fp_pdispersion, fn_pdispersion],
+    #     title= title+'_pdispersion',
+    #     save= not inspect,
+    #     y_label='Graus do ângulo de visão (RMS)',
+    #     single=False,
+    #     first_label='AP',
+    #     second_label='AN',
+    #     y_limit= [1., 15.]       
+    # )
 
-    title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'common'))   
-    draw.rates(
-        [fp_ndispersion, fn_ndispersion],
-        title= title+'_ndispersion',
-        save= not inspect,
-        y_label='2d dispersion (RMS) in deggres of visual angle',
-        single=False,
-        first_label='FP Group',
-        second_label='FN Group',
-        y_limit= [1., 15.]       
-    )
+    # title = ' - '.join(('%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'common'))   
+    # draw.rates(
+    #     [fp_ndispersion, fn_ndispersion],
+    #     title= title+'_ndispersion',
+    #     save= not inspect,
+    #     y_label='Graus do ângulo de visão (RMS)',
+    #     single=False,
+    #     first_label='AP',
+    #     second_label='AN',
+    #     y_limit= [1., 15.]       
+    # )
 
-    title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'distinctive-common'))   
-    imgs, y_max = custom_heatmap([fp_positive_gaze_data,fn_negative_gaze_data,
-                           fp_negative_gaze_data,fn_positive_gaze_data])
-    scale_path = heatmap_scale(size=368., title= title, y_max= y_max)
-    plot_path = draw.images_four(
-        imgs,
-        title=title,
-        save= not inspect)
+    # title = ' - '.join(('heat', '%02d'%i, str(info_file['feature_degree']), info_file['nickname'], 'distinctive-common'))   
+    # imgs, y_max = custom_heatmap([fp_positive_gaze_data,fn_negative_gaze_data,
+    #                        fp_negative_gaze_data,fn_positive_gaze_data])
+    # scale_path = heatmap_scale(size=368., title= title, y_max= y_max)
+    # plot_path = draw.images_four(
+    #     imgs,
+    #     title=title,
+    #     save= not inspect)
     
     # draw.join_images(plot_path, scale_path)
 
@@ -447,12 +447,12 @@ def analyse_experiment(feature_degree):
     d3, d4, e3, e4 = statistics(fn_pdispersion, fn_ndispersion)
 
     labels = [
-        'average RMS in deggres of visual angle',
-        'Trials',
-        'FP Group',
-        'FN Group',
-        'distinctive',
-        'common'
+        'Média do desvio padrão do ângulo de visão (RMS)',
+        'Tentativas',
+        'AP',
+        'AN',
+        'distintivo',
+        'comum'
     ]
     draw.rates_double(
         (d1, d4, d2, d3),
@@ -461,15 +461,15 @@ def analyse_experiment(feature_degree):
         labels= labels,
         y_limit=[6., 16.]
     )
-    title = ' - '.join(['heat', str(feature_degree)])
-    imgs, y_max = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
-    scale_path = heatmap_scale(size=368., title= title, y_max= y_max)
-    plot_path = draw.images_four(
-        imgs,
-        title= title,
-        save= True)
+    # title = ' - '.join(['heat', str(feature_degree)])
+    # imgs, y_max = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
+    # scale_path = heatmap_scale(size=368., title= title, y_max= y_max)
+    # plot_path = draw.images_four(
+    #     imgs,
+    #     title= title,
+    #     save= True)
        
-    draw.join_images(plot_path, scale_path)
+    # draw.join_images(plot_path, scale_path)
 
 def cache_exists_i(nickname):
     cache_root = os.path.join('cache', nickname)
@@ -600,12 +600,12 @@ def analyse_experiment_intrasubject(feature_degree):
     d3, d4, e3, e4 = statistics(fn_pdispersion, fn_ndispersion)
 
     labels = [
-        'average RMS in deggres of visual angle',
-        'Trials',
-        'FP Group',
-        'FN Group',
-        'distinctive',
-        'common'
+        'Média do desvio padrão do ângulo de visão (RMS)',
+        'Tentativas',
+        'AP',
+        'AN',
+        'distintivo',
+        'comum'
     ]
     draw.rates_double(
         (d1, d4, d2, d3),
@@ -615,14 +615,14 @@ def analyse_experiment_intrasubject(feature_degree):
         y_limit=[6., 16.]
     )
 
-    title = ' - '.join(['heat', str(feature_degree),'intra'])
-    imgs, y_max = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
-    scale_path = heatmap_scale(size=368., title= title, y_max= y_max)
-    plot_path = draw.images_four(
-        imgs,
-        title=title,
-        save= True)
-    draw.join_images(plot_path, scale_path)
+    # title = ' - '.join(['heat', str(feature_degree),'intra'])
+    # imgs, y_max = custom_heatmap([fp_positive, fn_negative, fp_negative, fn_positive])
+    # scale_path = heatmap_scale(size=368., title= title, y_max= y_max)
+    # plot_path = draw.images_four(
+    #     imgs,
+    #     title=title,
+    #     save= True)
+    # draw.join_images(plot_path, scale_path)
 
 def analyse_excluded(feature_degree):
     fp_positivex, fp_positivey = [], []
@@ -664,8 +664,8 @@ def analyse_excluded(feature_degree):
 
 if __name__ == '__main__':
     analyse_experiment_intrasubject(9)
-    # analyse_experiment(9)
-    # analyse_experiment(90)
+    analyse_experiment(9)
+    analyse_experiment(90)
    
     # analyse_excluded(9)
 

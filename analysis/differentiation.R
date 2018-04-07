@@ -337,11 +337,10 @@ test_per_row <- function (positive, negative, experiment_name) {
 		testn_mu <- mean(Y)
 
 		# print(sprintf("Participant%i", row))
-		# print(friedman.test(matrix(c(X, Y), ncol=2)))
-		# print(t.test(X, Y, var.equal=TRUE, paired=TRUE))
+		# print(t.test(X, Y, var.equal=FALSE, paired=TRUE))
 		# print('----------')
+		
 		# concatenate kendall estimates
-
 		positive_result <- c(positive_result, unname(testp$estimate))
 		negative_result <- c(negative_result, unname(testn$estimate))
 		positive_result_p <- c(positive_result_p, unname(testp$p.value))
@@ -393,9 +392,9 @@ test_per_row <- function (positive, negative, experiment_name) {
 # negative <- read.table('90_latency_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
 # test_per_row(positive, negative, "Estudo 2 - Estímulo com 90° LATÊNCIA")
 
-positive <- read.table('90_looking_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
-negative <- read.table('90_looking_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
-test_per_row(positive, negative, "Estudo 2 - Estímulo com 90 OLHAR°")
+# positive <- read.table('90_looking_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# negative <- read.table('90_looking_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+# test_per_row(positive, negative, "Estudo 2 - Estímulo com 90 OLHAR°")
 
 # positive <- read.table('9_button_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
 # negative <- read.table('9_button_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
@@ -417,10 +416,9 @@ test_per_row(positive, negative, "Estudo 2 - Estímulo com 90 OLHAR°")
 # negative <- read.table('9_intra_latency_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
 # test_per_row(positive, negative, "Estudo 4 - Estímulo com 9° Intra Sujeito LATENCIA")
 
-# positive <- read.table('9_intra_gaze_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
-# negative <- read.table('9_intra_gaze_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
-# test_per_row(positive, negative, "Estudo 4 - Estímulo com 9° Intra Sujeito OLHAR")
-
+positive <- read.table('9_intra_gaze_positive_relative_rate.txt', sep= ' ', na.strings= 'nan')
+negative <- read.table('9_intra_gaze_negative_relative_rate.txt', sep= ' ', na.strings= 'nan')
+test_per_row(positive, negative, "Estudo 4 - Estímulo com 9° Intra Sujeito OLHAR")
 
 # differentiation
 # use_jitter <- FALSE

@@ -206,17 +206,17 @@ def rates_double(data, error, title, labels, y_limit=[], save=True):
         ax.errorbar(
             range(len(data[0])), data[0], error[0],
             label=first_label,
-            color="k",marker='.', lw=1, alpha=0.6)
+            color="k",marker='', lw=1)
         ax.errorbar(
             np.array(range(len(data[1])))+0.18, data[1], error[1],
             label=second_label,
-            color="k",marker='x', fmt='.k', ls='--', lw=1, alpha=0.3) 
+            color="gray",marker='', ls='--', lw=1) 
         ax.spines['top'].set_visible(False)
         ax.spines['bottom'].set_visible(False)
         ax.spines['left'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        ax.xaxis.set_ticks_position('none')
-        ax.yaxis.set_ticks_position('none')
+        # ax.xaxis.set_ticks_position('none')
+        # ax.yaxis.set_ticks_position('none')
         if y_limit:
             ax.set_ylim(y_limit[0], y_limit[1])
         else:
@@ -226,7 +226,7 @@ def rates_double(data, error, title, labels, y_limit=[], save=True):
     (d1, d2, d3, d4) = data
     (e1, e2, e3, e4) = error
 
-    f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True)
+    f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True, figsize=(5,3))
     plot(ax1, [d1, d2], [e1, e2], labels[2], labels[3])
     plot(ax2, [d3, d4], [e3, e4], labels[2], labels[3])
 

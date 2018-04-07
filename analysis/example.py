@@ -185,7 +185,7 @@ def analyse_experiment(feature_degree, factor):
                     inspect=False,
                     data_files=data_files)
                 save_to_cache(info_file['nickname'],(gaze_proportion, button_proportion, latencies))
-
+            print(info_file['nickname'])
             # draw.rates([button_proportion, gaze_proportion],
             #     title = ' - '.join(['%02d'%i, '%02d'%info_file['feature_degree'], info_file['group'], info_file['nickname'], str(factor)]),
             #     save= True,
@@ -401,7 +401,7 @@ def analyse_experiment_intrasubject(feature_degree=9, factor='donut_slice'):
                     inspect=False,
                     data_files=data_files)
                 save_to_cache(info_file['nickname'],(looking_rate, button_rate, latencies))
-
+            print(info_file['nickname'])
             (fp_button, fn_button) = button_rate
             (fp_gaze, fn_gaze) = looking_rate
             (fp_latency, fn_latency) = latencies
@@ -529,8 +529,8 @@ if __name__ == '__main__':
     # factors = ['donut_slice', 1, 2, 3, 4]
     factors = ['donut_slice']
     for factor in factors:
-        analyse_experiment(feature_degree=90, factor=factor)
-        analyse_experiment(feature_degree=9, factor=factor)
+        # analyse_experiment(feature_degree=90, factor=factor)
+        # analyse_experiment(feature_degree=9, factor=factor)
         analyse_experiment_intrasubject(feature_degree=9, factor=factor)
 
     # analyse_excluded(9)
