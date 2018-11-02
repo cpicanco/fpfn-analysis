@@ -1,5 +1,7 @@
 # fpfn-analysis
 
+Data analysis from my doctorate, [full text here](https://www.researchgate.net/publication/325908971_Eye_movements_correlated_with_the_feature-positive_effect) (PT-BR only).
+
 Each participant has its own folder inside `DATA`. Each participant folder is a "session" and has the following files:
 
 - `gaze_coordenates.txt`
